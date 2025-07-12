@@ -1,0 +1,10 @@
+POST http://localhost:8000/scholaria/token/
+Content-Type: application/json
+
+{
+    "username":"oussama_teacher",
+    "password": 1234
+}
+
+DELETE http://localhost:8000/scholaria/courses/1/modules/1/delete-module/
+Content-Type: application/json

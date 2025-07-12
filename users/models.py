@@ -1,12 +1,19 @@
 from django.db import models
-
 from django.contrib.auth.models import AbstractUser
 
 # Create your models here.
 
 
 class CustomUser(AbstractUser):
-    role = models.CharField(null=False, blank=False)
+
+    CHOICES = {
+        ('Teacher', 'Teacher'),
+        ('Student', 'Student'),
+        ('ADMIN', 'ADMIN')
+    }
+    role = models.CharField(max_length=10, choices=CHOICES)
     birth_date = models.DateField(null=False, blank=False)
-    
-    REQUIRED_FIELDS = ["role", "birth_date"]  
+    REQUIRED_FIELDS = ["role", "birth_date"]
+
+
+

@@ -1,0 +1,10 @@
+
+
+DELETE http://localhost:8000/scholaria/courses/1/modules/1/delete-module/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0b2tlbl90eXBlIjoiYWNjZXNzIiwiZXhwIjoxNzUyMTg2MTc4LCJpYXQiOjE3NTIxODQzNzgsImp0aSI6IjMzMWI3MDk5ZWIyZjQ0MjU4MTE1NWIwMWZiYjEwMTdhIiwidXNlcl9pZCI6MX0.pypv-SdSiPsNb1h8ILZuOeXZAqfyGF5GhvY4CLLC8-4
+
+{
+    "username": "oussama_teacher",
+    "password": 1234
+}

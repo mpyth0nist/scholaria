@@ -9,8 +9,8 @@ class Course(models.Model):
     description = models.CharField(max_length=255)
     thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True)
     published = models.BooleanField(default=True)
-    # teacher = models.ForeignKey(CustomUser, related_name="courses_taught", on_delete=models.CASCADE)
-    # student = models.ForeignKey(CustomUser, related_name="students_enrolled", on_delete=models.CASCADE)
+    teacher = models.ForeignKey(CustomUser, null=True, related_name="courses_taught", on_delete=models.CASCADE)
+    student = models.ForeignKey(CustomUser, null=True,related_name="students_enrolled", on_delete=models.CASCADE)
 
 
 class Module(models.Model):
