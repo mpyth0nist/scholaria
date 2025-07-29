@@ -9,6 +9,7 @@ class Quiz(models.Model):
     description = models.CharField(null=True, blank=True)
     teacher = models.ForeignKey(CustomUser, related_name="made_by", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, related_name="quiz_course", on_delete=models.CASCADE)
+    done = models.BooleanField(default=False)
 
 class Question(models.Model):
     question_text = models.CharField(max_length=255)

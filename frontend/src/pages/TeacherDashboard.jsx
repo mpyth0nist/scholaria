@@ -1,26 +1,21 @@
 import api from '../api'
+import { useState, useEffect } from 'react'
 
-function Teacher(){
-    const firstName = ''
-    const lastName = ''
-    const courses = null
-    const quizzes = null
-    const students = null
-
-
+import '../style/style.css'
+function Teacher( { props } ){
 
     return (
         <>
             <div className="teacher-card-container">
-                <img src="" alt="" className="profile-pic" />
+                <img src={null} alt="" className="profile-pic" />
                 <div className="teacher-info">
-                    <p>Full name : {firstName + " " + lastName} </p>
-                    <p>Courses: {courses}</p>
-                    <p>Students: {students}</p>
-                    <p>quizzes: {quizzes}</p>
+                    <p>Full name : {props.firstName + " " + props.lastName} </p>
+                    <p>Courses: {props.courses}</p>
                 </div>
             </div>
         </>
     )
 
 }
+
+export default Teacher;

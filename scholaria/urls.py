@@ -21,27 +21,15 @@ from users.views import CreateUserView
 from courses.views import *
 from quizzes.views import *
 from django.conf.urls.static import static
-
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('scholaria/register/', CreateUserView.as_view(), name="create_user" ),
-    path('scholaria/token/', TokenObtainPairView.as_view(), name="get_token"),
-    path('scholaria/refresh/', TokenRefreshView.as_view(), name="refresh"),
-    path('scholaria/courses/', CourseView.as_view(), name="courses" ),
-    path('scholaria/courses/create-course/', CourseCreate.as_view(), name="create-course"),
-    path('scholaria/courses/delete/<int:id>/', CourseDelete.as_view(), name="course_delete"),
-    path('scholaria/courses/update/<int:id>/', CourseUpdate.as_view(), name="course_update"),
-    path('scholaria/modules/', ModuleList.as_view(), name="course_modules"),
-    path('scholaria/modules/add-module/', ModuleCreate.as_view(), name="add_module"),
-    path('scholaria/modules/<int:module_id>/update-module/', ModuleUpdate.as_view(), name="update_module"),
-    path('scholaria/modules/<int:module_id>/delete-module/', ModuleDelete.as_view(), name="delete_module"),
-    path('scholaria/quizzes/', QuizList.as_view(), name="show-quizzes" ),
-    path('scholaria/quizzes/create_quiz/', QuizCreate.as_view(), name="create-quiz"),
-    path('scholaria/quizzes/update_quiz/', QuizUpdate.as_view(), name="update-quiz"),
-    path('scholaria/quizzes/delete_quiz/', QuizDelete.as_view(), name="delete-quiz")
+    path('api/users/', include('users.urls')),
+    path('api/courses/', include('courses.urls')),
+    path('api/quizzes/', include('quizzes.urls')),
+    path('api/', include('users.urls'))
 ]
 
 if settings.DEBUG:
