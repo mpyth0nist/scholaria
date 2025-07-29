@@ -3,7 +3,7 @@ from rest_framework import generics
 from rest_framework.response import Response
 from .serializers import UserSerializer
 from .models import CustomUser
-
+from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
 
@@ -13,8 +13,8 @@ class CreateUserView(generics.CreateAPIView):
     permission_classes = [AllowAny]
 
 
-class LoggedUserView(generics.APIView):
-    permission_classes = [isAuthenticated]
+class LoggedUserView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
 

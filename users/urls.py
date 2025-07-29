@@ -6,8 +6,8 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
 urlpatterns = [
-    path('scholaria/register/', CreateUserView.as_view(), name="create_user" ),
-    path('scholaria/token/', TokenObtainPairView.as_view(), name="get_token"),
-    path('scholaria/refresh/', TokenRefreshView.as_view(), name="refresh"),
-    path('scholaria/user/', LoggedUserView.as_view(), name="get_user_info")
+    path('register/', CreateUserView.as_view(), name="create_user" ),
+    path('token/', TokenObtainPairView.as_view(), name="get_token"),
+    path('refresh/', TokenRefreshView.as_view(), name="refresh"),
+    path('user/', LoggedUserView.as_view(), name="get_user_info")
 ]
