@@ -1,19 +1,18 @@
 
-import Teacher from "./TeacherDashboard";
-import Student from "./StudentDashboard";
+
 import '../style/style.css'
-import api from '../api'
-
-import { useState,useEffect } from "react";
+import DashboardMain from './DashboardMain';
+import Sidebar from '../components/Sidebar'
 function Dashboard(){
-
+    
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [role, setRole] = useState('')
-    const [courses, setCourses] = useState('')
+    const [courses, setCourses] = useState([])
     const [quizzes, setQuizzes] = useState('')
 
-    
+
+
     const getUserInfo = async () => {
         const res = await api.get('api/users/user/')
         setFirstName(res.data.first_name)
@@ -23,38 +22,25 @@ function Dashboard(){
         setQuizzes(res.data.quizzes)
     }
 
-  useEffect(()=>{
-    getUserInfo()
-  }, [])
-
-  const isTeacher = (role.toUpperCase() === 'TEACHER')
-    
+    useEffect(()=>{
+        getUserInfo()
+    }, [])
 
     return (
         <>
-            <div className="grid grid-rows-[20%_70%] grid-cols-1 gap-[2rem]">
-                <div className="w-full">
-                    <div className="flex flex-row gap-[1rem]">
+            <div className="grid grid-rows-[100px_1fr] grid-cols-1 gap-[2rem]">
+                <div className="flex items-center relative w-full border-b-[2px] border-violet-500">
+                    <div className="flex flex-row absolute right-[1%] gap-[1rem]">
                         <div className="border-2 w-16 h-16 rounded-full">
                             <div className="notification-badge"></div>
                         </div>
                         <div className="border-2 w-16 h-16 rounded-full"> </div>
                     </div>
                 </div>
+                <div className="grid grid-cols-[300px_1fr]">
+                    <Sidebar role={role} firstName={firstName} lastName={lastName}/>
+                    </div>
 
-            <div className="grid grid-cols-2">
-
-                { 
-                    isTeacher ? <Teacher firstName={firstName} lastName={lastName} courses={courses}/> : <Student firstName={firstName} lastName={lastName} courses={courses} />
-                }
-            
-
-                <div className="content-area">
-                    <div>Annoucements</div>
-                    <div>User-details</div>
-                    <div>Courses</div>
-                </div>
-            </div>
             </div>
         </>
     )
