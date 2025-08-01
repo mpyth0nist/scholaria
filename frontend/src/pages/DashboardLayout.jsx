@@ -1,25 +1,23 @@
 
 
 import '../style/style.css'
-import DashboardMain from './DashboardMain';
+import TeacherDashboard from './TeacherDashboard';
+import StudentDashboard from './StudentDashboard'
 import Sidebar from '../components/Sidebar'
+import {useState, useEffect} from 'react'
+
+import api from '../api'
 function Dashboard(){
     
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
     const [role, setRole] = useState('')
-    const [courses, setCourses] = useState([])
-    const [quizzes, setQuizzes] = useState('')
-
-
 
     const getUserInfo = async () => {
         const res = await api.get('api/users/user/')
         setFirstName(res.data.first_name)
         setLastName(res.data.last_name)
         setRole(res.data.role)
-        setCourses(res.data.courses)
-        setQuizzes(res.data.quizzes)
     }
 
     useEffect(()=>{
@@ -39,7 +37,8 @@ function Dashboard(){
                 </div>
                 <div className="grid grid-cols-[300px_1fr]">
                     <Sidebar role={role} firstName={firstName} lastName={lastName}/>
-                    </div>
+                    <TeacherDashboard />
+                </div>
 
             </div>
         </>
