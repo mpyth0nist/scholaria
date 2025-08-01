@@ -3,6 +3,8 @@ from .models import *
 from rest_framework import generics
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission, SAFE_METHODS
+
+from django.db.models import Q
 # Create your views here.
 
 LOOKUP_FIELD = 'id'
@@ -63,7 +65,9 @@ class CourseView(generics.ListAPIView):
     serializer_class = CourseSerializer
     def get_queryset(self):
 
-        return Course.objects.all()
+        return Course.objects.filter(
+            Q(teacher=self.request.user) | Q(student=self.request.user)
+            )
 
 class CourseCreate(generics.CreateAPIView):
     '''

@@ -1,12 +1,18 @@
-
+import CoursesList from '../components/CoursesList'
+import CourseCreate from '../components/CourseCreate'
 import '../style/style.css'
-function Teacher( props ){
+function Teacher(){
+
 
     return (
-       <div className="">
-        <div>
+       <div className="card-container">
+        <div className='w-[450px] border-[2px] border-violet-500 rounded'>
+
+            <CoursesList />
             
         </div>
+                    <CourseCreate />
+
 
        </div>
     )
