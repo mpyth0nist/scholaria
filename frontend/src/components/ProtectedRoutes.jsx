@@ -9,20 +9,26 @@ function ProtectedRoutes(){
     const [isAuthorized, setisAuthorized] = useState(null)
 
     useEffect(() => {
-        auth()
-    }, [isAuthorized])
+        auth().catch(() => setisAuthorized(false))
+        const interval = setInterval(() => {
+            auth().catch(() => setisAuthorized(false))
+        }, 10000)
+        return () => clearInterval(interval)
+    }, [])
 
     const refreshToken = async () => {
+        console.log("refresh called")
         const refreshToken = localStorage.getItem(REFRESH_TOKEN)
 
         try {
-            const res = await api.post('/refresh/', {
+            const res = await api.post('api/users/refresh/', {
             refresh : refreshToken
             })
                                 
             if ( res.status === 200 ) {
                 localStorage.setItem(ACCESS_TOKEN, res.data.access)
-                setisAuthorized(true)            
+                setisAuthorized(true)           
+                console.log("Token refreshed successfully")
             }
             else{
                 setisAuthorized(false)
@@ -37,26 +43,29 @@ function ProtectedRoutes(){
     }
     
     const auth = async () => {
-
-        const token = localStorage.getItem(REFRESH_TOKEN)
-
+        const token = localStorage.getItem(ACCESS_TOKEN)
+        console.log("auth called")
         if (!token){
             setisAuthorized(false)
+            return
         }
 
         const decoded = jwtDecode(token)
         const expired = ( decoded.exp < (Date.now() / 1000) )
+        console.log(expired, decoded.exp, Date.now() / 1000)
 
         if (expired){
             await refreshToken()
         } else {
             setisAuthorized(true)
+
         }
     }
 
     if (isAuthorized === null){
         return <div>...Loading</div>
     }
+
 
     return isAuthorized ? <Outlet /> : <Navigate to='/login' />;
 }
