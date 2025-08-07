@@ -1,20 +1,22 @@
 import CoursesList from '../components/CoursesList'
-import CourseCreate from '../components/CourseCreate'
+import TeacherCard from '../components/TeacherInfoCard'
 import '../style/style.css'
 function Teacher(){
 
 
     return (
-       <div className="card-container">
-        <div className='w-[450px] border-[2px] border-violet-500 rounded'>
+
+
+        <div className="flex gap-[0.8rem]">
+            <TeacherCard />
+        <div className='w-[450px] h-min border-[2px] border-violet-500 rounded'>
 
             <CoursesList />
             
         </div>
-                    <CourseCreate />
+        </div>
 
 
-       </div>
     )
 
 }

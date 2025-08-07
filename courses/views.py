@@ -83,7 +83,7 @@ class CourseCreate(generics.CreateAPIView):
     def perform_create(self, serializer):
 
         if serializer.is_valid():
-            serializer.save()
+            serializer.save(teacher=self.request.user)
         else:
             print(serializer.errors)
 

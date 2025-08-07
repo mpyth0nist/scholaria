@@ -17,7 +17,6 @@ function ProtectedRoutes(){
     }, [])
 
     const refreshToken = async () => {
-        console.log("refresh called")
         const refreshToken = localStorage.getItem(REFRESH_TOKEN)
 
         try {
@@ -28,7 +27,6 @@ function ProtectedRoutes(){
             if ( res.status === 200 ) {
                 localStorage.setItem(ACCESS_TOKEN, res.data.access)
                 setisAuthorized(true)           
-                console.log("Token refreshed successfully")
             }
             else{
                 setisAuthorized(false)
@@ -36,7 +34,6 @@ function ProtectedRoutes(){
 
         } catch(error){
             setisAuthorized(false)
-            console.log(error)
         }
        
 
@@ -52,7 +49,6 @@ function ProtectedRoutes(){
 
         const decoded = jwtDecode(token)
         const expired = ( decoded.exp < (Date.now() / 1000) )
-        console.log(expired, decoded.exp, Date.now() / 1000)
 
         if (expired){
             await refreshToken()

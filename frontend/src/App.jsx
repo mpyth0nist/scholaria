@@ -5,7 +5,7 @@ import ProtectedRoutes from './components/ProtectedRoutes.jsx'
 import Dashboard from './pages/DashboardLayout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 
-
+import Teacher from './pages/TeacherDashboard.jsx'
 
 function App() {
 
@@ -20,7 +20,10 @@ function App() {
       <Routes>
 
         <Route element={<ProtectedRoutes />}>
-          <Route path='/dashboard' element={<Dashboard />}/>
+          <Route path='/dashboard' element={<Dashboard>
+            <Teacher />
+            </Dashboard>
+            }/>
         </Route>
 
         <Route element={<LoginPage />} path='/login' />
