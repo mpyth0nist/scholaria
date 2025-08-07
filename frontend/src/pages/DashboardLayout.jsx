@@ -7,7 +7,7 @@ import Sidebar from '../components/Sidebar'
 import {useState, useEffect} from 'react'
 
 import api from '../api'
-function Dashboard(){
+function Dashboard( {children} ){
     
     const [firstName, setFirstName] = useState('')
     const [lastName, setLastName] = useState('')
@@ -36,8 +36,8 @@ function Dashboard(){
                     </div>
                 </div>
                 <div className="grid grid-cols-[300px_1fr]">
-                    <Sidebar role={role} firstName={firstName} lastName={lastName}/>
-                    <TeacherDashboard />
+                    <Sidebar role={role}/>
+                    {children}
                 </div>
 
             </div>
