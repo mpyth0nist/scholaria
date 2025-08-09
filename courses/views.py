@@ -3,11 +3,33 @@ from .models import *
 from rest_framework import generics
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission, SAFE_METHODS
-
+from users.models import CustomUser
 from django.db.models import Q
 # Create your views here.
 
 LOOKUP_FIELD = 'id'
+
+
+# Helper Functions
+
+def get_students(students):
+    
+    selected_students = []
+
+    for student in students:
+
+        full_name = student.split(" ")
+
+        selected_student = CustomUser.objects.get(Q(first_name = full_name[0]) & Q(last_name = full_name[1])) 
+
+        if selected_student != None:
+
+            selected_students.append(selected_student)
+
+    return selected_students
+
+    
+
 
 def get_nested_attrs(obj, attrs):
 
@@ -69,6 +91,14 @@ class CourseView(generics.ListAPIView):
             Q(teacher=self.request.user) | Q(student=self.request.user)
             )
 
+class CourseDetailView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    serializer_class = CourseSerializer
+
+    def get_queryset(self):
+        return Course.objects.filter(id= self.kwargs['course_id'])
+
+
 class CourseCreate(generics.CreateAPIView):
     '''
     A view for creating a new Course:
@@ -78,8 +108,9 @@ class CourseCreate(generics.CreateAPIView):
     -> isTeacher : checks if the authenticated user has the role 'Teacher'.
 
     '''
-    permission_classes = [IsAuthenticated, isTeacher]    
+    permission_classes = [AllowAny]    
     serializer_class = CourseSerializer
+
     def perform_create(self, serializer):
 
         if serializer.is_valid():
