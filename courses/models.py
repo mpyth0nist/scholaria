@@ -9,7 +9,7 @@ class Course(models.Model):
     thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True)
     published = models.BooleanField(default=True)
     teacher = models.ForeignKey(CustomUser, null=True, related_name="courses_taught", on_delete=models.CASCADE)
-    student = models.ForeignKey(CustomUser, null=True,related_name="students_enrolled", on_delete=models.CASCADE)
+    student = models.ManyToManyField(CustomUser, related_name="students_enrolled")
     done = models.BooleanField(default=False)
 
 
