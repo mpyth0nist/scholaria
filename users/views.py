@@ -32,3 +32,5 @@ class ListStudentsView(APIView):
         serializer = UserSerializer(students, many=True)
         return Response(serializer.data)
 
+
+

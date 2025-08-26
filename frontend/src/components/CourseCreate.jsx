@@ -7,6 +7,7 @@ const CreateCourse = () => {
     const [courseInfo, setCourseInfo] = useState({
         course_name: '',
         subject: '',
+        thumbnail: null,
         description: '',
         published: false,
         done:false,
@@ -31,7 +32,17 @@ const CreateCourse = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const res = await api.post('api/courses/create-course/', courseInfo)
+        const formData = new FormData()
+
+        formData.append("course_name", courseInfo.course_name)
+        formData.append("description", courseInfo.description)
+        formData.append("thumbnail", courseInfo.thumbnail)
+        formData.append("subject", courseInfo.subject)
+        formData.append("done", courseInfo.done)
+        formData.append("published", courseInfo.published)
+        courseInfo.student.forEach(id => formData.append("student", id))
+
+        const res = await api.post('api/courses/create-course/', formData)
         console.log(res.status)
         if (res.status === 201){
             alert('Course Created Successfully!')
@@ -60,12 +71,13 @@ const CreateCourse = () => {
                 <input type="text" name="subject" value={courseInfo.subject} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Subject" />
                 <input type="textarea" name="description" value={courseInfo.description} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Description" />
                 <input type="checkbox" name="published" value={courseInfo.published} onChange={(e) => handleAdd(e.target.name, e.target.checked)}/>
+                <input type="file" name="thumbnail" onChange={(e) => handleAdd(e.target.name, e.target.files[0])} /> 
                 <label>Yes</label>
                 <input type="checkbox" name="done" onChange={(e) => handleAdd(e.target.name, e.target.checked)} value={courseInfo.done}/>
                 <label>Done</label>
-                <select multiple name="student" value={studentId} onChange={ (e) => setCourseInfo( prev => ({...prev,
+                <select multiple name="student" value={studentId} onChange={ (e) => {setCourseInfo( prev => ({...prev,
                     [e.target.name] : [...prev[e.target.name], e.target.value]
-                }))}>
+                }))}}>
                     
                     { students.map( student=> {
                         return <option value={student.id}>{student.first_name + " " + student.last_name}</option>

@@ -1,4 +1,4 @@
-import CourseUpdate from "../pages/CourseUpdate";
+import CourseUpdate from "./CourseUpdate";
 
 const CourseUpdateWrapper = ({ selectedCourse }) => {
 
