@@ -12,7 +12,10 @@ function Teacher(){
             <TeacherCard />
         <div className='w-[450px] h-min border-[2px] border-violet-500 rounded'>
 
-            <CoursesList />
+                <div className="text-xl font-sans pl-[1px] p-[0.8rem]">MY COURSES</div>
+                <div className="flex flex-col gap-[0.4rem]">
+                <CoursesList page='Home' />
+                </div>
 
             <CourseCreate />
             

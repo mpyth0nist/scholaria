@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom"
 import api from '../api'
 function CourseUpdate(){
 
+
     const {id} = useParams()
 
     const [courseData, setCourseData] = useState({
@@ -11,8 +12,10 @@ function CourseUpdate(){
         subject : '',
         description: '',
         published: false,
+        student: '',
         
     })
+
 
         
     const getCourse = async () => {
@@ -24,7 +27,7 @@ function CourseUpdate(){
             subject: res.data[0].subject,
             description: res.data[0].description,
             published: res.data[0].published,
-            students : res.data[0].student,
+            student : res.data[0].student,
         })
 
     }
@@ -55,7 +58,7 @@ function CourseUpdate(){
             <input type="text" value={courseData.course_name} onChange={(e) => handleUpdate('course_name', e.target.value)}/>
             <input type="text" value={courseData.subject} onChange={(e) => handleUpdate('subject', e.target.value)}/>
             <input type="text" value={courseData.description} onChange={(e) => handleUpdate('description', e.target.value)}/>
-            <input type="text" value={courseData.students} onChange={(e) => handleUpdate('students', e.target.value)}/>
+            <input type="text" value={courseData.student} onChange={(e) => handleUpdate('student', e.target.value)}/>
             <button type="submit">Submit</button>
         </form>
 

@@ -4,13 +4,11 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import ProtectedRoutes from './components/ProtectedRoutes.jsx'
 import Dashboard from './pages/DashboardLayout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
-import CourseUpdate from './pages/CourseUpdate.jsx'
+import CourseUpdate from './components/CourseUpdate.jsx'
 import Teacher from './pages/TeacherDashboard.jsx'
+import AllCoursesPage from './pages/AllCoursesPage.jsx'
 
 function App() {
-
-
-  
 
   return (
     
@@ -28,6 +26,12 @@ function App() {
             <Route path='/update-course/:id' element={<Dashboard>
               <CourseUpdate />
             </Dashboard>} />
+
+            <Route path='all-courses' element={
+              <Dashboard>
+                <AllCoursesPage />
+              </Dashboard>
+            } />
         </Route>
 
         <Route element={<LoginPage />} path='/login' />
