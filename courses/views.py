@@ -158,10 +158,6 @@ class ModuleList(generics.ListAPIView):
 class ModuleCreate(generics.CreateAPIView):
     serializer_class = ModuleSerializer
     permission_classes = [isModuleCourseTeacher]
-    def get_queryset(self):
-        module = Module.objects.get(id = self.kwargs['module_id'])
-        return module
-
 
     def perform_create(self, serializer):
         

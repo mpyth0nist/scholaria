@@ -8,7 +8,8 @@ import CourseUpdate from './components/CourseUpdate.jsx'
 import CourseCreate from './components/CourseCreate.jsx'
 import Teacher from './pages/TeacherDashboard.jsx'
 import AllCoursesPage from './pages/AllCoursesPage.jsx'
-
+import ModuleCreate from './components/ModuleCreate.jsx'
+import ModulesList from './components/ModuleList.jsx'
 function App() {
 
   return (
@@ -37,6 +38,18 @@ function App() {
             <Route path='create-course/' element={
               <Dashboard>
                 <CourseCreate />
+              </Dashboard>
+            } />
+
+            <Route path='course/:course_id/create-module/' element={
+              <Dashboard>
+                <ModuleCreate />
+              </Dashboard>
+            } />
+
+            <Route path='course/:course_id/modules/' element={
+              <Dashboard>
+                <ModulesList />
               </Dashboard>
             } />
         </Route>

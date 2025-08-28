@@ -10,6 +10,7 @@ const CoursesList = ( {page} ) => {
     const getCourses = async () => {
 
         const res = await api.get('api/courses/list/')
+        console.log(res.data)
         const recentCourse = res.data.length
 
         if (page === 'Courses') {
