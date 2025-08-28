@@ -65,7 +65,11 @@ class isLessonModuleCourseTeacher(isCourseTeacher):
 class isTeacher(BasePermission):
     
     def has_permission(self, request, view):
+
+        print('is teacher check called')
         user = request.user
+        print(user.role)
+
         
         return user.role == 'Teacher'
 
@@ -78,12 +82,22 @@ class isStudent(BasePermission):
 
         return user.role == 'Student'
 
+class isCourseStudent(BasePermission):
+    lookup_field = ['student']
+
+    def has_object_permission(self, request, view, obj):
+        course_students = get_nested_attrs(obj, self.lookup_field)
+        print(course_students)
+        print(request.user)
+        return request.user in course_students
+
+
 
 class CourseView(generics.ListAPIView):
     '''
     Shows a course content in details
     '''
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, isCourseStudent]
     serializer_class = CourseSerializer
     def get_queryset(self):
 
@@ -130,7 +144,7 @@ class CourseUpdate(generics.UpdateAPIView):
 
    queryset = Course.objects.all()
    serializer_class = CourseSerializer
-   permission_classes = [isCourseTeacher]
+   permission_classes = [IsAuthenticated, isTeacher, isCourseTeacher]
    lookup_field = LOOKUP_FIELD
 
 class ModuleList(generics.ListAPIView):
