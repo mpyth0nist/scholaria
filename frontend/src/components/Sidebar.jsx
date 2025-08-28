@@ -13,15 +13,18 @@ const Sidebar = (props) => {
             <div className="border-r-5 border-green-500 h-screen p-[20px] mr-[2rem]">
                 { isTeacher ? 
                     <div className='flex flex-col gap-4'>
-                    <button onClick={() => setToggleMenu(true)} >Courses</button>
+                    <button onClick={() => setToggleMenu(!toggleMenu)} >Courses</button>
 
                     {
-                        toggleMenu ? null :                     
-                        
+                        toggleMenu ?                         
                         <div>
                             <button onClick={() => navigate('/all-courses/')}>All Courses</button>
                             <button onClick={() => navigate('/create-course/')}>Create a Course</button>
                         </div>
+                        
+                        : null                     
+                        
+
                     }
 
 
