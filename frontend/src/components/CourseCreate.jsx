@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react"
 import api from '../api'
-
+import { useNavigate } from "react-router-dom"
 
 const CreateCourse = () => {
 
@@ -14,6 +14,8 @@ const CreateCourse = () => {
         student: [],
 
     })
+
+    const navigate = useNavigate()
 
     const [students, setStudents] = useState([])
     const [studentId, setStudentId] = useState(null)
@@ -56,6 +58,10 @@ const CreateCourse = () => {
             published: false,
             done:false
         })
+
+        navigate(`/course/${res.data.id}/create-module/`)
+
+        
     }
 
     useEffect(() => {

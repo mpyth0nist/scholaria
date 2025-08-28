@@ -13,19 +13,19 @@ class LessonSerializer(serializers.ModelSerializer):
 
 
 class ModuleSerializer(serializers.ModelSerializer):
-    lesson_module = LessonSerializer(many=True)
+    #lesson_module = LessonSerializer(many=True)
     class Meta:
 
         model = Module
-        fields = ['id','title','course', 'order', 'lesson_module']
+        fields = ['id','title','course', 'order','done']
 
     def create(self, validated_data):
-        lessons_data = validated_data.pop('lesson_module')
+        #lessons_data = validated_data.pop('lesson_module')
 
         module = Module.objects.create(**validated_data)
 
-        for lesson in lessons_data:
-            Lesson.objects.create(module=module, **lesson)
+        #for lesson in lessons_data:
+            #Lesson.objects.create(module=module, **lesson)
 
         return module
 

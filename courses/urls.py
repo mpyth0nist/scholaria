@@ -13,8 +13,8 @@ urlpatterns = [
     path('create-course/', CourseCreate.as_view(), name="create-course"),
     path('delete/<int:id>/', CourseDelete.as_view(), name="course_delete"),
     path('update/<int:id>/', CourseUpdate.as_view(), name="course_update"),
-    path('modules/', ModuleList.as_view(), name="course_modules"),
-    path('modules/add-module/', ModuleCreate.as_view(), name="add_module"),
+    path('<int:course_id>/modules/', ModuleList.as_view(), name="course_modules"),
+    path('<int:course_id>/modules/add-module/', ModuleCreate.as_view(), name="add_module"),
     path('modules/<int:module_id>/update-module/', ModuleUpdate.as_view(), name="update_module"),
     path('modules/<int:module_id>/delete-module/', ModuleDelete.as_view(), name="delete_module"),
 ]
