@@ -47,21 +47,25 @@ class ModuleSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
 
-    module_course = ModuleSerializer(many=True)
+    #module_course = ModuleSerializer(many=True)
 
     class Meta:
         model = Course
-        fields = ['id','course_name', 'subject', 'description', 'thumbnail', 'published','teacher','student','done','module_course']
+        fields = ['id','course_name', 'subject', 'description', 'thumbnail', 'published','teacher','student','done']
 
     def create(self, validated_data):
 
-        modules_data = validated_data.pop('module_course')
+        #modules_data = validated_data.pop('module_course')
+        students_data = validated_data.pop('student')
 
         course = Course.objects.create(**validated_data)
 
-        for module in modules_data:
+        if students_data:
+            course.student.set(students_data)
 
-            Module.objects.create(course=course, **module)
+        #for module in modules_data:
+
+            #Module.objects.create(course=course, **module)
 
         return course
 
