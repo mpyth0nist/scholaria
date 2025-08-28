@@ -1,5 +1,4 @@
 import CoursesList from '../components/CoursesList'
-import CourseCreate from '../components/CourseCreate'
 import TeacherCard from '../components/TeacherInfoCard'
 import '../style/style.css'
 function Teacher(){
@@ -17,7 +16,6 @@ function Teacher(){
                 <CoursesList page='Home' />
                 </div>
 
-            <CourseCreate />
             
         </div>
         </div>

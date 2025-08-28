@@ -5,6 +5,7 @@ import ProtectedRoutes from './components/ProtectedRoutes.jsx'
 import Dashboard from './pages/DashboardLayout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
 import CourseUpdate from './components/CourseUpdate.jsx'
+import CourseCreate from './components/CourseCreate.jsx'
 import Teacher from './pages/TeacherDashboard.jsx'
 import AllCoursesPage from './pages/AllCoursesPage.jsx'
 
@@ -30,6 +31,12 @@ function App() {
             <Route path='all-courses' element={
               <Dashboard>
                 <AllCoursesPage />
+              </Dashboard>
+            } />
+
+            <Route path='create-course/' element={
+              <Dashboard>
+                <CourseCreate />
               </Dashboard>
             } />
         </Route>

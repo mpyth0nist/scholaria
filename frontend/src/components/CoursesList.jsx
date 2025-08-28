@@ -45,7 +45,7 @@ const CoursesList = ( {page} ) => {
 
                 }
 
-                {page === 'Courses' ? null : <div className="text-lg border rounded border-grey-500 bg-red-800 text-center p-[1.2rem]">All Courses </div>} 
+                {page === 'Courses' ? null : <div className="text-lg border rounded border-grey-500 bg-red-800 text-center p-[1.2rem]" onClick={() => navigate('/all-courses/')}>All Courses </div>} 
 
         </div>
     )
