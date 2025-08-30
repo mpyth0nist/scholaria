@@ -182,28 +182,36 @@ class ModuleDelete(generics.DestroyAPIView):
         return Module.objects.all()
 
 class LessonList(generics.ListAPIView):
-
+    serializer_class = LessonSerializer
     def get_queryset(self):
-        linked_module = Module.objects.get(self.kwargs['module_id'])
-        return Lesson.objects.filter(module=linked_module)
+        linked_module = Module.objects.get(id=self.kwargs['module_id'])
+
+        lessons = Lesson.objects.filter(module=linked_module)
+
+        print(lessons)
+        return lessons
 
 
 
 class LessonCreate(generics.CreateAPIView):
 
-    permission_classes = [isLessonModuleCourseTeacher]
+    permission_classes = [isTeacher]
+
+    serializer_class = LessonSerializer
+
 
     def get_queryset(self):
-        linked_module = Module.objects.get(self.kwargs['module_id'])
+        linked_module = Module.objects.get(id=self.kwargs['module_id'])
+
         return Lesson.objects.filter(module = linked_module)
     
     def perform_create(self, serializer):
+        linked_module = Module.objects.get(id=self.kwargs['module_id'])
 
-        if serializer.is_valid():
-            serializer.save()
-            
-        else:
-            print(serializer.errors)
+
+        print('passed as valid')
+        serializer.save(module=linked_module)
+
 
 class LessonUpdate(generics.UpdateAPIView):
 

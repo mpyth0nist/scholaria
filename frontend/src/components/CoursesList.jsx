@@ -34,11 +34,12 @@ const CoursesList = ( {page} ) => {
                 {
                     courses.map(course => {
                         return ( 
-                        <div className='font-sans border border-grey-400 p-[1.2rem] rounded' onClick={() => navigate(`/update-course/${course.id}`)}>
+                        <div className='font-sans border border-grey-400 p-[1.2rem] rounded' >
                             <img src={course.thumbnail} alt="No thumbnail" />
                             <div className="text-lg" >{course.course_name}</div>
                             <div className="text-sm">{course.description}</div>             
-                        
+                            <button onClick={() => navigate(`/update-course/${course.id}`)}>Update the course</button>
+                            <button onClick={() => navigate(`/course/${course.id}/modules/`)}>View Modules</button>
                         </div>
 
                     )
