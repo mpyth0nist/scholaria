@@ -25,7 +25,7 @@ class ModuleSerializer(serializers.ModelSerializer):
         module = Module.objects.create(**validated_data)
 
         #for lesson in lessons_data:
-            #Lesson.objects.create(module=module, **lesson)
+         #   Lesson.objects.create(module=module, **lesson)
 
         return module
 
