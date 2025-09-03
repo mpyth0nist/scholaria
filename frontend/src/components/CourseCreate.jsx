@@ -11,24 +11,24 @@ const CreateCourse = () => {
         description: '',
         published: false,
         done:false,
-        student: [],
+        students: [],
 
     })
 
     const navigate = useNavigate()
 
-    const [students, setStudents] = useState([])
-    const [studentId, setStudentId] = useState(null)
+    const [schoolStudents, setSchoolStudents] = useState([])
     
     const getStudents = async () => {
         const res = await api.get('api/users/students/')
-        setStudents(res.data)
+        setSchoolStudents(res.data)
     }
     const handleAdd = (name, value) =>{
         setCourseInfo(prev => ({
             ...prev,
             [name]: value
         }))
+
     }
 
     const handleSubmit = async (e) => {
@@ -41,7 +41,7 @@ const CreateCourse = () => {
         formData.append("subject", courseInfo.subject)
         formData.append("done", courseInfo.done)
         formData.append("published", courseInfo.published)
-        courseInfo.student.forEach(id => formData.append("student", id))
+        courseInfo.students.forEach(id => formData.append("student", id))
 
         const res = await api.post('api/courses/create-course/', formData)
         console.log(res.status)
@@ -85,16 +85,33 @@ const CreateCourse = () => {
                     <input type="checkbox" name="done" onChange={(e) => handleAdd(e.target.name, e.target.checked)} value={courseInfo.done}/>
                     <label>Done</label>
                 </div>
-
-                <select multiple name="student" value={studentId} onChange={ (e) => {setCourseInfo( prev => ({...prev,
-                    [e.target.name] : [...prev[e.target.name], e.target.value]
-                }))}}>
                     
-                    { students.map( student=> {
-                        return <option value={student.id}>{student.first_name + " " + student.last_name}</option>
+                    { schoolStudents.map( student=> {
+                        return (
+
+                            <div>
+                                <input type="checkbox"
+                            
+                                    value={student.id}
+                                    checked = {courseInfo.students.includes(String(student.id))}
+                                    onChange={(e) => {
+                                        setCourseInfo(prev => ({
+                                            ...prev,
+                                            students : prev.students.includes(e.target.value) ? 
+                                                [...prev.students.filter(s => { return s !== e.target.value})] // removes student if unselected
+                                                : 
+                                                [...prev.students, e.target.value] // add student if selected
+                                        }))
+                                    }}
+                                
+                                />
+                                <label> {student.first_name + " " + student.last_name} </label>
+
+                        </div>
+
+                        ) 
                     }) }
 
-                </select>
                 <input type="submit" value="Submit"/>
 
             </form>

@@ -97,13 +97,13 @@ class CourseView(generics.ListAPIView):
     '''
     Shows a course content in details
     '''
-    permission_classes = [IsAuthenticated, isCourseStudent]
+    permission_classes = [IsAuthenticated, isTeacher, isCourseStudent]
     serializer_class = CourseSerializer
     def get_queryset(self):
 
         return Course.objects.filter(
             Q(teacher=self.request.user) | Q(student=self.request.user)
-            )
+            ).distinct()
 
 class CourseDetailView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -190,6 +190,19 @@ class LessonList(generics.ListAPIView):
 
         print(lessons)
         return lessons
+
+
+
+class LessonDetailView(generics.ListAPIView):
+
+    serializer_class = LessonSerializer
+
+    def get_queryset(self):
+
+        return Lesson.objects.filter(id=self.kwargs['lesson_id'])
+    
+
+
 
 
 

@@ -9,14 +9,14 @@ const TeacherCard = () => {
         firstName : '',
         lastName : '',
         email : '',
-        courses : [],
+        courses : null,
         students : null
 
     })
     const getTeacherInfo = async () => {
 
+        console.log('get teacher info called')
         const res = await api.get('api/users/user/')
-
         setTeacher({
             firstName : res.data.first_name,
             lastName : res.data.last_name,
@@ -26,6 +26,8 @@ const TeacherCard = () => {
 
         })
 
+        console.log(teacher)
+
     }
 
     useEffect(()=> {
@@ -34,8 +36,9 @@ const TeacherCard = () => {
 
 
     return (
-
         <div className='border-[0.6rem] h-fit rounded p-[0.8rem] border-violet-900'>
+                    {console.log(teacher)}
+
             <h2 className={TEXT_STYLE + " border-b-[2px] border-violet-700 p-[1rem]"}>Profile Summary</h2>
             <div className={TEXT_STYLE_SM}>{ teacher.firstName + " " + teacher.lastName }</div>
             <div className={TEXT_STYLE_SM}> Email : {teacher.email} </div>

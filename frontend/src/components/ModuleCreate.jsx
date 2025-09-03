@@ -38,13 +38,18 @@ const ModuleCreate = () => {
         setModules(res.data)
     }
 
-    const handleModulesClick = () => {
-        setToggleLessonsMenu(true)
+    const handleModulesClick = (module_id) => {
+        if (module_id === activeModule) {
+            setActiveModule(null)
+        }else {
+            setActiveModule(module_id)
+        }
     }
 
     useEffect(() => {
         getModules()
-    }, [])
+        
+    }, [modules])
 
     return ( 
 
@@ -69,7 +74,7 @@ const ModuleCreate = () => {
 
                 {
                     modules.map(module => {
-                        return <button onClick={() => setActiveModule(module.id) }>
+                        return <button >
                             
                             
                             {module.title}
@@ -81,7 +86,7 @@ const ModuleCreate = () => {
                             </div>
                              : null }
                         
-                        
+                            <button onClick={() => handleModulesClick(module.id) } className="p-[1rem] m-[0.7rem] text-white">Show</button>
                         </button>
                     })
                 }
