@@ -10,6 +10,7 @@ import Teacher from './pages/TeacherDashboard.jsx'
 import AllCoursesPage from './pages/AllCoursesPage.jsx'
 import ModuleCreate from './components/ModuleCreate.jsx'
 import ModulesList from './components/ModuleList.jsx'
+import LessonPage from './pages/LessonPage.jsx'
 function App() {
 
   return (
@@ -50,6 +51,12 @@ function App() {
             <Route path='course/:course_id/modules/' element={
               <Dashboard>
                 <ModulesList />
+              </Dashboard>
+            } />
+
+            <Route path='course/module/lessons/:lesson_id' element={
+              <Dashboard>
+                <LessonPage />
               </Dashboard>
             } />
         </Route>

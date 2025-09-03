@@ -16,7 +16,7 @@ const LessonCreate = ({module_id} ) => {
  
 
     return (
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} className='flex flex-col gap-[1rem]'>
 
             <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder='Title' />
             <input type="content" value={content} onChange={(e) => setContent(e.target.value)} placeholder='Content' />

@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
+
+import { useNavigate } from "react-router-dom";
 import api from "../api";
 
 const ListLessons = ({module_id}) => {
-
+    const navigate = useNavigate()
     const [lessons, setLessons] = useState([])
     
     const getLessons = async () => {
@@ -24,7 +26,10 @@ const ListLessons = ({module_id}) => {
         
         {
             lessons.map(lesson => {
-                return <button>{lesson.title}</button>
+                return <button onClick = {() => {
+                    console.log('triggered')
+                    navigate(`/course/module/lessons/${lesson.id}`)}
+                }>{lesson.title}</button>
             })
         }
         

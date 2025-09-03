@@ -29,13 +29,13 @@ const CoursesList = ( {page} ) => {
 
     return (
         
-        <div className='flex flex-col p-[0.5rem]'>
+        <div className='flex flex-wrap p-[0.5rem]'>
 
                 {
                     courses.map(course => {
                         return ( 
-                        <div className='font-sans border border-grey-400 p-[1.2rem] rounded' >
-                            <img src={course.thumbnail} alt="No thumbnail" />
+                        <div className='w-1/2 font-sans border border-grey-400 p-[1.2rem] rounded' >
+                            <img src={course.thumbnail} alt="No thumbnail" className='h-auto w-[400px]' />
                             <div className="text-lg" >{course.course_name}</div>
                             <div className="text-sm">{course.description}</div>             
                             <button onClick={() => navigate(`/update-course/${course.id}`)}>Update the course</button>
