@@ -1,9 +1,9 @@
 
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
-import api from '../api'
+import api from '../../api'
 
-import NotFound from '../pages/NotFound'
+import NotFound from '../../pages/NotFound'
 function CourseUpdate(){
 
     const [role, setRole] = useState(null)

@@ -1,5 +1,5 @@
 
-import CoursesList from "../components/CoursesList"
+import CoursesList from "../components/courses/CoursesList"
 
 const CoursesDetail = () => {
 

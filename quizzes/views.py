@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .serializers import *
 from .models import *
 from rest_framework import generics
-from courses.views import isTeacher, isStudent, isCourseTeacher, isLessonModuleCourseTeacher, isModuleCourseTeacher
+from courses.views import isTeacher, isStudent, isCourseTeacher
 
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 

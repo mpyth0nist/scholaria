@@ -24,6 +24,6 @@ class Lesson(models.Model):
     title = models.CharField(max_length=255)
     content = models.TextField()
     attachments = models.FileField(upload_to = 'lesson_docs/', null=True, blank=True)
-    video = models.URLField(blank=True, null=True)
+    video = models.FileField(upload_to= 'lesson_vids/', blank=True, null=True)
     module = models.ForeignKey(Module, related_name="lesson_module", on_delete=models.CASCADE)
     done = models.BooleanField(default=False)

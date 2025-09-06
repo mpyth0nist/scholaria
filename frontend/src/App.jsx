@@ -1,15 +1,15 @@
 
 import './App.css'
 import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import ProtectedRoutes from './components/ProtectedRoutes.jsx'
-import Dashboard from './pages/DashboardLayout.jsx'
+import ProtectedRoutes from './routes/ProtectedRoutes.jsx'
+import Dashboard from './components/layout/DashboardLayout.jsx'
 import LoginPage from './pages/LoginPage.jsx'
-import CourseUpdate from './components/CourseUpdate.jsx'
-import CourseCreate from './components/CourseCreate.jsx'
+import CourseUpdate from './components/courses/CourseUpdate.jsx'
+import CourseCreate from './components/courses/CourseCreate.jsx'
 import Teacher from './pages/TeacherDashboard.jsx'
 import AllCoursesPage from './pages/AllCoursesPage.jsx'
-import ModuleCreate from './components/ModuleCreate.jsx'
-import ModulesList from './components/ModuleList.jsx'
+import ModuleCreate from './components/modules/ModuleCreate.jsx'
+import ModulesList from './components/modules/ModuleList.jsx'
 import LessonPage from './pages/LessonPage.jsx'
 function App() {
 
