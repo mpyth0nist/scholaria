@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { ACCESS_TOKEN, REFRESH_TOKEN } from '../constants'
+import { ACCESS_TOKEN, REFRESH_TOKEN } from '../constants.js'
 import { jwtDecode } from 'jwt-decode'
 import api from '../api.js'
 import { Outlet, Navigate } from 'react-router-dom'

@@ -1,12 +1,12 @@
 
 
-import '../style/style.css'
-import TeacherDashboard from './TeacherDashboard';
-import StudentDashboard from './StudentDashboard'
-import Sidebar from '../components/Sidebar'
+import '../../style/style.css'
+import TeacherDashboard from '../../pages/TeacherDashboard';
+import StudentDashboard from '../../pages/StudentDashboard'
+import Sidebar from '../layout/Sidebar'
 import {useState, useEffect} from 'react'
 
-import api from '../api'
+import api from '../../api'
 function Dashboard( {children} ){
     
     const [firstName, setFirstName] = useState('')

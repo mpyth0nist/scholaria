@@ -1,4 +1,4 @@
-import CoursesList from '../components/CoursesList'
+import CoursesList from '../components/courses/CoursesList'
 import TeacherCard from '../components/TeacherInfoCard'
 import '../style/style.css'
 function Teacher(){

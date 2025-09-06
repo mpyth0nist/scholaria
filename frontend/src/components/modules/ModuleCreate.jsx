@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react"
-import api from '../api'
+import api from '../../api'
 import { useParams } from "react-router-dom"
 
-import LessonCreate from "./LessonCreate"
-import ListLessons from "./ListLessons"
+import LessonCreate from "../lessons/LessonCreate"
+import ListLessons from "../lessons/ListLessons"
 const ModuleCreate = () => {
 
     const [title, setTitle] = useState('')

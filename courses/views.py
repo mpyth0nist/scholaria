@@ -12,26 +12,24 @@ LOOKUP_FIELD = 'id'
 
 # Helper Functions
 
-def get_students(students):
-    
-    selected_students = []
-
-    for student in students:
-
-        full_name = student.split(" ")
-
-        selected_student = CustomUser.objects.get(Q(first_name = full_name[0]) & Q(last_name = full_name[1])) 
-
-        if selected_student != None:
-
-            selected_students.append(selected_student)
-
-    return selected_students
-
-    
-
 
 def get_nested_attrs(obj, attrs):
+
+    '''
+
+    Returns the value of a nested attribute of an object.
+
+    Args : 
+        obj : the object to retrieve the attributes from.
+
+        attrs : the list of attributes names (e.g Foreign Keys) 
+
+    Returns : 
+
+        The value of the last element of the attributes list (attrs), or None if it doesn't exist.
+
+
+    '''
 
     result = obj
     for attr in attrs:
@@ -53,14 +51,6 @@ class isCourseTeacher(BasePermission):
 
         return course_teacher == request.user
 
-
-class isModuleCourseTeacher(isCourseTeacher):
-
-    lookup_field = ['course', 'teacher']
-
-class isLessonModuleCourseTeacher(isCourseTeacher):
-
-    lookup_field = ['module', 'course', 'teacher']
 
 class isTeacher(BasePermission):
     
@@ -87,8 +77,7 @@ class isCourseStudent(BasePermission):
 
     def has_object_permission(self, request, view, obj):
         course_students = get_nested_attrs(obj, self.lookup_field)
-        print(course_students)
-        print(request.user)
+
         return request.user in course_students
 
 
@@ -130,6 +119,7 @@ class CourseCreate(generics.CreateAPIView):
         if serializer.is_valid():
             serializer.save(teacher=self.request.user)
         else:
+            print("failed")
             print(serializer.errors)
 
 
@@ -157,7 +147,7 @@ class ModuleList(generics.ListAPIView):
 
 class ModuleCreate(generics.CreateAPIView):
     serializer_class = ModuleSerializer
-    permission_classes = [isModuleCourseTeacher]
+    permission_classes = [isCourseTeacher]
 
     def perform_create(self, serializer):
         
@@ -169,14 +159,15 @@ class ModuleCreate(generics.CreateAPIView):
 
 class ModuleUpdate(generics.UpdateAPIView):
     queryset = Module.objects.all()
-    permission_classes = [isModuleCourseTeacher]
+    permission_classes = [IsAuthenticated]
     serializer_class = ModuleSerializer
-    lookup_field = 'module_id'
+    lookup_field = 'id'
+    lookup_url_kwarg = 'module_id'
 
 class ModuleDelete(generics.DestroyAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'module_id'
-    permission_classes = [isModuleCourseTeacher]
+    permission_classes = [isCourseTeacher]
     
     def get_queryset(self):
         return Module.objects.all()
@@ -219,26 +210,42 @@ class LessonCreate(generics.CreateAPIView):
         return Lesson.objects.filter(module = linked_module)
     
     def perform_create(self, serializer):
-        linked_module = Module.objects.get(id=self.kwargs['module_id'])
+
+        try:
+            linked_module = Module.objects.get(id=self.kwargs['module_id'])
+
+            serializer.save(module=linked_module)
+
+        except Module.DoesNotExist:
+
+            raise NotFound(f"Module with id {self.kwargs['module_id']} does not exist")
+
+        except Exception as e:
+
+            print(e)
+
+            raise
 
 
-        print('passed as valid')
-        serializer.save(module=linked_module)
+
+
 
 
 class LessonUpdate(generics.UpdateAPIView):
 
     queryset = Lesson.objects.all()
-    permission_classes = [isLessonModuleCourseTeacher]
+    permission_classes = [isCourseTeacher]
     serializer_class = LessonSerializer
+
     lookup_url_kwarg = 'lesson_id'
     lookup_field = LOOKUP_FIELD
+
 
 
 class LessonDelete(generics.DestroyAPIView):
 
     queryset = Lesson.objects.all()
-    permission_classes = [isLessonModuleCourseTeacher]
+    permission_classes = [isCourseTeacher]
     lookup_field = LOOKUP_FIELD
     lookup_url_kwarg = 'lesson_id'
 

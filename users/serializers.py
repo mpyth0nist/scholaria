@@ -7,9 +7,10 @@ from courses.serializers import CourseSerializer
 
 class UserSerializer(serializers.ModelSerializer):
 
+    courses_taught = CourseSerializer(many=True)
     class Meta:
         model = CustomUser
-        fields = ["id", "username","password","first_name", "last_name", "email", "role", "birth_date"]
+        fields = ["id", "username","password","first_name", "last_name", "email", "role", "birth_date", "courses_taught"]
         extra_kwargs = { 'password' : {'write_only': True}}
 
     def create(self, validated_data):

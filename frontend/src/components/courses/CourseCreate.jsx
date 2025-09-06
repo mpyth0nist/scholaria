@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react"
-import api from '../api'
+import api from '../../api'
 import { useNavigate } from "react-router-dom"
 
 const CreateCourse = () => {
@@ -33,35 +33,43 @@ const CreateCourse = () => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        const formData = new FormData()
 
-        formData.append("course_name", courseInfo.course_name)
-        formData.append("description", courseInfo.description)
-        formData.append("thumbnail", courseInfo.thumbnail)
-        formData.append("subject", courseInfo.subject)
-        formData.append("done", courseInfo.done)
-        formData.append("published", courseInfo.published)
-        courseInfo.students.forEach(id => formData.append("student", id))
+        try {
 
-        const res = await api.post('api/courses/create-course/', formData)
-        console.log(res.status)
-        if (res.status === 201){
-            alert('Course Created Successfully!')
-        }else{
-            alert('something wrong happened')
-        }
+       
+            const formData = new FormData()
 
-        setCourseInfo({        
-            course_name: '',
-            subject: '',
-            description: '',
-            published: false,
-            done:false
-        })
+            formData.append("course_name", courseInfo.course_name)
+            formData.append("description", courseInfo.description)
+            formData.append("thumbnail", courseInfo.thumbnail)
+            formData.append("subject", courseInfo.subject)
+            formData.append("done", courseInfo.done)
+            formData.append("published", courseInfo.published)
+            courseInfo.students.forEach(id => formData.append("student", id))
+            
+            const res = await api.post('api/courses/create-course/', formData)
+            console.log(res.status)
+            if (res.status === 201){
+                alert('Course Created Successfully!')
+            }else{
+                alert('something wrong happened')
+            }
 
-        navigate(`/course/${res.data.id}/create-module/`)
+            setCourseInfo({        
+                course_name: '',
+                subject: '',
+                description: '',
+                thumbnail: null,
+                published: false,
+                done:false,
+                students:[]
+            })
 
-        
+            navigate(`/course/${res.data.id}/create-module/`)
+
+     }catch(err){
+        console.log(err)
+     }
     }
 
     useEffect(() => {
@@ -74,33 +82,32 @@ const CreateCourse = () => {
 
                 <input type="text" name="course_name" value={courseInfo.course_name} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Title.."/>
                 <input type="text" name="subject" value={courseInfo.subject} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Subject" />
-                <input type="textarea" name="description" value={courseInfo.description} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Description" />
+                <textarea name="description" value={courseInfo.description} placeholder="description" onChange={(e) => handleAdd(e.target.name, e.target.value)}></textarea>
                 <input type="file" name="thumbnail" onChange={(e) => handleAdd(e.target.name, e.target.files[0])} /> 
                 <div className="flex gap-[0.7rem]">
-                    <input type="checkbox" name="published" value={courseInfo.published} onChange={(e) => handleAdd(e.target.name, e.target.checked)}/>
+                    <label>Published ? </label>
+                    <input type="checkbox" name="published" checked={courseInfo.published} onChange={(e) => handleAdd(e.target.name, e.target.checked)}/>
                     <label>Yes</label>
                 </div>
 
                 <div className="flex gap-[0.7rem]"> 
-                    <input type="checkbox" name="done" onChange={(e) => handleAdd(e.target.name, e.target.checked)} value={courseInfo.done}/>
+                    <input type="checkbox" name="done" onChange={(e) => handleAdd(e.target.name, e.target.checked)} checked={courseInfo.done}/>
                     <label>Done</label>
                 </div>
                     
                     { schoolStudents.map( student=> {
                         return (
 
-                            <div>
+                            <div key={student.id}>
                                 <input type="checkbox"
-                            
-                                    value={student.id}
-                                    checked = {courseInfo.students.includes(String(student.id))}
+                                    checked = {courseInfo.students.includes(student.id)}
                                     onChange={(e) => {
                                         setCourseInfo(prev => ({
                                             ...prev,
-                                            students : prev.students.includes(e.target.value) ? 
-                                                [...prev.students.filter(s => { return s !== e.target.value})] // removes student if unselected
+                                            students : prev.students.includes(student.id) ? 
+                                                [...prev.students.filter(s => { return s !== student.id})] // removes student if unselected
                                                 : 
-                                                [...prev.students, e.target.value] // add student if selected
+                                                [...prev.students, student.id] // add student if selected
                                         }))
                                     }}
                                 
