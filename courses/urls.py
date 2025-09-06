@@ -20,5 +20,6 @@ urlpatterns = [
     path('<int:module_id>/add-lesson/', LessonCreate.as_view(), name="add-lesson"),
 
     path('<int:module_id>/lessons/', LessonList.as_view(), name='list_module_lessons'),
-    path('lessons/<int:lesson_id>/', LessonDetailView.as_view(), name="show_lesson")
+    path('lessons/<int:lesson_id>/', LessonDetailView.as_view(), name="show_lesson"),
+    path('lessons/<int:lesson_id>/update-lesson/', LessonUpdate.as_view(), name="update-lesson")
 ]
