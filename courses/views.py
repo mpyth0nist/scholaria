@@ -234,7 +234,7 @@ class LessonCreate(generics.CreateAPIView):
 class LessonUpdate(generics.UpdateAPIView):
 
     queryset = Lesson.objects.all()
-    permission_classes = [isCourseTeacher]
+    permission_classes = [IsAuthenticated]
     serializer_class = LessonSerializer
 
     lookup_url_kwarg = 'lesson_id'
