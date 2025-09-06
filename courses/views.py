@@ -167,7 +167,7 @@ class ModuleUpdate(generics.UpdateAPIView):
 class ModuleDelete(generics.DestroyAPIView):
     lookup_field = 'id'
     lookup_url_kwarg = 'module_id'
-    permission_classes = [isCourseTeacher]
+    permission_classes = [IsAuthenticated]
     
     def get_queryset(self):
         return Module.objects.all()

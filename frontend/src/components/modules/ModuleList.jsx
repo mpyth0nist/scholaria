@@ -25,6 +25,16 @@ const ModulesList = () => {
 
     }
 
+    const deleteModule = async (e, moduleId) => {
+        e.preventDefault()
+
+        try {
+            const res = await api.delete(`api/courses/modules/${moduleId}/delete-module/`)
+        }catch(error) {
+            console.log(error)
+        }
+    }
+
     useEffect(() => {
         getModules()
     }, [])
@@ -60,6 +70,10 @@ const ModulesList = () => {
                             <button  onClick={() => {setActiveModule(module.id)
                                 if(toggleUpdate === true){ setToggleUpdate(!toggleUpdate)}
                             }}>Lessons</button>
+
+                            <button onClick={(e) => {
+                                deleteModule(e, module.id)
+                            }}>Delete</button>
 
                             {
                                 toggleUpdate !== true && activeModule === module.id ? <ListLessons module_id={module.id} /> : null
