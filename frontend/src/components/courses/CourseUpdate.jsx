@@ -2,7 +2,8 @@
 import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import api from '../../api'
-
+import { useSelector, useDispatch } from 'react-redux'
+import { fetchSelectedCourse, updateCourse } from "../../features/courses/coursesSlice"
 import NotFound from '../../pages/NotFound'
 function CourseUpdate(){
 
@@ -14,47 +15,34 @@ function CourseUpdate(){
     }
 
     const {id} = useParams()
-
+    const [courseData, setCourseData] = useState({})
+    const selectedCourse = useSelector(state => state.courses.selectedCourse)
     const [students, setStudents] = useState([])
-    const [courseData, setCourseData] = useState({
-        course_name: '',
-        subject : '',
-        description: '',
-        published: false,
-        student: '',
-        
-    })
+    const dispatch = useDispatch()
 
+    useEffect(() => {
+        dispatch(fetchSelectedCourse(id))
+    }, [])
 
-        
-    const getCourse = async () => {
-        console.log('get course triggered')
-        const res = await api.get(`api/courses/${id}`)
-        console.log(res.data[0])
-        setCourseData({
-            course_name: res.data[0].course_name,
-            subject: res.data[0].subject,
-            description: res.data[0].description,
-            published: res.data[0].published,
-            student : res.data[0].student,
-        })
-
-    }
+     useEffect(() => {
+        if(selectedCourse && selectedCourse.length > 0){
+            setCourseData(selectedCourse[0])
+        }
+     }, [selectedCourse])
 
     const handleUpdate = (k, v) => {
-        setCourseData(prev => ({...prev,
+        setCourseData(prev => ({
+            ...prev,
             [k] : v
         }))
     }
-    const handleSubmit = async (e) =>{
+    const handleSubmit = (e) =>{
         e.preventDefault()
         console.log('updating course triggered')
-        try {
-            const res = await api.put(`api/courses/update/${id}/`, courseData)
 
-        }catch(errors){
-            console.log(errors)
-        }
+        dispatch(updateCourse(courseData))
+
+
 
     }
 
@@ -70,11 +58,13 @@ function CourseUpdate(){
         const res = await api.delete(`api/courses/delete/${id}/`)
     }
     useEffect(()=> {
-        getCourse()
         getStudents()
         getRole()
     }, [])
 
+    useEffect(()=> {
+        console.log(courseData)
+    }, [courseData])
     if(role === 'Teacher'){
         return (
         

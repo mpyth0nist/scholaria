@@ -1,31 +1,38 @@
 import api from '../../api'
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useSelector, useDispatch } from 'react-redux'
+import { fetchCourses } from '../../features/courses/coursesSlice'
 const CoursesList = ( {page} ) => {
 
     const navigate = useNavigate()
-    const [courses, setCourses] = useState([])
+
+    const courses = useSelector(state => state.courses.courses)
+    const dispatch = useDispatch()
+
+    // const [courses, setCourses] = useState([])
 
 
-    const getCourses = async () => {
+    // const getCourses = async () => {
 
-        const res = await api.get('api/courses/list/')
-        console.log(res.data)
-        const recentCourse = res.data.length
+    //     const res = await api.get('api/courses/list/')
+    //    // console.log(res.data)
+    //     const recentCourse = res.data.length
 
-        if (page === 'Courses') {
-            setCourses(res.data)
+    //     if (page === 'Courses') {
+    //         setCourses(res.data)
 
-        } else {
-            setCourses(res.data.slice(recentCourse - 3, recentCourse))
-        }
+    //     } else {
+    //         setCourses(res.data.slice(recentCourse - 3, recentCourse))
+    //     }
 
-    }
+    // }
 
 
     useEffect(() => {
-        getCourses()
+        dispatch(fetchCourses())
     }, [])
+
 
     return (
         
