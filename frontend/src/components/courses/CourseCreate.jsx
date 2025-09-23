@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import api from '../../api'
 import { useNavigate } from "react-router-dom"
 
+import { useDispatch } from "react-redux"
+import { createCourse } from "../../features/courses/coursesSlice"
 const CreateCourse = () => {
 
     const [courseInfo, setCourseInfo] = useState({
@@ -14,6 +16,8 @@ const CreateCourse = () => {
         students: [],
 
     })
+
+    const dispatch = useDispatch()
 
     const navigate = useNavigate()
 
@@ -30,59 +34,25 @@ const CreateCourse = () => {
         }))
 
     }
-
-    const handleSubmit = async (e) => {
+    const handleSubmit = (e, courseData=courseInfo) => {
         e.preventDefault()
 
-        try {
+        dispatch(createCourse(courseData))
 
-       
-            const formData = new FormData()
-
-            formData.append("course_name", courseInfo.course_name)
-            formData.append("description", courseInfo.description)
-            formData.append("thumbnail", courseInfo.thumbnail)
-            formData.append("subject", courseInfo.subject)
-            formData.append("done", courseInfo.done)
-            formData.append("published", courseInfo.published)
-            courseInfo.students.forEach(id => formData.append("student", id))
-            
-            const res = await api.post('api/courses/create-course/', formData)
-            console.log(res.status)
-            if (res.status === 201){
-                alert('Course Created Successfully!')
-            }else{
-                alert('something wrong happened')
-            }
-
-            setCourseInfo({        
-                course_name: '',
-                subject: '',
-                description: '',
-                thumbnail: null,
-                published: false,
-                done:false,
-                students:[]
-            })
-
-            navigate(`/course/${res.data.id}/create-module/`)
-
-     }catch(err){
-        console.log(err)
-     }
+        
     }
-
+    
     useEffect(() => {
         getStudents()
     }, [])
 
     return (
         <>
-            <form onSubmit={handleSubmit} className="flex flex-col gap-[0.6rem]">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-4 bg-[rgb(36,36,36)] p-6 rounded-xl shadow-lg max-w-md mx-auto">
 
-                <input type="text" name="course_name" value={courseInfo.course_name} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Title.."/>
-                <input type="text" name="subject" value={courseInfo.subject} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Subject" />
-                <textarea name="description" value={courseInfo.description} placeholder="description" onChange={(e) => handleAdd(e.target.name, e.target.value)}></textarea>
+                <input  className="p-3 rounded-md bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:border-[#7f5af0] focus:ring-1 focus:ring-[#7f5af0] outline-none transition" type="text" name="course_name" value={courseInfo.course_name} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Title.."/>
+                <input   className="p-3 rounded-md bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:border-[#7f5af0] focus:ring-1 focus:ring-[#7f5af0] outline-none transition" type="text" name="subject" value={courseInfo.subject} onChange={(e) => handleAdd(e.target.name, e.target.value)} placeholder="Course Subject" />
+                <textarea  className="p-3 rounded-md bg-gray-800 text-white placeholder-gray-400 border border-gray-700 focus:border-[#7f5af0] focus:ring-1 focus:ring-[#7f5af0] outline-none transition resize-none" name="description" value={courseInfo.description} placeholder="description" onChange={(e) => handleAdd(e.target.name, e.target.value)}></textarea>
                 <input type="file" name="thumbnail" onChange={(e) => handleAdd(e.target.name, e.target.files[0])} /> 
                 <div className="flex gap-[0.7rem]">
                     <label>Published ? </label>
@@ -98,8 +68,8 @@ const CreateCourse = () => {
                     { schoolStudents.map( student=> {
                         return (
 
-                            <div key={student.id}>
-                                <input type="checkbox"
+                            <div key={student.id} className="flex items-center gap-3" >
+                                <input type="checkbox" 
                                     checked = {courseInfo.students.includes(student.id)}
                                     onChange={(e) => {
                                         setCourseInfo(prev => ({
@@ -119,7 +89,7 @@ const CreateCourse = () => {
                         ) 
                     }) }
 
-                <input type="submit" value="Submit"/>
+                <input  className="mt-4 p-3 rounded-md bg-[#7f5af0] text-white font-semibold hover:bg-[#5c3cd6] transition cursor-pointer" type="submit" value="Submit"/>
 
             </form>
         </>

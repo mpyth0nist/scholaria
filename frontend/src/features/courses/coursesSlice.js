@@ -1,6 +1,7 @@
 import {createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { ACCESS_TOKEN } from '../../constants'
 import api from '../../api'
+import { Form } from 'react-router-dom'
 
 
 const token = localStorage.getItem(ACCESS_TOKEN)
@@ -13,6 +14,8 @@ export const fetchCourses = createAsyncThunk("fetchCourses", async () => {
             "Authorization" : `Bearer ${token}`
         }
     })
+
+    console.log("courses are ", res.data)
 
     return res.data
 })
@@ -28,8 +31,40 @@ export const fetchSelectedCourse = createAsyncThunk("fetchSelectedCourse", async
     return res.data
 })
 
+
+export const createCourse = createAsyncThunk("createCourse", async (courseData) => {
+
+    const formData = new FormData()
+    for(let key in courseData){
+
+        console.log(key)
+
+        if(Array.isArray(courseData[key])){
+            courseData[key].forEach(id => formData.append("student", id))
+        
+        } else if(key === "thumbnail") {
+            if (courseData[key] instanceof File){
+                formData.append(key, courseData[key])
+            }
+        }
+  
+        else {
+
+            formData.append(key, courseData[key])
+        }
+    }
+    const res = await api.post('api/courses/create-course/', formData, {
+        headers : {
+            "Authorization" : `Bearer ${token}`,
+        }
+    })
+
+    return res.status
+})
+
+
 export const deleteCourse = createAsyncThunk("deleteCourse", async (id) => {
-    const res = await api.delete(`api/courses/${id}/delete/`, {
+    const res = await api.delete(`api/courses/delete/${id}/`, {
         headers : {
             "Authorization": `Bearer ${token}`
         }
@@ -41,13 +76,23 @@ export const deleteCourse = createAsyncThunk("deleteCourse", async (id) => {
 })
 
 export const updateCourse = createAsyncThunk("updateCourse", async (updatedCourse) => {
-
     const formData = new FormData()
 
     for(let key in updatedCourse){
-
+        console.log(key)
         if(Array.isArray(updatedCourse[key])){
+
             updatedCourse[key].forEach(id => formData.append(key, id))
+       
+       
+        } else if (key === "thumbnail"){
+
+            if(updatedCourse[key] instanceof File){
+                formData.append(key, updatedCourse[key])
+
+            }
+
+
         } else{
             formData.append(key, updatedCourse[key])
 
@@ -64,7 +109,7 @@ export const updateCourse = createAsyncThunk("updateCourse", async (updatedCours
 
     )
 
-    return res.status
+    return res.data
 })
 
 
@@ -116,6 +161,18 @@ const coursesSlice = createSlice({
         builder.addCase(updateCourse.rejected, (state, action)=>{
             console.log('Couldnt update course')
 
+        })
+
+        builder.addCase(createCourse.fulfilled, (state,action) => {
+            console.log(action.payload)
+        })
+
+        builder.addCase(createCourse.pending, () => {
+            console.log("Creating course ...")
+        })
+
+        builder.addCase(createCourse.rejected, (state, action) => {
+            console.log(action.payload)
         })
     }
 

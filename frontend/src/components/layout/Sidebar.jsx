@@ -28,7 +28,7 @@ const Sidebar = (props) => {
                     }
 
 
-                    <button>Quizzes</button>
+                    <button onClick={() => navigate('/quizzes/create-quiz/')}>Quizzes</button>
                     <button>Students</button>
                     
                     </div> 
@@ -37,7 +37,7 @@ const Sidebar = (props) => {
 
                     <div className='flex flex-col gap-4'>
                     <button onClick={()=> navigate('/all-courses/')} >Courses</button>
-                    <button>Quizzes</button>
+                    <button onClick={() => navigate('quizzes/create-quiz/')}>Quizzes</button>
                     </div>
                 }
                 

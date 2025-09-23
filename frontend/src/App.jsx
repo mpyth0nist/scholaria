@@ -11,6 +11,8 @@ import AllCoursesPage from './pages/AllCoursesPage.jsx'
 import ModuleCreate from './components/modules/ModuleCreate.jsx'
 import ModulesList from './components/modules/ModuleList.jsx'
 import LessonPage from './pages/LessonPage.jsx'
+
+import CreateQuizPage from './pages/CreateQuizPage.jsx'
 function App() {
 
   return (
@@ -59,6 +61,13 @@ function App() {
                 <LessonPage />
               </Dashboard>
             } />
+            
+            <Route path='quizzes/create-quiz/' element={
+              <Dashboard>
+                <CreateQuizPage />
+              </Dashboard>
+            } />
+
         </Route>
 
         <Route element={<LoginPage />} path='/login' />

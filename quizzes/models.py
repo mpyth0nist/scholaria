@@ -15,7 +15,7 @@ class Question(models.Model):
     question_text = models.CharField(max_length=255)
     question_type = models.CharField(max_length=255, choices = [
         ('multiple_choices', 'Multi Choices'),
-        ('text_input', 'Text Input'),
+        ('text_input', 'Text'),
         ('true_false', 'True/False')
     ], default='multiple_choices')
     quiz = models.ForeignKey(Quiz, related_name="questions", on_delete=models.CASCADE)
@@ -24,7 +24,7 @@ class Question(models.Model):
 class Choice(models.Model):
     choice = models.CharField(max_length=255)
     question = models.ForeignKey(Question, related_name='choices', on_delete=models.CASCADE)
-    is_correct = models.BooleanField(default=False)
+    is_correct = models.BooleanField(default=False, null=True, blank=True)
 
 
 class UserAttempt(models.Model):
