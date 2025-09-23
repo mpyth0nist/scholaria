@@ -3,7 +3,7 @@ import { useState, useEffect } from "react"
 import { useParams } from "react-router-dom"
 import api from '../../api'
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchSelectedCourse, updateCourse } from "../../features/courses/coursesSlice"
+import { fetchSelectedCourse, updateCourse, deleteCourse } from "../../features/courses/coursesSlice"
 import NotFound from '../../pages/NotFound'
 function CourseUpdate(){
 
@@ -54,8 +54,8 @@ function CourseUpdate(){
         setStudents(res.data)
     }
 
-    const handleDelete = async () =>{
-        const res = await api.delete(`api/courses/delete/${id}/`)
+    const handleDelete = async (course_id) =>{
+        dispatch(deleteCourse(course_id))
     }
     useEffect(()=> {
         getStudents()
@@ -86,7 +86,7 @@ function CourseUpdate(){
             <button type="submit">Submit</button>
         </form>
 
-        <button className="p-[0.8rem] bg-red-700 border rounded border-grey-300" onClick={() => handleDelete()}>Delete Course</button>       
+        <button className="p-[0.8rem] bg-red-700 border rounded border-grey-300" onClick={(course) => handleDelete(courseData.id)}>Delete Course</button>       
         
         </div>
 

@@ -11,28 +11,6 @@ const TeacherCard = () => {
 
     const teacher = useSelector(state => state.users.user)
     const dispatch = useDispatch()
-    // const [teacher, setTeacher] = useState({
-    //     firstName : '',
-    //     lastName : '',
-    //     email : '',
-    //     courses : [],
-    //     students : []
-
-    // })
-  //  const getTeacherInfo = async () => {
-
-    //    const res = await api.get('api/users/user/')
-
-   //     setTeacher({
-  //          firstName : res.data.first_name,
-  //          lastName : res.data.last_name,
-    //         email : res.data.email,
-    //         courses : res.data.courses_taught,
-    //         students: [],
-
-    //     })
-
-    // }
 
     useEffect(()=> {
         dispatch(fetchUser())

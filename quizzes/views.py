@@ -22,7 +22,7 @@ class QuizCreate(generics.CreateAPIView):
 
         if serializer.is_valid():
 
-            serializer.save()
+            serializer.save(teacher=self.request.user)
 
         else:
 
@@ -46,3 +46,5 @@ class QuizDelete(generics.DestroyAPIView):
         quiz = Quiz.objects.get(id=self.kwargs['quiz_id'])
 
         return quiz
+
+
