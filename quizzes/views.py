@@ -9,24 +9,21 @@ from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
 class QuizList(generics.ListAPIView):
 
     queryset = Quiz.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = QuizSerializer
 
     
 class QuizCreate(generics.CreateAPIView):
     queryset = Quiz.objects.all()
-    permission_classes = [AllowAny]
+    permission_classes = [IsAuthenticated]
     serializer_class = QuizSerializer
 
     def perform_create(self, serializer):
 
-        if serializer.is_valid():
+        print('perform create quiz called')
 
-            serializer.save(teacher=self.request.user)
 
-        else:
-
-            print(serializer.errors)
+        serializer.save(teacher=self.request.user)
 
 
 class QuizUpdate(generics.UpdateAPIView):

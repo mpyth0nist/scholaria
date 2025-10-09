@@ -10,7 +10,7 @@ class LessonSerializer(serializers.ModelSerializer):
         fields = ['id','title', 'content', 'attachments', 'video']
 
 
-
+ 
 
 class ModuleSerializer(serializers.ModelSerializer):
     #lesson_module = LessonSerializer(many=True)

@@ -6,7 +6,7 @@ export const store = configureStore({
     reducer : {
         users: userReducer,
         courses: coursesReducer,
-        quiz: quizReducer,
+        quizzes: quizReducer,
     }
 })
 

@@ -6,7 +6,7 @@ from courses.models import Course
 class Quiz(models.Model):
 
     name = models.CharField(max_length=200)
-    description = models.CharField(null=True, blank=True)
+    description = models.CharField(max_length=255, null=True, blank=True)
     teacher = models.ForeignKey(CustomUser, related_name="teacher_quizzes", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, related_name="course_quiz", on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
