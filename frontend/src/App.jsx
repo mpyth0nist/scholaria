@@ -13,7 +13,8 @@ import ModulesList from './components/modules/ModuleList.jsx'
 import LessonPage from './pages/LessonPage.jsx'
 import ListQuizzes from './pages/ListQuizzes.jsx'
 import CreateQuizPage from './pages/CreateQuizPage.jsx'
-import { useState } from 'react'
+import PassQuiz from './components/quizzes/PassQuiz.jsx'
+
 function App() {
 
   return (
@@ -72,6 +73,12 @@ function App() {
             <Route path='quizzes/list-quizzes/' element={
               <Dashboard>
                 <ListQuizzes />
+              </Dashboard>
+            } />
+            
+            <Route path='quizzes/:quiz_id/' element={
+              <Dashboard>
+                <PassQuiz />
               </Dashboard>
             } />
 

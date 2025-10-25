@@ -12,6 +12,16 @@ class QuizList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = QuizSerializer
 
+class QuizDetailedView(generics.ListAPIView):
+
+    permission_classes = [AllowAny]
+    serializer_class = QuizSerializer
+
+    def get_queryset(self):
+
+        quiz_id = self.kwargs['quiz_id']
+        
+        return Quiz.objects.filter(id=quiz_id).distinct()
     
 class QuizCreate(generics.CreateAPIView):
     queryset = Quiz.objects.all()
