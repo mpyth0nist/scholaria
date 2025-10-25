@@ -9,6 +9,12 @@ export const fetchQuizzes = createAsyncThunk("fetchQuizzes", async () => {
     return res.data
 })
 
+
+export const fetchQuiz = createAsyncThunk("fetchQuiz", async (quizId) => {
+    let res = api.get(`api/quizzes/${quiz_id}`)
+
+    return res.data
+})
 export const addQuiz = createAsyncThunk("addQuiz", async (quiz) => {
     console.log(quiz)
     const res = await api.post('api/quizzes/create_quiz/', quiz)
@@ -16,7 +22,12 @@ export const addQuiz = createAsyncThunk("addQuiz", async (quiz) => {
 })
 
 
-const initialState = {quizzes:[], loading: false, error: false}
+const initialState = {
+    quizzes : [],
+    currentQuiz: null,
+    loading: false, 
+    error: false
+}
 const quizSlice = createSlice(
     {
         name: "quiz",
@@ -24,9 +35,16 @@ const quizSlice = createSlice(
         reducer:{},
 
         extraReducers: (builder) => {
+
+
+
             builder.addCase(fetchQuizzes.fulfilled, (state, action) => {
+
+
                 state.quizzes = action.payload
+
                 state.loading = false
+                state.error = false
                 console.log('success!')
             })
 
@@ -41,6 +59,17 @@ const quizSlice = createSlice(
                 console.log("Something wen't wrong when adding the quiz")
             })
 
+
+            builder.fetchQuiz(fetchQuiz.fullfiled, (state, action) =>{
+                
+                state.currentQuiz(action.payload)
+
+                state.loading = false
+
+            })
+
+
+            
             builder.addCase(addQuiz.fulfilled, (state, action) => {
                 state.quizzes.push(action.payload)
                 state.loading = false
@@ -62,5 +91,7 @@ const quizSlice = createSlice(
 
     }
 )
+
+
 
 export default quizSlice.reducer;
