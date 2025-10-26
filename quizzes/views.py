@@ -37,13 +37,10 @@ class QuizCreate(generics.CreateAPIView):
 
 
 class QuizUpdate(generics.UpdateAPIView):
+    queryset = Quiz.objects.all()
     permission_classes = [AllowAny]
     serializer_class = QuizSerializer
-
-    def get_queryset(self):
-        quiz = Quiz.objects.get(id=self.kwargs['quiz_id'])
-
-        return quiz
+    lookup_field = 'id'
 
 class QuizDelete(generics.DestroyAPIView):
 
