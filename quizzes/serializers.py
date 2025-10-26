@@ -80,6 +80,8 @@ class QuizSerializer(serializers.ModelSerializer):
 
         instance.save()
 
+        return instance
+
 
 class UserAttemptSerializer(serializers.ModelSerializer):
 

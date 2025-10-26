@@ -11,13 +11,19 @@ export const fetchQuizzes = createAsyncThunk("fetchQuizzes", async () => {
 
 
 export const fetchQuiz = createAsyncThunk("fetchQuiz", async (quizId) => {
-    let res = api.get(`api/quizzes/${quiz_id}`)
+    let res = await api.get(`api/quizzes/${quizId}`)
 
-    return res.data
+    return res.data[0]
 })
 export const addQuiz = createAsyncThunk("addQuiz", async (quiz) => {
     console.log(quiz)
     const res = await api.post('api/quizzes/create_quiz/', quiz)
+    return res.data
+})
+
+export const updateQuiz = createAsyncThunk("updateQuiz", async (quiz) => {
+    const res = await api.put(`api/quizzes/update_quiz/${quiz.id}/`, quiz)
+
     return res.data
 })
 
@@ -60,12 +66,18 @@ const quizSlice = createSlice(
             })
 
 
-            builder.fetchQuiz(fetchQuiz.fullfiled, (state, action) =>{
+            builder.addCase(fetchQuiz.fulfilled, (state, action) =>{
                 
-                state.currentQuiz(action.payload)
-
+                state.currentQuiz = action.payload
+                console.log(action.payload,state.currentQuiz)
+                console.log('fetching succeeded')
                 state.loading = false
 
+            })
+
+            builder.addCase(fetchQuiz.pending, (state) => {
+                state.loading = true
+                console.log('loading')
             })
 
 

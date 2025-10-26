@@ -29,7 +29,7 @@ const QuizList = () => {
                                     <div className="flex bg-[#ecf0f1] text-black w-[600px] text-center border-[#bdc3c7] shadow-md p-[1rem] m-[0.5rem] items-center" onClick={() => navigate(`/quizzes/${quiz.id}`)}>
                                         
                                         <p className="basis-[70%] size-fit m-0 p-0">{quiz.name}</p>
-                                        <button className="text-white m-[5px]">Edit</button>
+                                        <button className="text-white m-[5px]" onClick={() => navigate(`/quizzes/update-quiz/${quiz.id}`)}>Edit</button>
                                         <button className="text-white m-[5px]">Delete</button>
                                     </div>
 

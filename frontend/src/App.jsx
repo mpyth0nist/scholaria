@@ -14,6 +14,7 @@ import LessonPage from './pages/LessonPage.jsx'
 import ListQuizzes from './pages/ListQuizzes.jsx'
 import CreateQuizPage from './pages/CreateQuizPage.jsx'
 import PassQuiz from './components/quizzes/PassQuiz.jsx'
+import UpdateQuiz from './components/quizzes/UpdateQuiz.jsx'
 
 function App() {
 
@@ -79,6 +80,12 @@ function App() {
             <Route path='quizzes/:quiz_id/' element={
               <Dashboard>
                 <PassQuiz />
+              </Dashboard>
+            } />
+
+            <Route path='quizzes/update-quiz/:quiz_id' element={
+              <Dashboard>
+                <UpdateQuiz />
               </Dashboard>
             } />
 
