@@ -43,11 +43,11 @@ class QuizUpdate(generics.UpdateAPIView):
     lookup_field = 'id'
 
 class QuizDelete(generics.DestroyAPIView):
-
+    lookup_field = 'id'
     permission_classes = [AllowAny]
     def get_queryset(self):
     
-        quiz = Quiz.objects.get(id=self.kwargs['quiz_id'])
+        quiz = Quiz.objects.filter(id=self.kwargs['id'])
 
         return quiz
 

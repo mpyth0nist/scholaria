@@ -1,5 +1,5 @@
 import { useSelector, useDispatch } from "react-redux"
-import { fetchQuizzes } from "../../features/quizzes/quizSlice"
+import { fetchQuizzes, deleteQuiz } from "../../features/quizzes/quizSlice"
 import { fetchUser } from "../../features/users/userSlice"
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
@@ -26,11 +26,11 @@ const QuizList = () => {
                             {
                                 userData.role === 'Teacher' ? 
                             
-                                    <div className="flex bg-[#ecf0f1] text-black w-[600px] text-center border-[#bdc3c7] shadow-md p-[1rem] m-[0.5rem] items-center" onClick={() => navigate(`/quizzes/${quiz.id}`)}>
+                                    <div className="flex bg-[#ecf0f1] text-black w-[600px] text-center border-[#bdc3c7] shadow-md p-[1rem] m-[0.5rem] items-center">
                                         
-                                        <p className="basis-[70%] size-fit m-0 p-0">{quiz.name}</p>
+                                        <p className="basis-[70%] size-fit m-0 p-0"  onClick={() => navigate(`/quizzes/${quiz.id}`)} >{quiz.name}</p>
                                         <button className="text-white m-[5px]" onClick={() => navigate(`/quizzes/update-quiz/${quiz.id}`)}>Edit</button>
-                                        <button className="text-white m-[5px]">Delete</button>
+                                        <button className="text-white m-[5px]" onClick={() => dispatch(deleteQuiz(quiz.id))}>Delete</button>
                                     </div>
 
                                 

@@ -4,6 +4,7 @@ import api from '../../api'
 import { ACCESS_TOKEN } from "../../constants";
 
 const token = localStorage.getItem(ACCESS_TOKEN)
+
 const initialState = {
     isAuthenticated : false,
     user: {}
