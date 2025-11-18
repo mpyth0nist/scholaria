@@ -27,6 +27,12 @@ export const updateQuiz = createAsyncThunk("updateQuiz", async (quiz) => {
     return res.data
 })
 
+export const deleteQuiz = createAsyncThunk("deleteQuiz", async (id) => {
+    const res = await api.delete(`api/quizzes/delete_quiz/${id}/`)
+
+    return res.data
+})
+
 
 const initialState = {
     quizzes : [],
@@ -99,7 +105,42 @@ const quizSlice = createSlice(
                 state.loading = false
                 console.log("Something went wrong when creating your quiz!")
             })
+
+            builder.addCase(updateQuiz.fulfilled, (state) => {
+                state.error = false;
+                state.loading = false;
+                console.log('Updated successfully')
+            })
+
+            builder.addCase(updateQuiz.pending, (state) => {
+                state.loading = true;
+            })
+
+            builder.addCase(updateQuiz.rejected, (state) => {
+                state.error = true;
+                state.loading = false;
+            })
+
+            builder.addCase(deleteQuiz.fulfilled, (state, action) => {
+
+                // Removing the deleted quiz from the list of quizzes.
+                state.quizzes = state.quizzes.filter(quiz => quiz.id !== action.payload.id)
+
+
+                state.error = false;
+                state.loading = false;
+            })
+
+            builder.addCase(deleteQuiz.pending, (state) => {
+                state.loading = true;
+            })
+
+            builder.addCase(deleteQuiz.rejected, (state) => {
+                state.error = true;
+            })
         }
+
+        
 
     }
 )

@@ -15,6 +15,8 @@ const UpdateQuiz = () =>{
 
     let [toggleQuestion, setToggleQuestion] = useState(null)
 
+    let [toggleQuestionAdd, setToggleQuestionAdd] = useState(false)
+
     useEffect(() => {
         dispatch(fetchQuiz(quiz_id))
     }, [])
@@ -121,7 +123,20 @@ const UpdateQuiz = () =>{
                     }
                 </button>
             })}
+            {
+                toggleQuestionAdd ? 
+                    <div>
+                        <input type="text" placeholder="Question..." className="m-4 p-4 text-white font-medium border rounded" />
+                        <input type="text" placeholder="Question..." className="m-4 p-4 text-white font-medium border rounded" />
+                        <input type="text" placeholder="Question..." className="m-4 p-4 text-white font-medium border rounded" />
+                        
+                    </div>
 
+                    :
+                    null
+            }
+
+            <button onClick={() => setToggleQuestionAdd(true)} type="button">Add another Question</button>
             <input type="submit" />
         </form>
 
