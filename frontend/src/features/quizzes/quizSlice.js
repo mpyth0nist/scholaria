@@ -57,7 +57,6 @@ const quizSlice = createSlice(
 
                 state.loading = false
                 state.error = false
-                console.log('success!')
             })
 
             builder.addCase(fetchQuizzes.pending, (state) => {

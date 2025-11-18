@@ -14,6 +14,14 @@ const UpdateQuiz = () =>{
     let [updatedQuiz, setUpdatedQuiz] = useState(null)
 
     let [toggleQuestion, setToggleQuestion] = useState(null)
+    
+    let [newQuestion, setNewQuestion] = useState({
+        question_text: '',
+        question_type : 'multiple_choices',
+        choices : []
+    })
+
+    let [newQuestionChoice, setNewQuestionChoice] = useState(null)
 
     let [toggleQuestionAdd, setToggleQuestionAdd] = useState(false)
 
@@ -30,6 +38,10 @@ const UpdateQuiz = () =>{
     useEffect(() => {
         console.log(updatedQuiz)
     }, [updatedQuiz])
+
+    useEffect(() => {
+        console.log('New Question data: ', newQuestion)
+    }, [newQuestion])
 
     const updateQuizData = (k, v) => {
         setUpdatedQuiz(prev => ({...prev,
@@ -51,6 +63,21 @@ const UpdateQuiz = () =>{
                     return question
                 }
     })}))
+    }
+
+    const addNewQuestion = ( questionData) => {
+
+        setUpdatedQuiz(prev => ({
+            ...prev,
+            questions : [...prev.questions, questionData]
+        }))
+    }
+
+    const deleteQuestion = (question) => {
+        setUpdatedQuiz(prev => ({
+            ...prev,
+            questions : prev.questions.filter(q => q !== question)
+        }))
     }
 
     const updateChoiceData = (question_id, choice_id, v) => {
@@ -86,6 +113,22 @@ const UpdateQuiz = () =>{
 
     }
 
+    const deleteChoice = (question_id, choice_id) => {
+        setUpdatedQuiz(prev => ({
+            ...prev,
+            questions : prev.questions.map(question => {
+                if(question.id === question_id){
+                    return{
+                        ...question,
+                        choices : question.choices.filter(choice => choice.id !== choice_id)
+                    }
+                }
+
+                return question
+            })
+        }))
+    }
+
     return (
 
         <form className="flex flex-col justify-center flex-wrap items-center text-white font-medium p-4" onSubmit={(e) => {
@@ -103,33 +146,63 @@ const UpdateQuiz = () =>{
 
 
             { updatedQuiz?.questions.map(question => {
-                return <button type="button" onClick={() => setToggleQuestion(question.id)} value={question.id}>
+                return <div type="button" onClick={() => setToggleQuestion(question.question_text)} value={question.question_text}>
                     {question.question_text}
                     <ChevronDown />
                     {
-                        toggleQuestion === question.id ? 
+                        toggleQuestion === question.question_text ? 
                         <>
                             <input type="text" value={question.question_text} onChange={(e) => updateQuestionData(question.id, e.target.value)} className="p-4 text-white font-medium border rounded" />
-                                <select>
-                                    <option>Multiple Choices</option>
-                                    <option>True/false</option>
-                                </select>
                             {question.choices.map(choice =>{
-                                return <input type="text" value={choice.choice} onChange={(e) => updateChoiceData(question.id, choice.id, e.target.value)  } className="p-4 text-white font-medium border rounded" />
-                        })  }         
-                        
+                                return (
+                                    <>
+                                        <input type="text" value={choice.choice} onChange={(e) => updateChoiceData(question.id, choice.id, e.target.value)  } className="p-4 text-white font-medium border rounded" />
+                                        <button type="reset" onClick={() => deleteChoice(question.id, choice.id)}>Delete Choice</button>
+                                    </>
+                                )
+
+                            })}
+
+
                         </>
                          : null
                     }
-                </button>
+
+                    <button type="button" onClick={() => deleteQuestion(question)}>Delete Question</button>
+                </div>
             })}
             {
                 toggleQuestionAdd ? 
                     <div>
-                        <input type="text" placeholder="Question..." className="m-4 p-4 text-white font-medium border rounded" />
-                        <input type="text" placeholder="Question..." className="m-4 p-4 text-white font-medium border rounded" />
-                        <input type="text" placeholder="Question..." className="m-4 p-4 text-white font-medium border rounded" />
-                        
+                        <input type="text" placeholder="Question..." value={newQuestion.question_text} className="m-4 p-4 text-white font-medium border rounded" onChange={(e) => setNewQuestion(prev => ({
+                            ...prev,
+                            question_text : e.target.value
+                        }))} />
+                        <select value={newQuestion.question_type} onChange={(e) => setNewQuestion(prev => ({...prev, 
+                            question_type : e.target.value
+                        })) }>
+                            <option value="multiple_choices">Multi Choices</option>
+                            <option value="true_false">True/False</option>
+                        </select> 
+
+                        <div>
+                            { newQuestion?.question_type === 'multiple_choices' ? 
+                                <div>
+                                    <input className="m-4 p-4 text-white font-medium border rounded" type="text" value={newQuestionChoice} onChange={(e) => setNewQuestionChoice(e.target.value)}/>
+                                    <button type="reset" onClick={() => {
+                                        setNewQuestion(prev => ({
+                                            ...prev,
+                                            choices : [...prev.choices, newQuestionChoice]
+                                        }))
+                                        setNewQuestionChoice('')} }>Add Choice</button>
+                                </div>
+
+                                : null
+                                
+                            }
+                        </div>
+
+                        <button type='button' onClick={() => addNewQuestion(newQuestion)}>Add Question</button>                       
                     </div>
 
                     :
