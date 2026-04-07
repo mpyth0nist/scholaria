@@ -2,6 +2,25 @@ from .models import *
 
 from rest_framework import serializers
 
+class UserChoiceSerializer(serializers.ModelSerializer):
+    class Meta:
+
+        model = Choice
+        fields = ['id','choice']
+
+class UserQuestionSerializer(serializers.ModelSerializer):
+    choices = UserChoiceSerializer(many=True)
+    quiz = serializers.PrimaryKeyRelatedField(read_only=True)
+    class Meta:
+        model = Question
+        fields = ['id', 'question_text', 'choices', 'quiz']
+
+class UserQuizSerializer(serializers.ModelSerializer):
+    questions = UserQuestionSerializer(many=True)
+    class Meta:
+        model = Quiz
+        fields = ['id', 'name', 'description', 'course', 'questions']
+
 class ChoiceSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -16,7 +35,7 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Question
-        fields = ['id','question_text', 'question_type', 'choices', 'quiz']
+        fields = ['id','question_text', 'choices', 'quiz']
 
     def create(self, validated_data, quiz=None):
         choices_data = validated_data.pop('choices')
@@ -35,7 +54,6 @@ class QuestionSerializer(serializers.ModelSerializer):
         choices_data = validated_data.pop('choices')
 
         instance.question_text = validated_data.get("question_text", instance.question_text)
-        instance.question_type = validated_data.get("question_type", instance.question_type)
         
         for choice in choices_data:
 
@@ -83,9 +101,21 @@ class QuizSerializer(serializers.ModelSerializer):
         return instance
 
 
+class UserAnswerSerializer(serializers.ModelSerializer):
+    chosen_choices = serializers.PrimaryKeyRelatedField(
+        many=True, queryset=Choice.objects.all()
+    )
+
+    class Meta:
+        model = UserAnswer
+        fields = ['id', 'attempt', 'question', 'chosen_choices', 'question_snapshot']
+        read_only_fields = ['attempt', 'question', 'question_snapshot']
+
+
 class UserAttemptSerializer(serializers.ModelSerializer):
+    answers = UserAnswerSerializer(many=True, read_only=True, source='attempt_answers')
 
     class Meta:
         model = UserAttempt
-
-        fields = ['id','passed_quiz', 'student', 'score', 'submitted_at']
+        fields = ['id', 'quiz', 'student', 'score', 'answers']
+        read_only_fields = ['student', 'score']

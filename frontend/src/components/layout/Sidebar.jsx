@@ -1,63 +1,100 @@
-
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
+
+const NavButton = ({ label, isActive, onClick, children }) => (
+    <div className="flex flex-col">
+        <button
+            onClick={onClick}
+            className={`
+                w-full text-left px-4 py-3 rounded-md text-sm font-bold tracking-widest uppercase transition-all duration-200
+                ${isActive
+                    ? 'bg-slate-300 text-[#0d0f1e] shadow-md'
+                    : 'bg-[#1a1d2e] text-slate-200 hover:bg-[#1f2340]'}
+            `}
+        >
+            {label}
+        </button>
+        {isActive && children && (
+            <div className="ml-3 mt-1 flex flex-col gap-1 border-l border-slate-600/50 pl-3">
+                {children}
+            </div>
+        )}
+    </div>
+);
+
+const SubNavButton = ({ label, onClick }) => (
+    <button
+        onClick={onClick}
+        className="text-left text-xs text-slate-400 hover:text-slate-200 py-1.5 px-2 rounded hover:bg-[#1f2340] transition-colors tracking-wide uppercase"
+    >
+        {label}
+    </button>
+);
+
 const Sidebar = (props) => {
-
     const isTeacher = (props.role.toUpperCase() === 'TEACHER')
-    const [toggleMenu, setToggleMenu] = useState(null)
-
+    const [activeMenu, setActiveMenu] = useState(null)
     const navigate = useNavigate()
+    const location = useLocation()
+
+    const toggle = (menu) => setActiveMenu(prev => prev === menu ? null : menu)
 
     return (
-            <>
-            <div className="border-r-5 border-green-500 h-screen p-[20px] mr-[2rem]">
-                { isTeacher ? 
-                    <div className='flex flex-col gap-4'>
-                    <button onClick={() => setToggleMenu('CoursesMenu')} >Courses</button>
+        <div className="h-full bg-[#161929] flex flex-col px-4 py-6 gap-3 border-r border-violet-900/40">
+            {/* Brand */}
+            <div className="mb-4 px-2">
+                <span className="text-violet-400 text-xs font-bold tracking-[0.3em] uppercase">Scholaria</span>
+                <div className="h-px bg-violet-800/30 mt-3" />
+            </div>
 
-                    {
-                        toggleMenu === 'CoursesMenu' ?                         
-                        <div>
-                            <button onClick={() => navigate('/all-courses/')}>All Courses</button>
-                            <button onClick={() => navigate('/create-course/')}>Create a Course</button>
-                        </div>
-                        
-                        : null                     
-                        
+            {isTeacher ? (
+                <>
+                    <NavButton
+                        label="Dashboard"
+                        isActive={location.pathname === '/dashboard'}
+                        onClick={() => navigate('/dashboard')}
+                    />
 
-                    }
+                    <NavButton
+                        label="Courses"
+                        isActive={activeMenu === 'CoursesMenu'}
+                        onClick={() => toggle('CoursesMenu')}
+                    >
+                        <SubNavButton label="All Courses" onClick={() => navigate('/all-courses/')} />
+                        <SubNavButton label="Create Course" onClick={() => navigate('/create-course/')} />
+                    </NavButton>
 
+                    <NavButton
+                        label="Quizzes"
+                        isActive={activeMenu === 'QuizzesMenu'}
+                        onClick={() => toggle('QuizzesMenu')}
+                    >
+                        <SubNavButton label="All Quizzes" onClick={() => navigate('/quizzes/list-quizzes/')} />
+                        <SubNavButton label="Create Quiz" onClick={() => navigate('/quizzes/create-quiz/')} />
+                    </NavButton>
 
-                    <button onClick={() => setToggleMenu('QuizzesMenu')}>Quizzes</button>
-                    {
-                        toggleMenu === 'QuizzesMenu' ?
-
-                            <div>
-                                <button onClick={() => navigate('/quizzes/create-quiz/')}>Create New Quiz</button>
-                                <button onClick={() => navigate('/quizzes/list-quizzes/')}>All Quizzes</button>
-                            </div> 
-                            : null
-
-                    }
-                    <button>Students</button>
-                    
-                    </div> 
-                    
-                    : 
-
-                    <div className='flex flex-col gap-4'>
-                    <button onClick={()=> navigate('/my-courses/')} >Courses</button>
-                    <button onClick={() => navigate('#')}>Quizzes</button>
-                    </div>
-                }
-                
-                   
-             </div>
-
-        </>
-
-    )
-
-}
+                    <NavButton
+                        label="Students"
+                        isActive={location.pathname === '/students/'}
+                        onClick={() => navigate('/students/')}
+                    />
+                </>
+            ) : (
+                <>
+                    <NavButton
+                        label="Courses"
+                        isActive={location.pathname === '/my-courses/'}
+                        onClick={() => navigate('/my-courses/')}
+                    />
+                    <NavButton
+                        label="Quizzes"
+                        isActive={false}
+                        onClick={() => navigate('#')}
+                    />
+                </>
+            )}
+        </div>
+    );
+};
 
 export default Sidebar;

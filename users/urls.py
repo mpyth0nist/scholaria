@@ -11,4 +11,7 @@ urlpatterns = [
     path('refresh/', TokenRefreshView.as_view(), name="refresh"),
     path('user/', LoggedUserView.as_view(), name="get_user_info"),
     path('students/' , ListStudentsView.as_view(), name="get_students"),
+    path('logout/', LogoutView.as_view(), name="logout"),
+    path('user/<int:user_id>/', UpdateUserView.as_view(), name="update_user"),
+    path('dashboard/', TeacherDashboardView.as_view(), name="teacher_dashboard"),
 ]

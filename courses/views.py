@@ -248,4 +248,3 @@ class LessonDelete(generics.DestroyAPIView):
     permission_classes = [isCourseTeacher]
     lookup_field = LOOKUP_FIELD
     lookup_url_kwarg = 'lesson_id'
-
