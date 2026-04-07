@@ -1,7 +1,6 @@
 import {createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { ACCESS_TOKEN } from '../../constants'
 import api from '../../api'
-import { Form } from 'react-router-dom'
 
 
 const token = localStorage.getItem(ACCESS_TOKEN)
@@ -118,18 +117,16 @@ const coursesSlice = createSlice({
     name: "courses",
     initialState: {courses: [], selectedCourse : {}, error: false, loading: false},
 
-    reducer:{},
+    reducers: {},
 
     extraReducers : (builder) => {
         builder.addCase(fetchCourses.fulfilled, (state, action) => {
             state.courses = action.payload
             state.loading = false
-            console.log('courses fetch success')
         })
 
         builder.addCase(fetchCourses.pending, (state)=> {
             state.loading = true
-            console.log('loading')
         })
 
         builder.addCase(fetchCourses.rejected, (state) => {
@@ -142,15 +139,12 @@ const coursesSlice = createSlice({
         })
 
         builder.addCase(fetchSelectedCourse.pending, (state, action) => {
-            console.log("loading")
         })
 
         builder.addCase(deleteCourse.fulfilled, (state, action) => {
-            console.log(action.payload)
         })
 
         builder.addCase(updateCourse.fulfilled, (state, action) => {
-            console.log("course Updated successfully!")
             state.selectedCourse = action.payload
         })
         
