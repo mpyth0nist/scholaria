@@ -1,4 +1,4 @@
-import {createSlice, createAsyncThunk } from '@reduxjs/toolkit'
+import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
 import { ACCESS_TOKEN } from '../../constants'
 import api from '../../api'
 
@@ -9,21 +9,20 @@ const token = localStorage.getItem(ACCESS_TOKEN)
 export const fetchCourses = createAsyncThunk("fetchCourses", async () => {
     const res = await api.get('api/courses/list/', {
         headers: {
-            "Content-Type" : "application/json",
-            "Authorization" : `Bearer ${token}`
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
     })
 
-    console.log("courses are ", res.data)
 
     return res.data
 })
 
 export const fetchSelectedCourse = createAsyncThunk("fetchSelectedCourse", async (id) => {
-    const res = await api.get(`api/courses/${id}`, {
-        headers : {
-            "Content-Type" : "application/json",
-            "Authorization" : `Bearer ${token}`
+    const res = await api.get(`api/courses/${id}/`, {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
         }
     })
 
@@ -31,40 +30,31 @@ export const fetchSelectedCourse = createAsyncThunk("fetchSelectedCourse", async
 })
 
 
-export const createCourse = createAsyncThunk("createCourse", async (courseData) => {
-
+export const createCourse = createAsyncThunk("createCourse", async (courseData, { rejectWithValue }) => {
     const formData = new FormData()
-    for(let key in courseData){
-
-        console.log(key)
-
-        if(Array.isArray(courseData[key])){
+    for (let key in courseData) {
+        if (Array.isArray(courseData[key])) {
             courseData[key].forEach(id => formData.append("student", id))
-        
-        } else if(key === "thumbnail") {
-            if (courseData[key] instanceof File){
+        } else if (key === "thumbnail") {
+            if (courseData[key] instanceof File) {
                 formData.append(key, courseData[key])
             }
-        }
-  
-        else {
-
+        } else {
             formData.append(key, courseData[key])
         }
     }
-    const res = await api.post('api/courses/create-course/', formData, {
-        headers : {
-            "Authorization" : `Bearer ${token}`,
-        }
-    })
-
-    return res.status
+    try {
+        const res = await api.post('api/courses/create-course/', formData)
+        return res.data   // ← returns the full course object including id
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
 })
 
 
 export const deleteCourse = createAsyncThunk("deleteCourse", async (id) => {
     const res = await api.delete(`api/courses/delete/${id}/`, {
-        headers : {
+        headers: {
             "Authorization": `Bearer ${token}`
         }
     })
@@ -77,32 +67,32 @@ export const deleteCourse = createAsyncThunk("deleteCourse", async (id) => {
 export const updateCourse = createAsyncThunk("updateCourse", async (updatedCourse) => {
     const formData = new FormData()
 
-    for(let key in updatedCourse){
+    for (let key in updatedCourse) {
         console.log(key)
-        if(Array.isArray(updatedCourse[key])){
+        if (Array.isArray(updatedCourse[key])) {
 
             updatedCourse[key].forEach(id => formData.append(key, id))
-       
-       
-        } else if (key === "thumbnail"){
 
-            if(updatedCourse[key] instanceof File){
+
+        } else if (key === "thumbnail") {
+
+            if (updatedCourse[key] instanceof File) {
                 formData.append(key, updatedCourse[key])
 
             }
 
 
-        } else{
+        } else {
             formData.append(key, updatedCourse[key])
 
         }
     }
-    const res = await api.patch(`api/courses/update/${updatedCourse.id}/`, 
-        formData, 
-        
+    const res = await api.patch(`api/courses/update/${updatedCourse.id}/`,
+        formData,
+
         {
-            headers : {
-                "Authorization" : `Bearer ${token}`
+            headers: {
+                "Authorization": `Bearer ${token}`
             }
         }
 
@@ -115,17 +105,17 @@ export const updateCourse = createAsyncThunk("updateCourse", async (updatedCours
 
 const coursesSlice = createSlice({
     name: "courses",
-    initialState: {courses: [], selectedCourse : {}, error: false, loading: false},
+    initialState: { courses: [], selectedCourse: {}, error: false, loading: false },
 
     reducers: {},
 
-    extraReducers : (builder) => {
+    extraReducers: (builder) => {
         builder.addCase(fetchCourses.fulfilled, (state, action) => {
             state.courses = action.payload
             state.loading = false
         })
 
-        builder.addCase(fetchCourses.pending, (state)=> {
+        builder.addCase(fetchCourses.pending, (state) => {
             state.loading = true
         })
 
@@ -147,26 +137,28 @@ const coursesSlice = createSlice({
         builder.addCase(updateCourse.fulfilled, (state, action) => {
             state.selectedCourse = action.payload
         })
-        
+
         builder.addCase(updateCourse.pending, () => {
             console.log('course updating....')
         })
 
-        builder.addCase(updateCourse.rejected, (state, action)=>{
+        builder.addCase(updateCourse.rejected, (state, action) => {
             console.log('Couldnt update course')
 
         })
 
-        builder.addCase(createCourse.fulfilled, (state,action) => {
-            console.log(action.payload)
+        builder.addCase(createCourse.fulfilled, (state, action) => {
+            state.courses.push(action.payload)
+            state.loading = false
         })
 
-        builder.addCase(createCourse.pending, () => {
-            console.log("Creating course ...")
+        builder.addCase(createCourse.pending, (state) => {
+            state.loading = true
         })
 
-        builder.addCase(createCourse.rejected, (state, action) => {
-            console.log(action.payload)
+        builder.addCase(createCourse.rejected, (state) => {
+            state.error = true
+            state.loading = false
         })
     }
 

@@ -7,7 +7,7 @@ from django.core.validators import MinLengthValidator
 class Course(models.Model):
     course_name = models.CharField(max_length=90, blank=False, null=False, validators=[MinLengthValidator(3)])
     subject = models.CharField(max_length=25, blank=False, null=False, validators=[MinLengthValidator(2)])
-    description = models.CharField(max_length=255)
+    description = models.CharField(max_length=255, blank=True, default='')
     thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True)
     published = models.BooleanField(default=True)
     teacher = models.ForeignKey(CustomUser, related_name="courses_taught", on_delete=models.CASCADE)

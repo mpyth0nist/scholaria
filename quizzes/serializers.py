@@ -69,7 +69,7 @@ class QuizSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
     class Meta:
         model = Quiz
-        fields = ['id', 'name', 'description', 'course', 'questions']
+        fields = ['id', 'name', 'description', 'course', 'due_date', 'questions']
     
 
     def create(self, validated_data):
@@ -89,6 +89,7 @@ class QuizSerializer(serializers.ModelSerializer):
         instance.name = validated_data.get('name', instance.name)
         instance.description = validated_data.get('description', instance.description)
         instance.course = validated_data.get('course', instance.course)
+        instance.due_date = validated_data.get('due_date', instance.due_date)
 
         instance.questions.all().delete()
         for question_data in questions_data:

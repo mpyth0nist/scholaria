@@ -83,13 +83,13 @@ const Sidebar = (props) => {
                 <>
                     <NavButton
                         label="Courses"
-                        isActive={location.pathname === '/my-courses/'}
-                        onClick={() => navigate('/my-courses/')}
+                        isActive={location.pathname === '/all-courses/'}
+                        onClick={() => navigate('/all-courses/')}
                     />
                     <NavButton
                         label="Quizzes"
                         isActive={false}
-                        onClick={() => navigate('#')}
+                        onClick={() => navigate('/quizzes/list-quizzes/')}
                     />
                 </>
             )}

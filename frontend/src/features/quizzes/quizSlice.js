@@ -8,13 +8,18 @@ export const fetchQuizzes = createAsyncThunk("fetchQuizzes", async () => {
 })
 
 export const fetchQuiz = createAsyncThunk("fetchQuiz", async (quizId) => {
-    const res = await api.get(`api/quizzes/${quizId}`)
+    const res = await api.get(`api/quizzes/${quizId}/`)
     return res.data[0]
 })
 
-export const addQuiz = createAsyncThunk("addQuiz", async (quiz) => {
-    const res = await api.post('api/quizzes/create_quiz/', quiz)
-    return res.data
+export const addQuiz = createAsyncThunk("addQuiz", async (quiz, { rejectWithValue }) => {
+    try {
+        const res = await api.post('api/quizzes/create_quiz/', quiz)
+        return res.data
+    } catch (err) {
+        console.error('❌ Quiz create error:', err.response?.status, JSON.stringify(err.response?.data, null, 2))
+        return rejectWithValue(err.response?.data)
+    }
 })
 
 export const updateQuiz = createAsyncThunk("updateQuiz", async (state) => {
@@ -33,7 +38,7 @@ export const updateQuiz = createAsyncThunk("updateQuiz", async (state) => {
     }
 
     try {
-        const res = await api.put(`api/quizzes/update_quiz/${quiz.id}/`, quiz)
+        const res = await api.patch(`api/quizzes/update_quiz/${quiz.id}/`, quiz)
         return res.data  // fix: was outside try block → res was not defined
     } catch (error) {
         console.error({ message: error })
@@ -44,6 +49,36 @@ export const updateQuiz = createAsyncThunk("updateQuiz", async (state) => {
 export const deleteQuiz = createAsyncThunk("deleteQuiz", async (id) => {
     const res = await api.delete(`api/quizzes/delete_quiz/${id}/`)
     return res.data
+})
+
+// ── Quiz-taking lifecycle thunks ────────────────────────────
+export const startAttempt = createAsyncThunk("startAttempt", async (quizId) => {
+
+    try {
+        const res = await api.post(`api/quizzes/${quizId}/start/`)
+        return res.data // returns the UserAttempt object { id, quiz, student, score, answers }
+    } catch (error) {
+        console.error({ message: error })
+        throw error
+    }
+})
+
+export const submitAnswer = createAsyncThunk("submitAnswer", async ({ attemptId, questionId, chosenChoices }) => {
+    const res = await api.post(
+        `api/quizzes/attempts/${attemptId}/questions/${questionId}/answer/`,
+        { chosen_choices: chosenChoices }
+    )
+    return res.data
+})
+
+export const submitQuiz = createAsyncThunk("submitQuiz", async (attemptId) => {
+    const res = await api.patch(`api/quizzes/attempts/${attemptId}/submit/`, {})
+    return res.data // returns the updated UserAttempt with score populated
+})
+
+export const cancelAttempt = createAsyncThunk("cancelAttempt", async (attemptId) => {
+    await api.delete(`api/quizzes/attempts/${attemptId}/cancel/`)
+    return attemptId
 })
 
 
@@ -61,17 +96,21 @@ const initialState = {
         name: '',
         description: '',
         course: null,
+        due_date: '',
         questions: []
     },
     newQuestion: {
         question_text: '',
-        question_type: 'multiple_choices',
         choices: []
     },
-    newChoice: { choice: '' },
+    newChoice: { choice: '', is_correct: false },
 
     loading: false,
-    error: false
+    error: false,
+    // ── active attempt (while student is taking a quiz) ────────────
+    activeAttempt: null,   // { id, quiz, student, score, answers }
+    attemptLoading: false,
+    submitResult: null,    // the graded attempt returned after submitQuiz
 }
 
 const quizSlice = createSlice({
@@ -136,19 +175,25 @@ const quizSlice = createSlice({
         setNewChoiceText(state, action) {
             state.newChoice.choice = action.payload
         },
+        setNewChoiceIsCorrect(state, action) {
+            state.newChoice.is_correct = action.payload
+        },
         addChoiceToNewQuestion(state) {
             if (!state.newChoice.choice.trim()) return
-            state.newQuestion.choices.push({ choice: state.newChoice.choice })
-            state.newChoice.choice = ''
+            state.newQuestion.choices.push({
+                choice: state.newChoice.choice,
+                is_correct: state.newChoice.is_correct
+            })
+            state.newChoice = { choice: '', is_correct: false }
         },
         addQuestionToNewQuiz(state) {
             state.newQuiz.questions.push({ ...state.newQuestion })
-            state.newQuestion = { question_text: '', question_type: 'multiple_choices', choices: [] }
+            state.newQuestion = { question_text: '', choices: [] }
         },
         resetNewQuiz(state) {
-            state.newQuiz = { name: '', description: '', course: null, questions: [] }
-            state.newQuestion = { question_text: '', question_type: 'multiple_choices', choices: [] }
-            state.newChoice = { choice: '' }
+            state.newQuiz = { name: '', description: '', course: null, due_date: '', questions: [] }
+            state.newQuestion = { question_text: '', choices: [] }
+            state.newChoice = { choice: '', is_correct: false }
         }
     },
 
@@ -233,6 +278,28 @@ const quizSlice = createSlice({
             state.error = true
             state.loading = false
         })
+
+        // ── startAttempt ──
+        builder.addCase(startAttempt.pending, (state) => { state.attemptLoading = true })
+        builder.addCase(startAttempt.fulfilled, (state, action) => {
+            state.activeAttempt = action.payload
+            state.attemptLoading = false
+        })
+        builder.addCase(startAttempt.rejected, (state) => { state.attemptLoading = false })
+
+        // ── submitQuiz ──
+        builder.addCase(submitQuiz.pending, (state) => { state.attemptLoading = true })
+        builder.addCase(submitQuiz.fulfilled, (state, action) => {
+            state.submitResult = action.payload
+            state.activeAttempt = null
+            state.attemptLoading = false
+        })
+        builder.addCase(submitQuiz.rejected, (state) => { state.attemptLoading = false })
+
+        // ── cancelAttempt ──
+        builder.addCase(cancelAttempt.fulfilled, (state) => {
+            state.activeAttempt = null
+        })
     }
 })
 
@@ -249,9 +316,11 @@ export const {
     setNewQuizField,
     setNewQuestionField,
     setNewChoiceText,
+    setNewChoiceIsCorrect,
     addChoiceToNewQuestion,
     addQuestionToNewQuiz,
     resetNewQuiz
 } = quizSlice.actions
 
+// async thunks are already exported at declaration
 export default quizSlice.reducer

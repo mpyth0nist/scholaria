@@ -3,6 +3,7 @@ from .models import *
 from rest_framework import generics
 from .serializers import *
 from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission, SAFE_METHODS
+from rest_framework.exceptions import NotFound
 from users.models import CustomUser
 from django.db.models import Q
 # Create your views here.
@@ -55,12 +56,7 @@ class isCourseTeacher(BasePermission):
 class isTeacher(BasePermission):
     
     def has_permission(self, request, view):
-
-        print('is teacher check called')
         user = request.user
-        print(user.role)
-
-        
         return user.role == 'Teacher'
 
 
@@ -84,12 +80,11 @@ class isCourseStudent(BasePermission):
 
 class CourseView(generics.ListAPIView):
     '''
-    Shows a course content in details
+    Lists courses for the authenticated user (teacher sees their courses, student sees enrolled courses).
     '''
-    permission_classes = [IsAuthenticated, isTeacher, isCourseStudent]
+    permission_classes = [IsAuthenticated]
     serializer_class = CourseSerializer
     def get_queryset(self):
-
         return Course.objects.filter(
             Q(teacher=self.request.user) | Q(student=self.request.user)
             ).distinct()
@@ -111,7 +106,7 @@ class CourseCreate(generics.CreateAPIView):
     -> isTeacher : checks if the authenticated user has the role 'Teacher'.
 
     '''
-    permission_classes = [AllowAny]    
+    permission_classes = [IsAuthenticated, isTeacher]    
     serializer_class = CourseSerializer
 
     def perform_create(self, serializer):
@@ -178,8 +173,6 @@ class LessonList(generics.ListAPIView):
         linked_module = Module.objects.get(id=self.kwargs['module_id'])
 
         lessons = Lesson.objects.filter(module=linked_module)
-
-        print(lessons)
         return lessons
 
 
@@ -232,16 +225,27 @@ class LessonCreate(generics.CreateAPIView):
 
 
 class LessonUpdate(generics.UpdateAPIView):
-
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated]
     serializer_class = LessonSerializer
-
     lookup_url_kwarg = 'lesson_id'
     lookup_field = LOOKUP_FIELD
 
+    def perform_update(self, serializer):
+        lesson = serializer.save()
 
+        # Cascade: if lesson marked done, check whether the whole module is complete
+        if lesson.done:
+            module = lesson.module
+            if not module.lesson_module.filter(done=False).exists():
+                module.done = True
+                module.save(update_fields=['done'])
 
+                # Cascade further: check whether all modules in the course are complete
+                course = module.course
+                if not course.module_course.filter(done=False).exists():
+                    course.done = True
+                    course.save(update_fields=['done'])
 class LessonDelete(generics.DestroyAPIView):
 
     queryset = Lesson.objects.all()
