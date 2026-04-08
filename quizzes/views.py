@@ -7,20 +7,6 @@ from rest_framework.permissions import IsAuthenticated
 from django.db import transaction
 
 
-def get_correct_choices(instance):
-    quiz_questions = instance.questions
-    correct_choices = []
-
-    def is_correct(choice):
-        return choice.is_correct
-
-    for question in quiz_questions:
-        correct_choice = filter(is_correct, question.choices)
-        correct_choices.append(correct_choice)
-
-    return correct_choices
-
-
 
 class QuizList(generics.ListAPIView):
 
@@ -80,8 +66,8 @@ class UserAttemptCreate(generics.CreateAPIView):
     serializer_class = UserAttemptSerializer
 
     def perform_create(self, serializer):
-        quiz = get_object_or_404(Quiz, id=self.kwargs['quiz_id'])
-        serializer.save(student=self.request.user, quiz=quiz)
+
+        serializer.save(score=0, student=self.request.user, quiz=self.kwargs['quiz_id'])
 
 class UserAttemptDelete(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, isStudent]

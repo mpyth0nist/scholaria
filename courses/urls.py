@@ -21,5 +21,6 @@ urlpatterns = [
 
     path('<int:module_id>/lessons/', LessonList.as_view(), name='list_module_lessons'),
     path('lessons/<int:lesson_id>/', LessonDetailView.as_view(), name="show_lesson"),
-    path('lessons/<int:lesson_id>/update-lesson/', LessonUpdate.as_view(), name="update-lesson")
+    path('lessons/<int:lesson_id>/update-lesson/', LessonUpdate.as_view(), name="update-lesson"),
+    path('lessons/<int:lesson_id>/delete-lesson/', LessonDelete.as_view(), name="delete-lesson"),
 ]

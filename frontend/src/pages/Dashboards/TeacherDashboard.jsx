@@ -44,7 +44,7 @@ function Teacher() {
                     </div>
                     <h3 className="text-4xl font-bold text-white">{dashboardMetrics.total_courses}</h3>
                 </div>
-                
+
                 <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50 shadow-xl shadow-purple-900/10 hover:-translate-y-1 transition duration-300">
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase">Total Students</p>
@@ -54,7 +54,7 @@ function Teacher() {
                 </div>
 
                 <div className="bg-slate-800/80 backdrop-blur-md rounded-xl p-6 border border-slate-700/50 shadow-xl shadow-emerald-900/10 hover:-translate-y-1 transition duration-300">
-                     <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center justify-between mb-2">
                         <p className="text-slate-400 text-sm font-semibold tracking-wide uppercase">Class Engagement</p>
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">🚀</div>
                     </div>

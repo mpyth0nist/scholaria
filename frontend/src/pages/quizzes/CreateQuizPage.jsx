@@ -3,7 +3,7 @@ import AddQuestions from './AddQuestions'
 import { useState, useEffect } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchCourses } from '../../features/courses/coursesSlice'
-import { addQuiz, resetNewQuiz, setNewQuizField, setNewQuestionField, setNewChoiceText, addChoiceToNewQuestion, addQuestionToNewQuiz } from '../../features/quizzes/quizSlice'
+import { addQuiz, resetNewQuiz, setNewQuizField, setNewQuestionField, setNewChoiceText, setNewChoiceIsCorrect, addChoiceToNewQuestion, addQuestionToNewQuiz } from '../../features/quizzes/quizSlice'
 
 const CreateQuizPage = () => {
 
@@ -37,6 +37,10 @@ const CreateQuizPage = () => {
         dispatch(setNewChoiceText(value))
     }
 
+    const handleChoiceIsCorrectChange = (value) => {
+        dispatch(setNewChoiceIsCorrect(value))
+    }
+
     const addChoiceToQuestion = () => {
         dispatch(addChoiceToNewQuestion())
     }
@@ -64,8 +68,10 @@ const CreateQuizPage = () => {
                 <AddQuestions
                     question={question}
                     choice={choice}
+                    quizData={quizData}
                     handleQuestionFieldChange={handleQuestionFieldChange}
                     handleChoiceChange={handleChoiceChange}
+                    handleChoiceIsCorrectChange={handleChoiceIsCorrectChange}
                     handleSave={addQuestionToQuiz}
                     addChoice={addChoiceToQuestion}
                     handleSubmit={handleSubmit}

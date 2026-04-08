@@ -1,108 +1,249 @@
 import { useEffect, useState } from "react"
-import { useParams } from "react-router-dom"
+import { useParams, useNavigate } from "react-router-dom"
 import { useDispatch, useSelector } from "react-redux"
-import { fetchQuiz } from "../../features/quizzes/quizSlice"
-
+import {
+    fetchQuiz,
+    startAttempt,
+    submitAnswer,
+    submitQuiz,
+    cancelAttempt,
+} from "../../features/quizzes/quizSlice"
 
 const PassQuiz = () => {
-
-    const [questionIndex, setQuestionIndex] = useState(0)
     const { quiz_id } = useParams()
     const dispatch = useDispatch()
+    const navigate = useNavigate()
 
     const quiz = useSelector(state => state.quizzes.currentQuiz)
     const questions = useSelector(state => state.quizzes.currentQuizQuestions)
     const choices = useSelector(state => state.quizzes.currentQuizChoices)
     const loading = useSelector(state => state.quizzes.loading)
+    const activeAttempt = useSelector(state => state.quizzes.activeAttempt)
+    const attemptLoading = useSelector(state => state.quizzes.attemptLoading)
+    const submitResult = useSelector(state => state.quizzes.submitResult)
 
-    // Build an ordered array of questions with their choices embedded
+    const [questionIndex, setQuestionIndex] = useState(0)
+    const [selectedChoices, setSelectedChoices] = useState({}) // { [questionId]: choiceId }
+    const [submitting, setSubmitting] = useState(false)
+    const [error, setError] = useState(null)
+
+    // Build ordered question list
     const questionList = (quiz.questionsIds || []).map(qId => ({
+        id: qId,
         ...questions[qId],
-        choices: (questions[qId]?.choicesIds || []).map(cId => choices[cId])
+        choices: (questions[qId]?.choicesIds || []).map(cId => choices[cId]).filter(Boolean)
     }))
 
+    // 1. Fetch quiz details + start an attempt on mount
     useEffect(() => {
         dispatch(fetchQuiz(quiz_id))
-    }, [quiz_id])
+        dispatch(startAttempt(quiz_id))
+    }, [])
 
-    if (loading || !quiz.id || questionList.length === 0) {
-        return <div className="flex items-center justify-center min-h-screen text-gray-400">Loading quiz...</div>
+    // ── Handlers ────────────────────────────────────────────────────
+
+    const handleSelectChoice = (questionId, choiceId) => {
+        setSelectedChoices(prev => ({ ...prev, [questionId]: choiceId }))
     }
 
+    const handleNext = async () => {
+        const currentQuestion = questionList[questionIndex]
+        const choiceId = selectedChoices[currentQuestion.id]
+
+        if (!choiceId) {
+            setError("Please select an answer before continuing.")
+            return
+        }
+        setError(null)
+
+        // Submit the answer for this question
+        await dispatch(submitAnswer({
+            attemptId: activeAttempt.id,
+            questionId: currentQuestion.id,
+            chosenChoices: [choiceId]
+        }))
+
+        setQuestionIndex(prev => prev + 1)
+    }
+
+    const handleFinish = async () => {
+        const currentQuestion = questionList[questionIndex]
+        const choiceId = selectedChoices[currentQuestion.id]
+
+        if (!choiceId) {
+            setError("Please select an answer before finishing.")
+            return
+        }
+        setError(null)
+        setSubmitting(true)
+
+        // Submit the final answer
+        await dispatch(submitAnswer({
+            attemptId: activeAttempt.id,
+            questionId: currentQuestion.id,
+            chosenChoices: [choiceId]
+        }))
+
+        // Submit the entire quiz for grading
+        await dispatch(submitQuiz(activeAttempt.id))
+        setSubmitting(false)
+    }
+
+    const handleCancel = async () => {
+        if (activeAttempt?.id) {
+            await dispatch(cancelAttempt(activeAttempt.id))
+        }
+        navigate(-1)
+    }
+
+    // ── States ──────────────────────────────────────────────────────
+
+    // Loading quiz or starting attempt
+    if (loading || attemptLoading || !quiz.id || questionList.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-[#0d0f1e] gap-4">
+                <div className="w-12 h-12 border-4 border-violet-500 border-t-transparent rounded-full animate-spin" />
+                <p className="text-slate-400 tracking-widest text-sm uppercase">Loading quiz...</p>
+            </div>
+        )
+    }
+
+    // Result screen after submission
+    if (submitResult) {
+        const score = submitResult.score ?? 0
+        const passed = score >= 50
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-[#0d0f1e] p-6">
+                <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl backdrop-blur-md">
+                    <div className={`text-6xl font-black mb-2 ${passed ? 'text-emerald-400' : 'text-red-400'}`}>
+                        {score.toFixed(0)}%
+                    </div>
+                    <p className={`text-lg font-semibold mb-1 ${passed ? 'text-emerald-300' : 'text-red-300'}`}>
+                        {passed ? '🎉 Quiz Passed!' : '😔 Quiz Failed'}
+                    </p>
+                    <p className="text-slate-400 text-sm mb-8">
+                        You answered {questionList.length} question{questionList.length !== 1 ? 's' : ''}.
+                    </p>
+                    <div className="w-full bg-slate-700/50 rounded-full h-3 mb-8 overflow-hidden">
+                        <div
+                            className={`h-3 rounded-full transition-all duration-1000 ${passed ? 'bg-emerald-500' : 'bg-red-500'}`}
+                            style={{ width: `${score}%` }}
+                        />
+                    </div>
+                    <button
+                        onClick={() => navigate('/dashboard')}
+                        className="w-full py-3 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-semibold tracking-wide transition-colors shadow-lg shadow-violet-900/40"
+                    >
+                        Back to Dashboard
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    // Quiz in progress
     const currentQuestion = questionList[questionIndex]
+    const isLastQuestion = questionIndex >= questionList.length - 1
+    const progress = ((questionIndex) / questionList.length) * 100
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-12 px-4">
-            <div className="w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8">
-                {/* Question Header */}
-                <div className="mb-6">
-                    <h3 className="text-2xl font-bold text-gray-800">
-                        Question {questionIndex + 1}
-                        <span className="text-gray-400 text-lg ml-2">
-                            of {questionList.length}
-                        </span>
-                    </h3>
+        <div className="flex items-center justify-center min-h-screen bg-[#0d0f1e] p-6">
+            <div className="w-full max-w-2xl">
+
+                {/* Header */}
+                <div className="flex items-center justify-between mb-6">
+                    <div>
+                        <h1 className="text-lg font-bold text-slate-100 truncate max-w-sm">{quiz.name}</h1>
+                        <p className="text-slate-500 text-xs mt-0.5 tracking-wide">
+                            Question {questionIndex + 1} of {questionList.length}
+                        </p>
+                    </div>
+                    <button
+                        onClick={handleCancel}
+                        className="text-slate-500 hover:text-red-400 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
+                    >
+                        Cancel Quiz
+                    </button>
                 </div>
 
-                {/* Question Text */}
-                <div className="mb-8">
-                    <p className="text-lg text-gray-700 leading-relaxed">
+                {/* Progress bar */}
+                <div className="w-full bg-slate-800 rounded-full h-1.5 mb-8 overflow-hidden">
+                    <div
+                        className="h-1.5 bg-violet-500 rounded-full transition-all duration-500"
+                        style={{ width: `${progress}%` }}
+                    />
+                </div>
+
+                {/* Question card */}
+                <div className="bg-slate-800/80 border border-slate-700/50 rounded-2xl p-8 shadow-2xl backdrop-blur-md">
+
+                    {/* Question text */}
+                    <p className="text-xl font-semibold text-slate-100 leading-relaxed mb-8">
                         {currentQuestion.question_text}
                     </p>
-                </div>
 
-                {/* Answer Options */}
-                <div className="space-y-4 mb-8">
-                    {currentQuestion.question_type === 'multiple_choices' ? (
-                        currentQuestion.choices.map((element, index) => (
-                            <label
-                                key={index}
-                                className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-indigo-500 hover:bg-indigo-50 transition-all duration-200"
-                            >
-                                <input
-                                    value={element.choice}
-                                    type="radio"
-                                    name="answer"
-                                    className="w-5 h-5 text-indigo-600 focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                                />
-                                <span className="ml-3 text-gray-700 font-medium">
-                                    {element.choice}
-                                </span>
-                            </label>
-                        ))
-                    ) : (
-                        <div className="space-y-4">
-                            <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-green-500 hover:bg-green-50 transition-all duration-200">
-                                <input
-                                    value="True"
-                                    type="radio"
-                                    name="answer"
-                                    className="w-5 h-5 text-green-600 focus:ring-2 focus:ring-green-500 cursor-pointer"
-                                />
-                                <span className="ml-3 text-gray-700 font-medium">True</span>
-                            </label>
-                            <label className="flex items-center p-4 border-2 border-gray-200 rounded-lg cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all duration-200">
-                                <input
-                                    value="False"
-                                    type="radio"
-                                    name="answer"
-                                    className="w-5 h-5 text-red-600 focus:ring-2 focus:ring-red-500 cursor-pointer"
-                                />
-                                <span className="ml-3 text-gray-700 font-medium">False</span>
-                            </label>
-                        </div>
+                    {/* Choices */}
+                    <div className="space-y-3 mb-8">
+                        {currentQuestion.choices.map(choice => {
+                            const isSelected = selectedChoices[currentQuestion.id] === choice.id
+                            return (
+                                <button
+                                    key={choice.id}
+                                    onClick={() => handleSelectChoice(currentQuestion.id, choice.id)}
+                                    className={`
+                                        w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-200 font-medium
+                                        ${isSelected
+                                            ? 'bg-violet-700/30 border-violet-500 text-slate-100 shadow-lg shadow-violet-900/30'
+                                            : 'bg-slate-900/40 border-slate-700/50 text-slate-300 hover:border-violet-600/50 hover:text-slate-100 hover:bg-slate-700/30'
+                                        }
+                                    `}
+                                >
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'border-violet-400 bg-violet-500' : 'border-slate-500'
+                                            }`}>
+                                            {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
+                                        </div>
+                                        {choice.choice}
+                                    </div>
+                                </button>
+                            )
+                        })}
+                    </div>
+
+                    {/* Error message */}
+                    {error && (
+                        <p className="text-red-400 text-sm mb-4 flex items-center gap-2">
+                            <span>⚠</span> {error}
+                        </p>
                     )}
-                </div>
 
-                {/* Navigation Button */}
-                <div className="flex justify-end">
-                    <button
-                        onClick={() => setQuestionIndex(questionIndex + 1)}
-                        disabled={questionIndex >= questionList.length - 1}
-                        className="px-8 py-3 bg-indigo-600 text-white font-semibold rounded-lg hover:bg-indigo-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors duration-200 shadow-md hover:shadow-lg"
-                    >
-                        {questionIndex >= questionList.length - 1 ? 'Finish' : 'Next'}
-                    </button>
+                    {/* Navigation */}
+                    <div className="flex justify-between items-center">
+                        <button
+                            onClick={() => setQuestionIndex(prev => Math.max(0, prev - 1))}
+                            disabled={questionIndex === 0}
+                            className="px-5 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-sm font-medium hover:bg-slate-700/30"
+                        >
+                            ← Previous
+                        </button>
+
+                        {isLastQuestion ? (
+                            <button
+                                onClick={handleFinish}
+                                disabled={submitting}
+                                className="px-8 py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-semibold transition-colors shadow-lg shadow-emerald-900/40 disabled:opacity-60 disabled:cursor-not-allowed"
+                            >
+                                {submitting ? 'Submitting...' : 'Submit Quiz ✓'}
+                            </button>
+                        ) : (
+                            <button
+                                onClick={handleNext}
+                                className="px-8 py-3 rounded-xl bg-violet-700 hover:bg-violet-600 text-white font-semibold transition-colors shadow-lg shadow-violet-900/40"
+                            >
+                                Next →
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
         </div>

@@ -7,7 +7,7 @@ from django.core.validators import MinLengthValidator
 
 class Quiz(models.Model):
 
-    name = models.CharField(max_length=200, validators=[MinLengthValidator(40)])
+    name = models.CharField(max_length=200, validators=[MinLengthValidator(5)])
     description = models.CharField(max_length=255, null=True, blank=True)
     teacher = models.ForeignKey(CustomUser, related_name="teacher_quizzes", on_delete=models.CASCADE)
     course = models.ForeignKey(Course, related_name="course_quiz", on_delete=models.CASCADE)

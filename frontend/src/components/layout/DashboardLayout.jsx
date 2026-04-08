@@ -15,8 +15,8 @@ function Dashboard({ children }) {
     }, [])
 
     const firstName = user?.first_name ?? ''
-    const lastName  = user?.last_name  ?? ''
-    const role      = user?.role       ?? ''
+    const lastName = user?.last_name ?? ''
+    const role = user?.role ?? ''
 
     return (
         <div className="min-h-screen bg-[#0d0f1e] p-2">

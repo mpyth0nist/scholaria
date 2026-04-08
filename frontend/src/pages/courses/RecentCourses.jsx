@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-const CourseModal = ({ course, onClose }) => {
+const CourseModal = ({ course, onClose, isTeacher }) => {
     const navigate = useNavigate()
 
     return (
@@ -65,7 +65,7 @@ const CourseModal = ({ course, onClose }) => {
                         onClick={() => navigate(`/course/${course.id}/modules/`)}
                         className="py-2.5 px-4 rounded-lg bg-violet-700 hover:bg-violet-600 text-white text-sm font-semibold tracking-wide transition-colors shadow-lg shadow-violet-900/40 border border-violet-500/30"
                     >
-                        Go to Course →
+                        {isTeacher ? 'Manage Course →' : 'View Course →'}
                     </button>
                 </div>
             </div>
@@ -75,6 +75,8 @@ const CourseModal = ({ course, onClose }) => {
 
 const RecentCourses = () => {
     const courses = useSelector(state => state.courses.courses)
+    const role = useSelector(state => state.users.user?.role)
+    const isTeacher = role === 'Teacher'
     const [selectedCourse, setSelectedCourse] = useState(null)
 
     // Show only 3 most recent
@@ -129,6 +131,7 @@ const RecentCourses = () => {
             {selectedCourse && (
                 <CourseModal
                     course={selectedCourse}
+                    isTeacher={isTeacher}
                     onClose={() => setSelectedCourse(null)}
                 />
             )}
