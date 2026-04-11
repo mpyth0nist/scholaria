@@ -119,4 +119,4 @@ class UserAttemptSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserAttempt
         fields = ['id', 'quiz', 'student', 'score', 'answers']
-        read_only_fields = ['student', 'score']
+        read_only_fields = ['student', 'score', 'quiz']

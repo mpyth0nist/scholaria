@@ -30,7 +30,6 @@ export const updateQuiz = createAsyncThunk("updateQuiz", async (state) => {
         description: state.quiz.description,
         questions: Object.values(state.questions).map(question => ({
             question_text: question.question_text,
-            question_type: question.question_type,
             choices: Object.values(state.choices).filter(choice =>
                 question.choicesIds.includes(choice.id)
             )
@@ -129,7 +128,6 @@ const quizSlice = createSlice({
             state.currentQuiz.questionsIds.push(questionId)
             state.currentQuizQuestions[questionId] = {
                 question_text: action.payload.question_text,
-                question_type: action.payload.question_type,
                 choicesIds: action.payload.choicesIds
             }
         },
@@ -223,11 +221,11 @@ const quizSlice = createSlice({
             state.currentQuiz.name = action.payload.name
             state.currentQuiz.description = action.payload.description
             state.currentQuiz.course = action.payload.course
+            state.currentQuiz.questionsIds = []
             action.payload.questions.forEach((question) => {
                 state.currentQuiz.questionsIds.push(question.id)
                 state.currentQuizQuestions[question.id] = {
                     question_text: question.question_text,
-                    question_type: question.question_type,
                     choicesIds: []
                 }
                 question.choices.forEach(choice => {

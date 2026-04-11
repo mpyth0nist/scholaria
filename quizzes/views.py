@@ -66,8 +66,8 @@ class UserAttemptCreate(generics.CreateAPIView):
     serializer_class = UserAttemptSerializer
 
     def perform_create(self, serializer):
-
-        serializer.save(score=0, student=self.request.user, quiz=self.kwargs['quiz_id'])
+        quiz = get_object_or_404(Quiz, id=self.kwargs['quiz_id'])
+        serializer.save(score=0, student=self.request.user, quiz=quiz)
 
 class UserAttemptDelete(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, isStudent]
