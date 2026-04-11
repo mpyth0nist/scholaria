@@ -10,7 +10,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 urlpatterns = [
     path('list/', CourseView.as_view(), name="courses" ),
     path('<int:course_id>/', CourseDetailView.as_view(), name="course"),
-    path('create-course/', CourseCreate.as_view(), name="create-course"),
+    path('create-course/', CourseCreate.as_view(), name="create_course"),
     path('delete/<int:id>/', CourseDelete.as_view(), name="course_delete"),
     path('update/<int:id>/', CourseUpdate.as_view(), name="course_update"),
     path('<int:course_id>/modules/', ModuleList.as_view(), name="course_modules"),

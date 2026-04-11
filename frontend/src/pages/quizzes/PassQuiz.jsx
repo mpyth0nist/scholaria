@@ -38,7 +38,7 @@ const PassQuiz = () => {
     useEffect(() => {
         dispatch(fetchQuiz(quiz_id))
         dispatch(startAttempt(quiz_id))
-    }, [])
+    }, [quiz_id])
 
     // ── Handlers ────────────────────────────────────────────────────
 
