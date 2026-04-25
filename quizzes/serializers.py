@@ -40,48 +40,75 @@ class QuestionSerializer(serializers.ModelSerializer):
     def create(self, validated_data, quiz=None):
         choices_data = validated_data.pop('choices')
 
+        if len(choices_data) < 2:
+            raise serializers.ValidationError('A question must have at least 2 choices.')
+
         question = Question.objects.create(**validated_data)
 
         for choice in choices_data:
             Choice.objects.create(question=question, **choice)
 
         return question
-        
-
 
     def update(self, instance, validated_data):
-
         choices_data = validated_data.pop('choices')
 
         instance.question_text = validated_data.get("question_text", instance.question_text)
-        
-        for choice in choices_data:
 
-            Choice.objects.create(question=instance, **choice)
+        # ── Diff-based choice sync ────────────────────────────────────
+        incoming_ids = {c['id'] for c in choices_data if 'id' in c}
+        # Delete choices no longer present
+        instance.choices.exclude(id__in=incoming_ids).delete()
+
+        for choice_data in choices_data:
+            choice_id = choice_data.get('id')
+            if choice_id:
+                # Update existing choice
+                Choice.objects.filter(id=choice_id, question=instance).update(
+                    choice=choice_data.get('choice', ''),
+                    is_correct=choice_data.get('is_correct', False),
+                )
+            else:
+                # New choice (no id supplied)
+                Choice.objects.create(question=instance, **{k: v for k, v in choice_data.items() if k != 'id'})
 
         instance.save()
-
         return instance
 
     
 
 class QuizSerializer(serializers.ModelSerializer):
     questions = QuestionSerializer(many=True)
+    my_score = serializers.SerializerMethodField()
+
     class Meta:
         model = Quiz
-        fields = ['id', 'name', 'description', 'course', 'due_date', 'questions']
-    
+        fields = ['id', 'name', 'description', 'course', 'due_date', 'questions', 'my_score']
+
+    def get_my_score(self, obj):
+        """Return the requesting student's score for this quiz, or None if not yet taken."""
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        if getattr(request.user, 'role', None) == 'Teacher':
+            return None
+        attempt = (
+            UserAttempt.objects
+            .filter(quiz=obj, student=request.user, score__isnull=False)
+            .order_by('-id')
+            .first()
+        )
+        return float(attempt.score) if attempt else None
 
     def create(self, validated_data):
-        print('create quiz called')
         questions_data = validated_data.pop('questions')
         quiz = Quiz.objects.create(**validated_data)
-        
+
         for question_data in questions_data:
             question_serializer = QuestionSerializer(data=question_data)
             question_serializer.is_valid(raise_exception=True)
             question_serializer.save(quiz=quiz)
-        
+
         return quiz
 
     def update(self, instance, validated_data):
