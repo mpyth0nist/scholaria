@@ -21,14 +21,6 @@ class Question(models.Model):
     question_text = models.TextField(max_length=500)
     quiz = models.ForeignKey(Quiz, related_name="questions", on_delete=models.CASCADE)
 
-    def save(self, *args, **kwargs):
-        # NOTE: This will raise an error if a question is updated without choices.
-        # Ensure choices are added either before updates or handled at the form level.
-        if self.pk and self.choices.count() < 2:
-            raise ValueError('A question must have at least 2 choices')
-        
-        super().save(*args, **kwargs)
-
     def __str__(self):
         return self.question_text[:50]
 
@@ -44,6 +36,7 @@ class Choice(models.Model):
 class UserAttempt(models.Model):
     quiz = models.ForeignKey(Quiz, related_name="attempts", on_delete=models.PROTECT)
     student = models.ForeignKey(CustomUser, related_name="quiz_attempts", on_delete=models.CASCADE)
+    # null=True means "not yet graded"; 0 is a valid (zero) score after submission
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
@@ -52,9 +45,16 @@ class UserAttempt(models.Model):
 
 class UserAnswer(models.Model):
     chosen_choices = models.ManyToManyField(Choice)
-    attempt = models.ForeignKey(UserAttempt, related_name="attempt_answers", on_delete=models.PROTECT)
+    # CASCADE: answers are meaningless without their parent attempt
+    attempt = models.ForeignKey(UserAttempt, related_name="attempt_answers", on_delete=models.CASCADE)
     question = models.ForeignKey(Question, related_name="question_user_answer", on_delete=models.PROTECT)
     question_snapshot = models.JSONField(blank=True)
+
+    class Meta:
+        # One answer per question per attempt
+        constraints = [
+            models.UniqueConstraint(fields=['attempt', 'question'], name='unique_answer_per_question')
+        ]
 
     def save(self, *args, **kwargs):
         if not self.pk:
