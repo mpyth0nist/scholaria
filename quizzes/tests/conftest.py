@@ -77,8 +77,9 @@ def client_filled_data(teacher_client, db):
     Attaches `.course` and `.quiz` to the client object for use in tests.
     """
     from users.models import CustomUser
+    from quizzes.models import Quiz, Choice
 
-    user = CustomUser.objects.create_user(   # create_user hashes the password
+    student = CustomUser.objects.create_user(   # create_user hashes the password
         username="student",
         password="student123",
         email="student@scholaria.net",
@@ -93,25 +94,50 @@ def client_filled_data(teacher_client, db):
             "course_name": "Testing course",
             "description": "testing course's description",
             "subject": "testing_course subject",
-            "student" : [user.id]
+            "student" : [student.id]
         },
         format='json',
     )
     assert course_res.status_code == 201, f"Course creation failed: {course_res.data}"
 
+    questions = [
+        {
+            'question_text': "Question #1",
+            'choices': [
+                {"choice": "choice #1", "is_correct": True},
+                {"choice": "choice #2", "is_correct": False},
+            ]
+        },
+        {
+            'question_text': "Question #2",
+            'choices': [
+                {"choice": "choice #1", "is_correct": True},
+                {"choice": "choice #2", "is_correct": False},
+            ]
+        },
+        {
+            'question_text': "Question #3",
+            'choices': [
+                {"choice": "choice #1", "is_correct": True},
+                {"choice": "choice #2", "is_correct": False},
+            ]
+        },
+    ]
     quiz_res = teacher_client.post(
         reverse('create-quiz'),     # api/quizzes/create_quiz/
         data={
             "name": "Testing quiz",
             "description": "testing quiz's description",
             "course": course_res.data['id'],   # Response object → .data['id'], not .id
-            "due_date": "2026-04-15",
-            "questions": [],
+            "due_date": "2030-12-31",
+            "questions": questions,
         },
         format='json',
     )
     assert quiz_res.status_code == 201, f"Quiz creation failed: {quiz_res.data}"
 
     teacher_client.course = course_res.data
-    teacher_client.quiz = quiz_res.data
+    teacher_client.quiz = Quiz.objects.get(id=quiz_res.data['id'])
+    teacher_client.choices = Choice.objects.filter(question__quiz=teacher_client.quiz)
+    teacher_client.student = student
     return teacher_client

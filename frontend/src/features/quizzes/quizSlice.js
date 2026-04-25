@@ -51,14 +51,13 @@ export const deleteQuiz = createAsyncThunk("deleteQuiz", async (id) => {
 })
 
 // ── Quiz-taking lifecycle thunks ────────────────────────────
-export const startAttempt = createAsyncThunk("startAttempt", async (quizId) => {
-
+export const startAttempt = createAsyncThunk("startAttempt", async (quizId, { rejectWithValue }) => {
     try {
         const res = await api.post(`api/quizzes/${quizId}/start/`)
         return res.data // returns the UserAttempt object { id, quiz, student, score, answers }
     } catch (error) {
-        console.error({ message: error })
-        throw error
+        const detail = error.response?.data?.detail ?? error.message ?? 'Failed to start quiz.'
+        return rejectWithValue(detail)
     }
 })
 
@@ -109,6 +108,7 @@ const initialState = {
     // ── active attempt (while student is taking a quiz) ────────────
     activeAttempt: null,   // { id, quiz, student, score, answers }
     attemptLoading: false,
+    attemptError: null,    // error message when startAttempt fails
     submitResult: null,    // the graded attempt returned after submitQuiz
 }
 
@@ -215,6 +215,10 @@ const quizSlice = createSlice({
             state.currentQuiz = { id: null, name: '', description: '', course: '', questionsIds: [] }
             state.currentQuizQuestions = {}
             state.currentQuizChoices = {}
+            // Reset quiz-taking state so a previous result doesn't leak into a new quiz
+            state.submitResult = null
+            state.activeAttempt = null
+            state.attemptError = null
         })
         builder.addCase(fetchQuiz.fulfilled, (state, action) => {
             state.currentQuiz.id = action.payload.id
@@ -278,12 +282,18 @@ const quizSlice = createSlice({
         })
 
         // ── startAttempt ──
-        builder.addCase(startAttempt.pending, (state) => { state.attemptLoading = true })
+        builder.addCase(startAttempt.pending, (state) => {
+            state.attemptLoading = true
+            state.attemptError = null
+        })
         builder.addCase(startAttempt.fulfilled, (state, action) => {
             state.activeAttempt = action.payload
             state.attemptLoading = false
         })
-        builder.addCase(startAttempt.rejected, (state) => { state.attemptLoading = false })
+        builder.addCase(startAttempt.rejected, (state, action) => {
+            state.attemptLoading = false
+            state.attemptError = action.payload ?? action.error?.message ?? 'Failed to start quiz.'
+        })
 
         // ── submitQuiz ──
         builder.addCase(submitQuiz.pending, (state) => { state.attemptLoading = true })

@@ -77,8 +77,12 @@ const QuizList = () => {
                             {/* info */}
                             <div className="flex flex-col min-w-0 flex-1">
                                 <button
-                                    onClick={() => navigate(`/quizzes/${quiz.id}/`)}
-                                    className="text-slate-200 font-semibold text-sm text-left hover:text-violet-300 transition truncate"
+                                    onClick={() => quiz.my_score == null ? navigate(`/quizzes/${quiz.id}/`) : null}
+                                    className={`text-slate-200 font-semibold text-sm text-left transition truncate ${
+                                        quiz.my_score == null
+                                            ? 'hover:text-violet-300 cursor-pointer'
+                                            : 'cursor-default opacity-80'
+                                    }`}
                                 >
                                     {quiz.name}
                                 </button>
@@ -121,7 +125,22 @@ const QuizList = () => {
                                             🗑 Delete
                                         </button>
                                     </>
+                                ) : quiz.my_score != null ? (
+                                    /* ── Already completed: show score badge ── */
+                                    <div className={`flex flex-col items-center px-4 py-2 rounded-xl border ${
+                                        quiz.my_score >= 50
+                                            ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400'
+                                            : 'bg-red-500/10 border-red-500/30 text-red-400'
+                                    }`}>
+                                        <span className="text-lg font-black leading-none">
+                                            {quiz.my_score.toFixed(0)}%
+                                        </span>
+                                        <span className="text-[10px] font-medium mt-0.5 tracking-wide uppercase opacity-70">
+                                            {quiz.my_score >= 50 ? 'Passed' : 'Failed'}
+                                        </span>
+                                    </div>
                                 ) : (
+                                    /* ── Not yet taken ── */
                                     <button
                                         onClick={() => navigate(`/quizzes/${quiz.id}/`)}
                                         className="bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-xs font-semibold px-4 py-2 rounded-lg transition-all"
@@ -130,6 +149,7 @@ const QuizList = () => {
                                     </button>
                                 )}
                             </div>
+
                         </div>
                     ))}
                 </div>

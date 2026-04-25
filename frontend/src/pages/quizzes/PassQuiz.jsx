@@ -20,6 +20,7 @@ const PassQuiz = () => {
     const loading = useSelector(state => state.quizzes.loading)
     const activeAttempt = useSelector(state => state.quizzes.activeAttempt)
     const attemptLoading = useSelector(state => state.quizzes.attemptLoading)
+    const attemptError = useSelector(state => state.quizzes.attemptError)
     const submitResult = useSelector(state => state.quizzes.submitResult)
 
     const [questionIndex, setQuestionIndex] = useState(0)
@@ -57,11 +58,17 @@ const PassQuiz = () => {
         setError(null)
 
         // Submit the answer for this question
-        await dispatch(submitAnswer({
+        const result = await dispatch(submitAnswer({
             attemptId: activeAttempt.id,
             questionId: currentQuestion.id,
             chosenChoices: [choiceId]
         }))
+
+        // #8 Block navigation if the answer couldn't be saved
+        if (submitAnswer.rejected.match(result)) {
+            setError("Failed to save your answer. Please check your connection and try again.")
+            return
+        }
 
         setQuestionIndex(prev => prev + 1)
     }
@@ -78,11 +85,18 @@ const PassQuiz = () => {
         setSubmitting(true)
 
         // Submit the final answer
-        await dispatch(submitAnswer({
+        const result = await dispatch(submitAnswer({
             attemptId: activeAttempt.id,
             questionId: currentQuestion.id,
             chosenChoices: [choiceId]
         }))
+
+        // #8 Block submission if the last answer couldn't be saved
+        if (submitAnswer.rejected.match(result)) {
+            setError("Failed to save your answer. Please check your connection and try again.")
+            setSubmitting(false)
+            return
+        }
 
         // Submit the entire quiz for grading
         await dispatch(submitQuiz(activeAttempt.id))
@@ -108,9 +122,33 @@ const PassQuiz = () => {
         )
     }
 
+    // Failed to start attempt (e.g. past due date, network error)
+    if (attemptError) {
+        const isDueDateError = attemptError.includes('due date') || attemptError.includes('403') || attemptError.includes('Forbidden')
+        const message = isDueDateError
+            ? 'This quiz is past its due date and can no longer be started.'
+            : 'Could not start the quiz. Please check your connection and try again.'
+        return (
+            <div className="flex items-center justify-center min-h-screen bg-[#0d0f1e] p-6">
+                <div className="bg-slate-800/80 border border-red-700/40 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
+                    <div className="text-5xl mb-4">⚠️</div>
+                    <h2 className="text-xl font-bold text-red-400 mb-2">Cannot Start Quiz</h2>
+                    <p className="text-slate-400 text-sm mb-8">{message}</p>
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="w-full py-3 rounded-xl bg-slate-700 hover:bg-slate-600 text-white font-semibold transition-colors"
+                    >
+                        ← Go Back
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
     // Result screen after submission
     if (submitResult) {
-        const score = submitResult.score ?? 0
+        // score comes back as a string from Django's DecimalField — parse it first
+        const score = Number(submitResult.score ?? 0)
         const passed = score >= 50
         return (
             <div className="flex items-center justify-center min-h-screen bg-[#0d0f1e] p-6">
@@ -122,7 +160,8 @@ const PassQuiz = () => {
                         {passed ? '🎉 Quiz Passed!' : '😔 Quiz Failed'}
                     </p>
                     <p className="text-slate-400 text-sm mb-8">
-                        You answered {questionList.length} question{questionList.length !== 1 ? 's' : ''}.
+                        {/* #16 Show actually-answered count, not total quiz length */}
+                        You answered {submitResult?.answers?.length ?? questionList.length} question{(submitResult?.answers?.length ?? questionList.length) !== 1 ? 's' : ''}.
                     </p>
                     <div className="w-full bg-slate-700/50 rounded-full h-3 mb-8 overflow-hidden">
                         <div
@@ -144,7 +183,8 @@ const PassQuiz = () => {
     // Quiz in progress
     const currentQuestion = questionList[questionIndex]
     const isLastQuestion = questionIndex >= questionList.length - 1
-    const progress = ((questionIndex) / questionList.length) * 100
+    // #15 reaches 100% when on the last question
+    const progress = ((questionIndex + 1) / questionList.length) * 100
 
     return (
         <div className="flex items-center justify-center min-h-screen bg-[#0d0f1e] p-6">
