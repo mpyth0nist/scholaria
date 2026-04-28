@@ -59,7 +59,14 @@ function Teacher() {
                         <div className="h-8 w-8 rounded-lg bg-emerald-500/10 flex items-center justify-center text-emerald-400">🚀</div>
                     </div>
                     <div className="flex items-baseline gap-2">
-                        <h3 className="text-4xl font-bold text-white">{dashboardMetrics.engagement}%</h3>
+                        {dashboardMetrics.engagement != null ? (
+                            <h3 className="text-4xl font-bold text-white">{dashboardMetrics.engagement}%</h3>
+                        ) : (
+                            <>
+                                <h3 className="text-4xl font-bold text-slate-500">N/A</h3>
+                                <span className="text-xs text-slate-600">No quizzes yet</span>
+                            </>
+                        )}
                     </div>
                 </div>
             </div>
@@ -102,7 +109,7 @@ function Teacher() {
                                                 <td className="py-4 px-4 text-right">
                                                     {sub.score !== "Pending" ? (
                                                         <span className="bg-emerald-500/10 text-emerald-400 py-1 px-3 rounded-full text-sm font-bold shadow-sm border border-emerald-500/20">
-                                                            {sub.score}%
+                                                            {Number(sub.score).toFixed(1)}%
                                                         </span>
                                                     ) : (
                                                         <span className="bg-amber-500/10 text-amber-400 py-1 px-3 rounded-full text-sm font-semibold shadow-sm border border-amber-500/20">

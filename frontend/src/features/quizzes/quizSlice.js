@@ -28,17 +28,23 @@ export const updateQuiz = createAsyncThunk("updateQuiz", async (state) => {
         name: state.quiz.name,
         course: state.quiz.course,
         description: state.quiz.description,
+        due_date: state.quiz.due_date,
         questions: Object.values(state.questions).map(question => ({
             question_text: question.question_text,
-            choices: Object.values(state.choices).filter(choice =>
-                question.choicesIds.includes(choice.id)
-            )
+            choices: question.choicesIds.map(cid => {
+                const c = state.choices[cid]
+                return {
+                    id:         c?.id,          // real DB id (undefined for new choices → backend creates)
+                    choice:     c?.choice ?? '',
+                    is_correct: c?.is_correct ?? false,
+                }
+            })
         }))
     }
 
     try {
         const res = await api.patch(`api/quizzes/update_quiz/${quiz.id}/`, quiz)
-        return res.data  // fix: was outside try block → res was not defined
+        return res.data
     } catch (error) {
         console.error({ message: error })
         throw error
@@ -124,11 +130,22 @@ const quizSlice = createSlice({
             state.currentQuiz.description = action.payload
         },
         addQuestion(state, action) {
-            const questionId = action.payload.id
-            state.currentQuiz.questionsIds.push(questionId)
-            state.currentQuizQuestions[questionId] = {
-                question_text: action.payload.question_text,
-                choicesIds: action.payload.choicesIds
+            const { id, question_text, choicesIds, _choiceData } = action.payload
+            state.currentQuiz.questionsIds.push(id)
+            state.currentQuizQuestions[id] = {
+                question_text,
+                choicesIds: choicesIds ?? [],
+            }
+            // Seed choice records so updateQuiz thunk can read them
+            if (_choiceData && choicesIds) {
+                _choiceData.forEach((c, i) => {
+                    const cid = choicesIds[i]
+                    state.currentQuizChoices[cid] = {
+                        id:         undefined,      // no DB id yet — backend will create it
+                        choice:     c.text,
+                        is_correct: c.is_correct,
+                    }
+                })
             }
         },
         deleteQuestion(state, action) {
@@ -149,6 +166,21 @@ const quizSlice = createSlice({
             const choiceId = action.payload.id
             state.currentQuizChoices[choiceId].choice = action.payload.choice
         },
+        // Update both choice text and is_correct together
+        updateChoiceFull(state, action) {
+            const { id, choice, is_correct } = action.payload
+            if (state.currentQuizChoices[id]) {
+                if (choice     !== undefined) state.currentQuizChoices[id].choice     = choice
+                if (is_correct !== undefined) state.currentQuizChoices[id].is_correct = is_correct
+            }
+        },
+        // Set one choice as correct and clear all others in the provided list
+        updateChoiceCorrect(state, action) {
+            const { id, is_correct } = action.payload
+            if (state.currentQuizChoices[id]) {
+                state.currentQuizChoices[id].is_correct = is_correct
+            }
+        },
         deleteChoice(state, action) {
             const choiceId = action.payload.choiceId
             const questionId = action.payload.questionId
@@ -159,6 +191,32 @@ const quizSlice = createSlice({
         addChoice(state, action) {
             const choiceId = action.payload.id
             state.currentQuizChoices[choiceId] = { id: choiceId, choice: action.payload.choice }
+        },
+        // Add a new choice to an existing question (used in the update/edit flow)
+        addChoiceToQuestion(state, action) {
+            const { questionId, choice, is_correct } = action.payload
+            const tempId = `new_${Date.now()}_${Math.random().toString(36).slice(2)}`
+
+            // Single-correct: if this choice is correct, clear all siblings first
+            if (is_correct && state.currentQuizQuestions[questionId]) {
+                state.currentQuizQuestions[questionId].choicesIds.forEach(cid => {
+                    if (state.currentQuizChoices[cid]) {
+                        state.currentQuizChoices[cid].is_correct = false
+                    }
+                })
+            }
+
+            // Register the new choice
+            state.currentQuizChoices[tempId] = {
+                id: undefined,   // no DB id yet — backend creates it on save
+                choice,
+                is_correct,
+            }
+
+            // Attach it to the question
+            if (state.currentQuizQuestions[questionId]) {
+                state.currentQuizQuestions[questionId].choicesIds.push(tempId)
+            }
         },
 
         // ── new-quiz draft reducers (CreateQuizPage) ───────────
@@ -178,6 +236,13 @@ const quizSlice = createSlice({
         },
         addChoiceToNewQuestion(state) {
             if (!state.newChoice.choice.trim()) return
+            // Enforce single correct answer: clear any existing correct choice
+            if (state.newChoice.is_correct) {
+                state.newQuestion.choices = state.newQuestion.choices.map(c => ({
+                    ...c,
+                    is_correct: false
+                }))
+            }
             state.newQuestion.choices.push({
                 choice: state.newChoice.choice,
                 is_correct: state.newChoice.is_correct
@@ -185,6 +250,8 @@ const quizSlice = createSlice({
             state.newChoice = { choice: '', is_correct: false }
         },
         addQuestionToNewQuiz(state) {
+            const correctCount = state.newQuestion.choices.filter(c => c.is_correct).length
+            if (correctCount !== 1) return  // silently block; UI already warns
             state.newQuiz.questions.push({ ...state.newQuestion })
             state.newQuestion = { question_text: '', choices: [] }
         },
@@ -319,8 +386,11 @@ export const {
     deleteQuestion,
     updateQuestionText,
     updateChoice,
+    updateChoiceFull,
+    updateChoiceCorrect,
     deleteChoice,
     addChoice,
+    addChoiceToQuestion,
     setNewQuizField,
     setNewQuestionField,
     setNewChoiceText,
