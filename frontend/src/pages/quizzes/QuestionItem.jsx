@@ -13,7 +13,7 @@ function QuestionItem({ questionId, showQuestion, question, selected }) {
             onClick={() => showQuestion(questionId)}
             className="w-full max-w-2xl p-4 bg-gray-800 rounded-xl shadow-xl cursor-pointer hover:bg-gray-700 transition duration-200 ease-in-out space-y-3"
         >
-            <div className="flex justify-between items-center text-lg font-medium text-cyan-400">
+            <div className="flex justify-between items-center text-lg font-medium text-primary">
                 <span>{question.question_text}</span>
                 <ChevronDown className="w-5 h-5 text-indigo-400" />
             </div>

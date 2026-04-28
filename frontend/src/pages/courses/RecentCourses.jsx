@@ -2,74 +2,82 @@ import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 
-const CourseModal = ({ course, onClose, isTeacher }) => {
+const CourseItem = ({ course, isTeacher, isSelected, onClick }) => {
     const navigate = useNavigate()
 
-    return (
-        // Backdrop
-        <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm"
-            onClick={onClose}
-        >
-            {/* Modal box — stop clicks from bubbling to backdrop */}
-            <div
-                className="relative bg-[#13152a] border border-violet-700/50 rounded-2xl shadow-2xl w-96 p-6 flex flex-col gap-5 animate-fade-in"
-                onClick={e => e.stopPropagation()}
-            >
-                {/* Close X */}
-                <button
-                    onClick={onClose}
-                    className="absolute top-3 right-4 text-slate-500 hover:text-slate-200 text-2xl leading-none transition-colors"
-                    aria-label="Close"
-                >
-                    ×
-                </button>
-
-                {/* Thumbnail circle */}
-                <div className="flex justify-center">
-                    <div className="w-28 h-28 rounded-full border-2 border-violet-600/60 overflow-hidden shadow-lg shadow-violet-900/40">
-                        {course.thumbnail ? (
-                            <img
-                                src={course.thumbnail}
-                                alt={course.course_name}
-                                className="w-full h-full object-cover"
-                            />
-                        ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-violet-800/60 to-indigo-900/60 flex items-center justify-center">
-                                <span className="text-4xl">📚</span>
-                            </div>
-                        )}
-                    </div>
+    if (isSelected) {
+        return (
+            <div className="flex flex-col bg-background border border-primary/20 rounded-xl shadow-lg w-[300px] h-[360px] overflow-hidden animate-fade-in transition-all duration-300 transform scale-100">
+                {/* 16:9 Thumbnail */}
+                <div className="w-full h-[168px] shrink-0 relative bg-primary/10 border-b border-primary/20 overflow-hidden">
+                    {course.thumbnail ? (
+                        <img
+                            src={course.thumbnail.startsWith('http') ? course.thumbnail : `http://localhost:8000${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`}
+                            alt={course.course_name}
+                            className="w-full h-full object-cover"
+                        />
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-4xl">📚</div>
+                    )}
+                    <button
+                        onClick={(e) => { e.stopPropagation(); onClick(); }}
+                        className="absolute top-2 right-2 bg-background/80 hover:bg-background text-text w-8 h-8 rounded-full flex items-center justify-center shadow transition-colors z-10"
+                        aria-label="Close"
+                    >
+                        ×
+                    </button>
                 </div>
-
-                {/* Info */}
-                <div className="text-center">
-                    <h3 className="text-lg font-bold text-slate-100 leading-tight">{course.course_name}</h3>
+                
+                {/* Content */}
+                <div className="flex flex-col flex-1 p-5">
+                    <h3 className="font-serif font-bold text-text text-lg leading-tight line-clamp-1">{course.course_name}</h3>
                     {course.subject && (
-                        <p className="text-xs text-violet-400 mt-1 uppercase tracking-widest">{course.subject}</p>
+                        <p className="text-xs text-primary mt-1 uppercase tracking-widest font-semibold">{course.subject}</p>
                     )}
                     {course.description && (
-                        <p className="text-slate-400 text-sm mt-3 leading-relaxed line-clamp-3">{course.description}</p>
+                        <p className="text-primary text-sm mt-3 leading-relaxed line-clamp-2">{course.description}</p>
                     )}
-                </div>
-
-                {/* Actions */}
-                <div className="grid grid-cols-2 gap-3 pt-1">
-                    <button
-                        onClick={onClose}
-                        className="py-2.5 px-4 rounded-lg bg-slate-700/60 hover:bg-slate-700 text-slate-300 text-sm font-semibold tracking-wide transition-colors border border-slate-600/40"
-                    >
-                        Close
-                    </button>
-                    <button
-                        onClick={() => navigate(`/course/${course.id}/modules/`)}
-                        className="py-2.5 px-4 rounded-lg bg-violet-700 hover:bg-violet-600 text-white text-sm font-semibold tracking-wide transition-colors shadow-lg shadow-violet-900/40 border border-violet-500/30"
-                    >
-                        {isTeacher ? 'Manage Course →' : 'View Course →'}
-                    </button>
+                    
+                    {/* Actions */}
+                    <div className="mt-auto pt-4">
+                        <button
+                            onClick={(e) => { e.stopPropagation(); navigate(`/course/${course.id}/modules/`); }}
+                            className="w-full py-2.5 px-4 rounded-lg bg-action hover:bg-[#a04618] text-white text-sm font-semibold tracking-wide transition-colors shadow-md"
+                        >
+                            {isTeacher ? 'Manage Course →' : 'View Course →'}
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        )
+    }
+
+    return (
+        <button
+            onClick={onClick}
+            className="flex flex-col items-center gap-3 group focus:outline-none transition-all duration-300"
+            aria-label={`Open ${course.course_name}`}
+        >
+            <div
+                className="rounded-full overflow-hidden border-4 border-primary/20 group-hover:border-primary/50 shadow-md transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg"
+                style={{ width: '180px', height: '180px', minWidth: '180px' }}
+            >
+                {course.thumbnail ? (
+                    <img
+                        src={course.thumbnail.startsWith('http') ? course.thumbnail : `http://localhost:8000${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`}
+                        alt={course.course_name}
+                        className="w-full h-full object-cover"
+                    />
+                ) : (
+                    <div className="w-full h-full bg-primary/10 flex items-center justify-center">
+                        <span className="text-5xl">📚</span>
+                    </div>
+                )}
+            </div>
+            <span className="text-sm font-bold text-primary group-hover:text-text text-center max-w-[180px] line-clamp-1 transition-colors">
+                {course.course_name}
+            </span>
+        </button>
     )
 }
 
@@ -77,14 +85,14 @@ const RecentCourses = () => {
     const courses = useSelector(state => state.courses.courses)
     const role = useSelector(state => state.users.user?.role)
     const isTeacher = role === 'Teacher'
-    const [selectedCourse, setSelectedCourse] = useState(null)
+    const [selectedCourseId, setSelectedCourseId] = useState(null)
 
     // Show only 3 most recent
     const displayCourses = courses.slice(0, 3)
 
     if (!displayCourses.length) {
         return (
-            <div className="flex flex-col items-center justify-center py-8 gap-3 text-slate-500">
+            <div className="flex flex-col items-center justify-center py-8 gap-3 text-primary/60">
                 <span className="text-3xl">📭</span>
                 <p className="text-sm italic">No courses yet.</p>
             </div>
@@ -92,50 +100,17 @@ const RecentCourses = () => {
     }
 
     return (
-        <>
-            <div className="flex justify-around items-center w-full gap-4 py-2 px-1">
-                {displayCourses.map(course => (
-                    <button
-                        key={course.id}
-                        onClick={() => setSelectedCourse(course)}
-                        className="flex flex-col items-center gap-3 group focus:outline-none"
-                        aria-label={`Open ${course.course_name}`}
-                    >
-                        {/* Circle thumbnail — 96px so 3 fit side-by-side in a 1/3 col */}
-                        <div
-                            className="rounded-full overflow-hidden border-2 border-violet-600/50 group-hover:border-violet-400 shadow-lg shadow-violet-900/30 group-hover:shadow-violet-700/50 transition-all duration-300 group-hover:scale-105"
-                            style={{ width: '180px', height: '180px', minWidth: '180px' }}
-                        >
-                            {course.thumbnail ? (
-                                <img
-                                    src={course.thumbnail}
-                                    alt={course.course_name}
-                                    className="w-full h-full object-cover"
-                                />
-                            ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-violet-900/70 to-indigo-900/70 flex items-center justify-center">
-                                    <span className="text-5xl">📚</span>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* Course name below the circle */}
-                        <span className="text-sm text-slate-400 group-hover:text-slate-200 text-center max-w-[180px] line-clamp-1 transition-colors">
-                            {course.course_name}
-                        </span>
-                    </button>
-                ))}
-            </div>
-
-            {/* Modal */}
-            {selectedCourse && (
-                <CourseModal
-                    course={selectedCourse}
+        <div className="flex justify-around items-center w-full gap-4 py-4 px-1 min-h-[380px]">
+            {displayCourses.map(course => (
+                <CourseItem
+                    key={course.id}
+                    course={course}
                     isTeacher={isTeacher}
-                    onClose={() => setSelectedCourse(null)}
+                    isSelected={selectedCourseId === course.id}
+                    onClick={() => setSelectedCourseId(prev => prev === course.id ? null : course.id)}
                 />
-            )}
-        </>
+            ))}
+        </div>
     )
 }
 

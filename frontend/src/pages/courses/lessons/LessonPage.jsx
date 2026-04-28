@@ -42,10 +42,7 @@ const LessonPage = () => {
     const handleMarkRead = async () => {
         setMarking(true)
         try {
-            await api.patch(
-                `api/courses/lessons/${lesson_id}/update-lesson/`,
-                { done: true }
-            )
+            await api.post(`api/courses/lessons/${lesson_id}/mark-read/`)
             setLesson(prev => ({ ...prev, done: true }))
         } catch (err) {
             console.error(err)
@@ -95,7 +92,7 @@ const LessonPage = () => {
 
     if (!lesson) {
         return (
-            <div className="flex items-center justify-center h-64 text-violet-400 animate-pulse text-base">
+            <div className="flex items-center justify-center h-64 text-action animate-pulse text-base">
                 Loading lesson…
             </div>
         )
@@ -105,7 +102,7 @@ const LessonPage = () => {
     const BackButton = (
         <button
             onClick={() => navigate(-1)}
-            className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-violet-300 transition w-fit"
+            className="flex items-center gap-1.5 text-sm text-primary hover:text-action transition w-fit"
         >
             ← Back to modules
         </button>
@@ -116,24 +113,24 @@ const LessonPage = () => {
     // ─────────────────────────────────────────────────────────────────────────
     if (!isTeacher) {
         return (
-            <div className="flex flex-col gap-7 p-6 max-w-3xl text-slate-100">
+            <div className="flex flex-col gap-7 p-6 max-w-3xl text-text">
                 {BackButton}
 
                 {/* completion banner */}
                 {lesson.done && (
-                    <div className="flex items-center gap-3 px-5 py-4 bg-emerald-500/10 border border-emerald-500/30 rounded-xl">
+                    <div className="flex items-center gap-3 px-5 py-4 bg-primary/10 border border-primary/20 rounded-xl">
                         <span className="text-2xl">✅</span>
-                        <p className="text-base text-emerald-400 font-medium">You've completed this lesson.</p>
+                        <p className="text-base text-primary font-medium">You've completed this lesson.</p>
                     </div>
                 )}
 
                 {/* lesson title */}
-                <h1 className="text-3xl font-bold text-slate-100 leading-snug">{lesson.title}</h1>
+                <h1 className="text-3xl font-bold text-text leading-snug">{lesson.title}</h1>
 
                 {/* content card — module title badge in top-right corner */}
-                <div className="relative bg-slate-800/60 border border-slate-700/50 rounded-xl p-7">
+                <div className="relative bg-white/60 border border-primary/20 rounded-xl p-7">
                     {lesson.module_title && (
-                        <span className="absolute top-4 right-4 text-xs font-semibold text-violet-300 bg-violet-700/20 border border-violet-600/30 px-2.5 py-1 rounded-full">
+                        <span className="absolute top-4 right-4 text-xs font-semibold text-action bg-action/10 border border-action/20 px-2.5 py-1 rounded-full">
                             {lesson.module_title}
                         </span>
                     )}
@@ -148,20 +145,20 @@ const LessonPage = () => {
                         href={lesson.attachments}
                         target="_blank"
                         rel="noreferrer"
-                        className="inline-flex items-center gap-2 text-base text-violet-400 hover:text-violet-300 border border-violet-700/40 hover:border-violet-500/60 px-5 py-3 rounded-lg transition w-fit bg-violet-700/10"
+                        className="inline-flex items-center gap-2 text-base text-action hover:text-action border border-action/20 hover:border-action/20 px-5 py-3 rounded-lg transition w-fit bg-action/10"
                     >
                         📎 View Attachment
                     </a>
                 )}
 
                 {/* mark as read */}
-                <div className="pt-2 border-t border-slate-700/50">
+                <div className="pt-2 border-t border-primary/20">
                     {lesson.done ? (
                         <div className="flex items-center gap-4">
-                            <span className="text-emerald-400 text-base font-semibold">✓ Marked as Read</span>
+                            <span className="text-primary text-base font-semibold">✓ Marked as Read</span>
                             <button
                                 onClick={() => navigate(-1)}
-                                className="text-base text-violet-400 hover:text-violet-300 transition"
+                                className="text-base text-action hover:text-action transition"
                             >
                                 ← Back to modules
                             </button>
@@ -170,7 +167,7 @@ const LessonPage = () => {
                         <button
                             onClick={handleMarkRead}
                             disabled={marking}
-                            className="flex items-center gap-2 bg-emerald-600 hover:bg-emerald-500 active:scale-95 text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50"
+                            className="flex items-center gap-2 bg-primary hover:bg-primary active:scale-95 text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50"
                         >
                             {marking ? (
                                 <>
@@ -190,18 +187,18 @@ const LessonPage = () => {
     // TEACHER VIEW
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div className="flex flex-col gap-7 p-6 max-w-3xl text-slate-100">
+        <div className="flex flex-col gap-7 p-6 max-w-3xl text-text">
             {BackButton}
 
             {/* view mode */}
             {!editing ? (
                 <>
                     <div className="flex items-start justify-between gap-4">
-                        <h1 className="text-3xl font-bold text-slate-100 leading-snug">{lesson.title}</h1>
+                        <h1 className="text-3xl font-bold text-text leading-snug">{lesson.title}</h1>
                         <div className="flex items-center gap-2 shrink-0">
                             <button
                                 onClick={() => setEditing(true)}
-                                className="text-sm text-slate-400 hover:text-violet-300 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition"
+                                className="text-sm text-primary hover:text-action px-3 py-2 rounded-lg hover:bg-primary/5 transition"
                             >
                                 ✏️ Edit
                             </button>
@@ -216,9 +213,9 @@ const LessonPage = () => {
                     </div>
 
                     {/* content card — module title badge in top-right corner */}
-                    <div className="relative bg-slate-800/60 border border-slate-700/50 rounded-xl p-7">
+                    <div className="relative bg-white/60 border border-primary/20 rounded-xl p-7">
                         {lesson.module_title && (
-                            <span className="absolute top-4 right-4 text-xs font-semibold text-violet-300 bg-violet-700/20 border border-violet-600/30 px-2.5 py-1 rounded-full">
+                            <span className="absolute top-4 right-4 text-xs font-semibold text-action bg-action/10 border border-action/20 px-2.5 py-1 rounded-full">
                                 {lesson.module_title}
                             </span>
                         )}
@@ -232,7 +229,7 @@ const LessonPage = () => {
                             href={lesson.attachments}
                             target="_blank"
                             rel="noreferrer"
-                            className="inline-flex items-center gap-2 text-base text-violet-400 hover:text-violet-300 border border-violet-700/40 hover:border-violet-500/60 px-5 py-3 rounded-lg transition w-fit bg-violet-700/10"
+                            className="inline-flex items-center gap-2 text-base text-action hover:text-action border border-action/20 hover:border-action/20 px-5 py-3 rounded-lg transition w-fit bg-action/10"
                         >
                             📎 View Attachment
                         </a>
@@ -242,31 +239,31 @@ const LessonPage = () => {
                 /* edit mode */
                 <form onSubmit={handleUpdate} className="flex flex-col gap-5">
                     <div className="flex items-center justify-between">
-                        <h1 className="text-2xl font-bold text-slate-100">Editing lesson</h1>
+                        <h1 className="text-2xl font-bold text-text">Editing lesson</h1>
                         <button
                             type="button"
                             onClick={() => { setEditing(false); setForm({ title: lesson.title, content: lesson.content, attachments: null }) }}
-                            className="text-sm text-slate-400 hover:text-slate-200 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition"
+                            className="text-sm text-primary hover:text-text px-3 py-2 rounded-lg hover:bg-primary/5 transition"
                         >
                             Cancel
                         </button>
                     </div>
 
-                    <div className="flex flex-col gap-4 bg-slate-800/60 border border-violet-700/40 rounded-xl p-6">
+                    <div className="flex flex-col gap-4 bg-white/60 border border-action/20 rounded-xl p-6">
                         {/* title */}
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-semibold uppercase tracking-widest text-violet-400">Title</label>
+                            <label className="text-xs font-semibold uppercase tracking-widest text-action">Title</label>
                             <input
                                 type="text"
                                 value={form.title}
                                 onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
-                                className="bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition"
+                                className="bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
                             />
                         </div>
 
                         {/* rich text content */}
                         <div className="flex flex-col gap-1.5">
-                            <label className="text-xs font-semibold uppercase tracking-widest text-violet-400">Content</label>
+                            <label className="text-xs font-semibold uppercase tracking-widest text-action">Content</label>
                             <RichTextEditor
                                 key={lesson.id}
                                 value={form.content}
@@ -275,15 +272,15 @@ const LessonPage = () => {
                         </div>
 
                         {/* file attachment */}
-                        <div className="flex flex-col gap-1.5 mt-2 border-t border-slate-700/50 pt-5">
-                            <label className="text-xs font-semibold uppercase tracking-widest text-violet-400">Attachment</label>
+                        <div className="flex flex-col gap-1.5 mt-2 border-t border-primary/20 pt-5">
+                            <label className="text-xs font-semibold uppercase tracking-widest text-action">Attachment</label>
                             {lesson.attachments && !form.attachments && (
-                                <p className="text-sm text-slate-400 mb-2">
+                                <p className="text-sm text-primary mb-2">
                                     Current attachment exists. Uploading a new file will replace it.
                                 </p>
                             )}
-                            <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
-                                <span className="bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 hover:bg-slate-800 transition text-slate-200">
+                            <label className="flex items-center gap-2 text-sm text-primary cursor-pointer">
+                                <span className="bg-white/60 border border-primary/20 rounded-lg px-4 py-2.5 hover:bg-white/60 transition text-text">
                                     {form.attachments ? form.attachments.name : 'Choose file... (optional)'}
                                 </span>
                                 <input
@@ -298,7 +295,7 @@ const LessonPage = () => {
                     <button
                         type="submit"
                         disabled={saving}
-                        className="self-start bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-base font-semibold px-6 py-3 rounded-lg transition-all disabled:opacity-50"
+                        className="self-start bg-action hover:bg-action active:scale-95 text-white text-base font-semibold px-6 py-3 rounded-lg transition-all disabled:opacity-50"
                     >
                         {saving ? 'Saving…' : 'Save Changes'}
                     </button>

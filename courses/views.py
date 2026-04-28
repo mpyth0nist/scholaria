@@ -6,6 +6,10 @@ from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_MET
 from rest_framework.exceptions import NotFound
 from users.models import CustomUser
 from django.db.models import Q
+from rest_framework.views import APIView
+from rest_framework import status
+from rest_framework.response import Response
+from django.shortcuts import get_object_or_404
 # Create your views here.
 
 LOOKUP_FIELD = 'id'
@@ -102,6 +106,21 @@ class StudentClassList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     queryset = StudentClass.objects.all()
     serializer_class = StudentClassSerializer
+
+class StudentClassCreate(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated, isTeacher]
+    serializer_class = StudentClassSerializer
+
+class StudentClassUpdate(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated, isTeacher]
+    queryset = StudentClass.objects.all()
+    serializer_class = StudentClassSerializer
+    lookup_field = 'id'
+
+class StudentClassDelete(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated, isTeacher]
+    queryset = StudentClass.objects.all()
+    lookup_field = 'id'
 
 class CourseDetailView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
@@ -264,3 +283,11 @@ class LessonDelete(generics.DestroyAPIView):
     permission_classes = [IsAuthenticated, isLessonTeacher]
     lookup_field = LOOKUP_FIELD
     lookup_url_kwarg = 'lesson_id'
+
+class LessonMarkRead(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, lesson_id):
+        lesson = get_object_or_404(Lesson, id=lesson_id)
+        UserLessonProgress.objects.get_or_create(student=request.user, lesson=lesson)
+        return Response({"status": "marked as read"}, status=status.HTTP_200_OK)
