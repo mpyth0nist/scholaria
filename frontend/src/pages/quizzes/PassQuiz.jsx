@@ -22,6 +22,9 @@ const PassQuiz = () => {
     const attemptLoading = useSelector(state => state.quizzes.attemptLoading)
     const attemptError = useSelector(state => state.quizzes.attemptError)
     const submitResult = useSelector(state => state.quizzes.submitResult)
+    const userData = useSelector(state => state.users.user)
+
+    const isTeacher = userData?.role === 'Teacher'
 
     const [questionIndex, setQuestionIndex] = useState(0)
     const [selectedChoices, setSelectedChoices] = useState({}) // { [questionId]: choiceId }
@@ -38,8 +41,10 @@ const PassQuiz = () => {
     // 1. Fetch quiz details + start an attempt on mount
     useEffect(() => {
         dispatch(fetchQuiz(quiz_id))
-        dispatch(startAttempt(quiz_id))
-    }, [quiz_id])
+        if (!isTeacher) {
+            dispatch(startAttempt(quiz_id))
+        }
+    }, [quiz_id, isTeacher])
 
     // ── Handlers ────────────────────────────────────────────────────
 
@@ -57,17 +62,19 @@ const PassQuiz = () => {
         }
         setError(null)
 
-        // Submit the answer for this question
-        const result = await dispatch(submitAnswer({
-            attemptId: activeAttempt.id,
-            questionId: currentQuestion.id,
-            chosenChoices: [choiceId]
-        }))
+        if (!isTeacher) {
+            // Submit the answer for this question
+            const result = await dispatch(submitAnswer({
+                attemptId: activeAttempt.id,
+                questionId: currentQuestion.id,
+                chosenChoices: [choiceId]
+            }))
 
-        // #8 Block navigation if the answer couldn't be saved
-        if (submitAnswer.rejected.match(result)) {
-            setError("Failed to save your answer. Please check your connection and try again.")
-            return
+            // #8 Block navigation if the answer couldn't be saved
+            if (submitAnswer.rejected.match(result)) {
+                setError("Failed to save your answer. Please check your connection and try again.")
+                return
+            }
         }
 
         setQuestionIndex(prev => prev + 1)
@@ -84,27 +91,32 @@ const PassQuiz = () => {
         setError(null)
         setSubmitting(true)
 
-        // Submit the final answer
-        const result = await dispatch(submitAnswer({
-            attemptId: activeAttempt.id,
-            questionId: currentQuestion.id,
-            chosenChoices: [choiceId]
-        }))
+        if (!isTeacher) {
+            // Submit the final answer
+            const result = await dispatch(submitAnswer({
+                attemptId: activeAttempt.id,
+                questionId: currentQuestion.id,
+                chosenChoices: [choiceId]
+            }))
 
-        // #8 Block submission if the last answer couldn't be saved
-        if (submitAnswer.rejected.match(result)) {
-            setError("Failed to save your answer. Please check your connection and try again.")
-            setSubmitting(false)
-            return
+            // #8 Block submission if the last answer couldn't be saved
+            if (submitAnswer.rejected.match(result)) {
+                setError("Failed to save your answer. Please check your connection and try again.")
+                setSubmitting(false)
+                return
+            }
+
+            // Submit the entire quiz for grading
+            await dispatch(submitQuiz(activeAttempt.id))
+        } else {
+            // Mock finish for teacher preview
+            navigate('/quizzes/list-quizzes/')
         }
-
-        // Submit the entire quiz for grading
-        await dispatch(submitQuiz(activeAttempt.id))
         setSubmitting(false)
     }
 
     const handleCancel = async () => {
-        if (activeAttempt?.id) {
+        if (!isTeacher && activeAttempt?.id) {
             await dispatch(cancelAttempt(activeAttempt.id))
         }
         navigate(-1)
@@ -193,7 +205,14 @@ const PassQuiz = () => {
                 {/* Header */}
                 <div className="flex items-center justify-between mb-6">
                     <div>
-                        <h1 className="text-lg font-bold text-slate-100 truncate max-w-sm">{quiz.name}</h1>
+                        <div className="flex items-center gap-3">
+                            <h1 className="text-lg font-bold text-slate-100 truncate max-w-sm">{quiz.name}</h1>
+                            {isTeacher && (
+                                <span className="bg-violet-500/20 text-violet-300 text-[10px] font-bold uppercase tracking-widest px-2 py-1 rounded-md border border-violet-500/30">
+                                    Preview Mode
+                                </span>
+                            )}
+                        </div>
                         <p className="text-slate-500 text-xs mt-0.5 tracking-wide">
                             Question {questionIndex + 1} of {questionList.length}
                         </p>
@@ -202,7 +221,7 @@ const PassQuiz = () => {
                         onClick={handleCancel}
                         className="text-slate-500 hover:text-red-400 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
                     >
-                        Cancel Quiz
+                        {isTeacher ? "Exit Preview" : "Cancel Quiz"}
                     </button>
                 </div>
 
