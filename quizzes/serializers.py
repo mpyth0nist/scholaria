@@ -37,11 +37,25 @@ class QuestionSerializer(serializers.ModelSerializer):
         model = Question
         fields = ['id','question_text', 'choices', 'quiz']
 
+    def _validate_single_correct(self, choices_data):
+        """Raise ValidationError unless exactly one choice is marked is_correct."""
+        correct = [c for c in choices_data if c.get('is_correct', False)]
+        if len(correct) == 0:
+            raise serializers.ValidationError(
+                {'choices': 'Each question must have exactly one correct answer.'}
+            )
+        if len(correct) > 1:
+            raise serializers.ValidationError(
+                {'choices': 'Each question can only have one correct answer.'}
+            )
+
     def create(self, validated_data, quiz=None):
         choices_data = validated_data.pop('choices')
 
         if len(choices_data) < 2:
             raise serializers.ValidationError('A question must have at least 2 choices.')
+
+        self._validate_single_correct(choices_data)
 
         question = Question.objects.create(**validated_data)
 
@@ -52,6 +66,8 @@ class QuestionSerializer(serializers.ModelSerializer):
 
     def update(self, instance, validated_data):
         choices_data = validated_data.pop('choices')
+
+        self._validate_single_correct(choices_data)
 
         instance.question_text = validated_data.get("question_text", instance.question_text)
 

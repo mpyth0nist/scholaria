@@ -38,6 +38,8 @@ class UserAttempt(models.Model):
     student = models.ForeignKey(CustomUser, related_name="quiz_attempts", on_delete=models.CASCADE)
     # null=True means "not yet graded"; 0 is a valid (zero) score after submission
     score = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    # Set at submission time — used for accurate dashboard ordering
+    submitted_at = models.DateTimeField(null=True, blank=True)
 
     def __str__(self):
         return f"{self.student} - {self.quiz}"

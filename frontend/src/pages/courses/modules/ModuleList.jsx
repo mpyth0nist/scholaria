@@ -2,6 +2,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import api from '../../../api'
 import { useEffect, useState } from 'react'
+import RichTextEditor from '../../../components/RichTextEditor'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TEACHER SUB-COMPONENTS
@@ -15,7 +16,7 @@ const AddLessonForm = ({ moduleId, onCreated }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        if (!title.trim() || !content.trim()) return
+        if (!title.trim() || !content) return
         setLoading(true)
         try {
             await api.post(`api/courses/${moduleId}/add-lesson/`, { title, content })
@@ -31,23 +32,21 @@ const AddLessonForm = ({ moduleId, onCreated }) => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="mt-4 flex flex-col gap-3 border-t border-slate-700/50 pt-4">
+        <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3 border-t border-slate-700/50 pt-5">
             <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">Add a Lesson</p>
             <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Lesson title"
-                className="bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition"
+                className="bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition"
             />
-            <textarea
+            <RichTextEditor
                 value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Lesson content"
-                rows={4}
-                className="bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition resize-none"
+                onChange={setContent}
+                placeholder="Write lesson content…"
             />
-            <label className="flex items-center gap-2 text-xs text-slate-400 cursor-pointer">
+            <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
                 <span className="bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 hover:bg-slate-700 transition text-slate-300">
                     {attachment ? attachment.name : 'Attach file (optional)'}
                 </span>
@@ -56,7 +55,7 @@ const AddLessonForm = ({ moduleId, onCreated }) => {
             <button
                 type="submit"
                 disabled={loading}
-                className="self-start bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all disabled:opacity-50"
+                className="self-start bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all disabled:opacity-50"
             >
                 {loading ? 'Adding…' : 'Add Lesson'}
             </button>
@@ -99,59 +98,73 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
 
     return (
         <div className="bg-slate-800/60 border border-slate-700/50 rounded-xl overflow-hidden transition hover:border-violet-700/40">
-            <div className="flex items-center justify-between px-5 py-4">
-                <div className="flex items-center gap-3">
-                    <span className="w-7 h-7 rounded-md bg-violet-700/30 border border-violet-600/40 flex items-center justify-center text-violet-300 text-xs font-bold">
+            {/* card header */}
+            <div className="flex items-center justify-between px-6 py-5">
+                <div className="flex items-center gap-4">
+                    <span className="w-9 h-9 rounded-lg bg-violet-700/30 border border-violet-600/40 flex items-center justify-center text-violet-300 text-sm font-bold shrink-0">
                         {module.order}
                     </span>
-                    <span className="text-slate-200 font-semibold text-sm">{module.title}</span>
-                    {module.done && (
-                        <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">✓ Complete</span>
-                    )}
+                    <div>
+                        <span className="text-slate-100 font-semibold text-base">{module.title}</span>
+                        {module.done && (
+                            <span className="ml-3 text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">✓ Complete</span>
+                        )}
+                    </div>
                 </div>
-                <div className="flex items-center gap-2">
-                    <button onClick={() => { setEditing(prev => !prev); setExpanded(false) }}
-                        className="text-xs text-slate-400 hover:text-violet-300 px-3 py-1.5 rounded-lg hover:bg-slate-700/50 transition">
+                <div className="flex items-center gap-1">
+                    <button
+                        onClick={() => { setEditing(prev => !prev); setExpanded(false) }}
+                        className="text-sm text-slate-400 hover:text-violet-300 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition"
+                    >
                         ✏️ Edit
                     </button>
-                    <button onClick={handleToggle}
-                        className="text-xs text-slate-400 hover:text-violet-300 px-3 py-1.5 rounded-lg hover:bg-slate-700/50 transition">
+                    <button
+                        onClick={handleToggle}
+                        className="text-sm text-slate-400 hover:text-violet-300 px-3 py-2 rounded-lg hover:bg-slate-700/50 transition"
+                    >
                         {expanded ? '▲ Hide' : '▼ Lessons'}
                     </button>
-                    <button onClick={() => onDelete(module.id)}
-                        className="text-xs text-red-400/70 hover:text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition">
+                    <button
+                        onClick={() => onDelete(module.id)}
+                        className="text-sm text-red-400/70 hover:text-red-400 px-3 py-2 rounded-lg hover:bg-red-500/10 transition"
+                    >
                         🗑 Delete
                     </button>
                 </div>
             </div>
 
+            {/* edit inline form */}
             {editing && (
-                <form onSubmit={handleUpdate} className="px-5 pb-4 flex flex-col gap-3 border-t border-slate-700/50 pt-4">
+                <form onSubmit={handleUpdate} className="px-6 pb-5 flex flex-col gap-3 border-t border-slate-700/50 pt-5">
                     <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">Edit Module</p>
                     <div className="flex gap-3">
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title"
-                            className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
+                            className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
                         <input type="number" value={order} onChange={(e) => setOrder(parseInt(e.target.value, 10))} placeholder="Order"
-                            className="w-24 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
+                            className="w-24 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
                     </div>
                     <div className="flex gap-2">
-                        <button type="submit" className="bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all">Save</button>
-                        <button type="button" onClick={() => setEditing(false)} className="text-slate-400 hover:text-slate-200 text-sm px-4 py-2 rounded-lg hover:bg-slate-700/50 transition">Cancel</button>
+                        <button type="submit" className="bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all">Save</button>
+                        <button type="button" onClick={() => setEditing(false)} className="text-slate-400 hover:text-slate-200 text-sm px-4 py-2.5 rounded-lg hover:bg-slate-700/50 transition">Cancel</button>
                     </div>
                 </form>
             )}
 
+            {/* lessons panel */}
             {expanded && (
-                <div className="px-5 pb-5 border-t border-slate-700/50 pt-4 flex flex-col gap-2">
+                <div className="px-6 pb-6 border-t border-slate-700/50 pt-5 flex flex-col gap-2">
                     {lessons.length === 0 ? (
-                        <p className="text-xs text-slate-500 italic">No lessons yet.</p>
+                        <p className="text-sm text-slate-500 italic">No lessons yet.</p>
                     ) : (
                         lessons.map(lesson => (
-                            <button key={lesson.id} onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
-                                className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg bg-slate-900/40 hover:bg-slate-700/40 border border-slate-700/30 hover:border-violet-700/40 transition group">
-                                <span className="text-violet-400 text-xs">📄</span>
-                                <span className="text-sm text-slate-300 group-hover:text-slate-100 transition">{lesson.title}</span>
-                                {lesson.done && <span className="ml-auto text-emerald-400 text-xs">✓</span>}
+                            <button
+                                key={lesson.id}
+                                onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
+                                className="flex items-center gap-4 w-full text-left px-4 py-4 rounded-lg bg-slate-900/40 hover:bg-slate-700/40 border border-slate-700/30 hover:border-violet-700/40 transition group"
+                            >
+                                <span className="text-violet-400 text-sm shrink-0">📄</span>
+                                <span className="text-base text-slate-300 group-hover:text-slate-100 transition flex-1">{lesson.title}</span>
+                                {lesson.done && <span className="ml-auto text-emerald-400 text-sm">✓</span>}
                             </button>
                         ))
                     )}
@@ -199,61 +212,62 @@ const StudentModuleCard = ({ module, navigate }) => {
             {/* header */}
             <button
                 onClick={handleToggle}
-                className="w-full flex items-center justify-between px-5 py-4 text-left"
+                className="w-full flex items-center justify-between px-6 py-5 text-left"
             >
-                <div className="flex items-center gap-3">
-                    <span className={`w-7 h-7 rounded-md flex items-center justify-center text-xs font-bold border ${module.done
+                <div className="flex items-center gap-4">
+                    <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold border shrink-0 ${module.done
                         ? 'bg-emerald-700/30 border-emerald-600/40 text-emerald-300'
                         : 'bg-violet-700/30 border-violet-600/40 text-violet-300'}`}>
                         {module.done ? '✓' : module.order}
                     </span>
-                    <span className="text-slate-200 font-semibold text-sm">{module.title}</span>
-                    {module.done && (
-                        <span className="text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">Complete</span>
-                    )}
+                    <div>
+                        <span className="text-slate-100 font-semibold text-base">{module.title}</span>
+                        {module.done && (
+                            <span className="ml-3 text-xs bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-0.5 rounded-full">Complete</span>
+                        )}
+                    </div>
                 </div>
 
-                <div className="flex items-center gap-3">
-                    {/* progress indicator shown once lessons are loaded */}
+                <div className="flex items-center gap-4 shrink-0">
                     {totalCount > 0 && (
                         <div className="flex items-center gap-2">
-                            <div className="w-20 h-1.5 bg-slate-700 rounded-full overflow-hidden">
+                            <div className="w-24 h-1.5 bg-slate-700 rounded-full overflow-hidden">
                                 <div
                                     className="h-full bg-emerald-500 rounded-full transition-all"
                                     style={{ width: `${(doneCount / totalCount) * 100}%` }}
                                 />
                             </div>
-                            <span className="text-xs text-slate-400">{doneCount}/{totalCount}</span>
+                            <span className="text-sm text-slate-400">{doneCount}/{totalCount}</span>
                         </div>
                     )}
-                    <span className="text-slate-500 text-xs">{expanded ? '▲' : '▼'}</span>
+                    <span className="text-slate-500 text-sm">{expanded ? '▲' : '▼'}</span>
                 </div>
             </button>
 
             {/* lessons panel */}
             {expanded && (
-                <div className="px-5 pb-5 pt-1 border-t border-slate-700/40 flex flex-col gap-2">
+                <div className="px-6 pb-6 pt-1 border-t border-slate-700/40 flex flex-col gap-2">
                     {loadingLessons ? (
-                        <p className="text-xs text-slate-500 animate-pulse py-3">Loading lessons…</p>
+                        <p className="text-sm text-slate-500 animate-pulse py-3">Loading lessons…</p>
                     ) : lessons.length === 0 ? (
-                        <p className="text-xs text-slate-500 italic py-3">No lessons in this module yet.</p>
+                        <p className="text-sm text-slate-500 italic py-3">No lessons in this module yet.</p>
                     ) : (
                         lessons.map(lesson => (
                             <button
                                 key={lesson.id}
                                 onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
-                                className={`flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg border transition group ${lesson.done
+                                className={`flex items-center gap-4 w-full text-left px-4 py-4 rounded-lg border transition group ${lesson.done
                                     ? 'bg-emerald-900/10 border-emerald-700/30'
                                     : 'bg-slate-900/40 border-slate-700/30 hover:bg-slate-700/40 hover:border-violet-700/40'}`}
                             >
-                                <span className={`text-xs shrink-0 ${lesson.done ? 'text-emerald-400' : 'text-violet-400'}`}>
+                                <span className={`text-sm shrink-0 ${lesson.done ? 'text-emerald-400' : 'text-violet-400'}`}>
                                     {lesson.done ? '✅' : '📄'}
                                 </span>
-                                <span className={`text-sm transition flex-1 text-left ${lesson.done ? 'text-slate-400 line-through' : 'text-slate-300 group-hover:text-slate-100'}`}>
+                                <span className={`text-base transition flex-1 text-left ${lesson.done ? 'text-slate-400 line-through' : 'text-slate-200 group-hover:text-white'}`}>
                                     {lesson.title}
                                 </span>
                                 {!lesson.done && (
-                                    <span className="text-xs text-slate-500 group-hover:text-violet-400 transition">Read →</span>
+                                    <span className="text-sm text-slate-500 group-hover:text-violet-400 transition shrink-0">Read →</span>
                                 )}
                             </button>
                         ))
@@ -323,30 +337,28 @@ const ModulesList = () => {
         setModules(prev => prev.map(m => m.id === moduleId ? { ...m, ...data } : m))
     }
 
-    // Compute overall progress for student header
     const completedModules = modules.filter(m => m.done).length
 
     return (
-        <div className="flex flex-col gap-6 p-6 text-slate-100">
+        <div className="flex flex-col gap-7 p-6 text-slate-100">
 
             {/* ── page header ── */}
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-slate-100">
+                    <h1 className="text-3xl font-bold text-slate-100">
                         {isTeacher ? 'Course Modules' : 'Course Content'}
                     </h1>
-                    <p className="text-slate-400 text-sm mt-1">
+                    <p className="text-slate-400 text-base mt-1.5">
                         {isTeacher
                             ? `${modules.length} module${modules.length !== 1 ? 's' : ''} in this course`
                             : `${completedModules} of ${modules.length} modules completed`}
                     </p>
                 </div>
 
-                {/* teacher-only: add module button */}
                 {isTeacher && (
                     <button
                         onClick={() => setShowForm(prev => !prev)}
-                        className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all"
+                        className="flex items-center gap-2 bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-3 rounded-lg transition-all"
                     >
                         <span className="text-lg leading-none">+</span> Add Module
                     </button>
@@ -356,13 +368,13 @@ const ModulesList = () => {
             {/* student: overall progress bar */}
             {!isTeacher && modules.length > 0 && (
                 <div className="flex items-center gap-3">
-                    <div className="flex-1 h-2 bg-slate-700 rounded-full overflow-hidden">
+                    <div className="flex-1 h-2.5 bg-slate-700 rounded-full overflow-hidden">
                         <div
                             className="h-full bg-emerald-500 rounded-full transition-all duration-500"
                             style={{ width: `${(completedModules / modules.length) * 100}%` }}
                         />
                     </div>
-                    <span className="text-xs text-slate-400 shrink-0">
+                    <span className="text-sm text-slate-400 shrink-0 font-medium">
                         {Math.round((completedModules / modules.length) * 100)}% complete
                     </span>
                 </div>
@@ -370,23 +382,23 @@ const ModulesList = () => {
 
             {/* teacher-only: add module form */}
             {isTeacher && showForm && (
-                <form onSubmit={handleAddModule} className="bg-slate-800/60 border border-violet-700/40 rounded-xl p-5 flex flex-col gap-4">
+                <form onSubmit={handleAddModule} className="bg-slate-800/60 border border-violet-700/40 rounded-xl p-6 flex flex-col gap-4">
                     <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">New Module</p>
                     <div className="flex gap-3">
                         <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
                             placeholder="Module title" autoFocus
-                            className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
+                            className="flex-1 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
                         <input type="number" value={newOrder} onChange={(e) => setNewOrder(parseInt(e.target.value, 10))}
                             placeholder="Order"
-                            className="w-24 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-2.5 text-sm text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
+                            className="w-24 bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition" />
                     </div>
                     <div className="flex gap-2">
                         <button type="submit" disabled={adding}
-                            className="bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2 rounded-lg transition-all disabled:opacity-50">
+                            className="bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all disabled:opacity-50">
                             {adding ? 'Creating…' : 'Create Module'}
                         </button>
                         <button type="button" onClick={() => setShowForm(false)}
-                            className="text-slate-400 hover:text-slate-200 text-sm px-4 py-2 rounded-lg hover:bg-slate-700/50 transition">
+                            className="text-slate-400 hover:text-slate-200 text-sm px-4 py-2.5 rounded-lg hover:bg-slate-700/50 transition">
                             Cancel
                         </button>
                     </div>
@@ -395,16 +407,16 @@ const ModulesList = () => {
 
             {/* modules list */}
             {modules.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-20 text-slate-500 gap-3">
-                    <span className="text-4xl">{isTeacher ? '📦' : '📭'}</span>
-                    <p className="text-sm italic">
+                <div className="flex flex-col items-center justify-center py-24 text-slate-500 gap-4">
+                    <span className="text-5xl">{isTeacher ? '📦' : '📭'}</span>
+                    <p className="text-base italic">
                         {isTeacher
                             ? 'No modules yet. Add one above to get started.'
                             : 'This course has no content yet.'}
                     </p>
                 </div>
             ) : (
-                <div className="flex flex-col gap-3">
+                <div className="flex flex-col gap-4">
                     {modules.map(module => isTeacher ? (
                         <TeacherModuleCard
                             key={module.id}

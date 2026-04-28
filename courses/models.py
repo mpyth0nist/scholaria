@@ -4,6 +4,13 @@ from django.core.validators import MinLengthValidator
 
 # Create your models here.
 
+class StudentClass(models.Model):
+    name = models.CharField(max_length=100)
+    students = models.ManyToManyField(CustomUser, limit_choices_to={'role': 'Student'}, related_name="classes")
+
+    def __str__(self):
+        return self.name
+
 class Course(models.Model):
     course_name = models.CharField(max_length=90, blank=False, null=False, validators=[MinLengthValidator(3)])
     subject = models.CharField(max_length=25, blank=False, null=False, validators=[MinLengthValidator(2)])
@@ -11,7 +18,8 @@ class Course(models.Model):
     thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True)
     published = models.BooleanField(default=True)
     teacher = models.ForeignKey(CustomUser, related_name="courses_taught", on_delete=models.CASCADE)
-    student = models.ManyToManyField(CustomUser, related_name="student_courses")
+    student = models.ManyToManyField(CustomUser, related_name="student_courses", blank=True)
+    student_classes = models.ManyToManyField(StudentClass, related_name="courses", blank=True)
     done = models.BooleanField(default=False)
 
     def __str__(self):

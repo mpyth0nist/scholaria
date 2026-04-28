@@ -18,6 +18,16 @@ export const fetchCourses = createAsyncThunk("fetchCourses", async () => {
     return res.data
 })
 
+export const fetchClasses = createAsyncThunk("fetchClasses", async () => {
+    const res = await api.get('api/courses/classes/list/', {
+        headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`
+        }
+    })
+    return res.data
+})
+
 export const fetchSelectedCourse = createAsyncThunk("fetchSelectedCourse", async (id) => {
     const res = await api.get(`api/courses/${id}/`, {
         headers: {
@@ -34,7 +44,7 @@ export const createCourse = createAsyncThunk("createCourse", async (courseData, 
     const formData = new FormData()
     for (let key in courseData) {
         if (Array.isArray(courseData[key])) {
-            courseData[key].forEach(id => formData.append("student", id))
+            courseData[key].forEach(id => formData.append(key, id))
         } else if (key === "thumbnail") {
             if (courseData[key] instanceof File) {
                 formData.append(key, courseData[key])
@@ -105,7 +115,7 @@ export const updateCourse = createAsyncThunk("updateCourse", async (updatedCours
 
 const coursesSlice = createSlice({
     name: "courses",
-    initialState: { courses: [], selectedCourse: {}, error: false, loading: false },
+    initialState: { courses: [], selectedCourse: {}, classes: [], error: false, loading: false },
 
     reducers: {},
 
@@ -159,6 +169,10 @@ const coursesSlice = createSlice({
         builder.addCase(createCourse.rejected, (state) => {
             state.error = true
             state.loading = false
+        })
+
+        builder.addCase(fetchClasses.fulfilled, (state, action) => {
+            state.classes = action.payload
         })
     }
 

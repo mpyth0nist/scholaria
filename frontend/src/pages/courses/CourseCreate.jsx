@@ -1,8 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
-import { createCourse } from '../../features/courses/coursesSlice'
-import { fetchStudents } from '../../features/users/userSlice'
+import { createCourse, fetchClasses } from '../../features/courses/coursesSlice'
 
 // ── reusable styled input ────────────────────────────────────────────────────
 const Field = ({ label, children }) => (
@@ -43,16 +42,15 @@ const CreateCourse = () => {
         description: '',
         published: false,
         done: false,
-        students: [],
+        student_classes: [],
     })
     const [error, setError] = useState(null)
     const [submitting, setSubmitting] = useState(false)
 
-    const schoolStudents = useSelector(state => state.users.students)
-    const studentsLoading = useSelector(state => state.users.studentsLoading)
+    const availableClasses = useSelector(state => state.courses.classes) || []
 
     useEffect(() => {
-        dispatch(fetchStudents({ size: 1000 }))
+        dispatch(fetchClasses())
     }, [dispatch])
 
     const handleField = (name, value) => setCourseInfo(prev => ({ ...prev, [name]: value }))
@@ -136,35 +134,33 @@ const CreateCourse = () => {
                 </label>
             </Field>
 
-            {/* Enroll students */}
-            <Field label="Enroll Students">
-                {studentsLoading ? (
-                    <p className="text-slate-500 text-sm italic animate-pulse">Loading students…</p>
-                ) : schoolStudents.length === 0 ? (
-                    <p className="text-slate-500 text-sm italic">No students registered yet.</p>
+            {/* Enroll Classes */}
+            <Field label="Enroll Classes">
+                {availableClasses.length === 0 ? (
+                    <p className="text-slate-500 text-sm italic">No classes available yet.</p>
                 ) : (
                     <div className="max-h-44 overflow-y-auto flex flex-col gap-1 pr-1">
-                        {schoolStudents.map(student => (
+                        {availableClasses.map(cls => (
                             <label
-                                key={student.id}
+                                key={cls.id}
                                 className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-slate-700/30 cursor-pointer transition group"
                             >
                                 <input
                                     type="checkbox"
                                     className="accent-violet-500 w-4 h-4"
-                                    checked={courseInfo.students.includes(student.id)}
+                                    checked={courseInfo.student_classes.includes(cls.id)}
                                     onChange={() => setCourseInfo(prev => ({
                                         ...prev,
-                                        students: prev.students.includes(student.id)
-                                            ? prev.students.filter(s => s !== student.id)
-                                            : [...prev.students, student.id]
+                                        student_classes: prev.student_classes.includes(cls.id)
+                                            ? prev.student_classes.filter(c => c !== cls.id)
+                                            : [...prev.student_classes, cls.id]
                                     }))}
                                 />
-                                <div className="w-7 h-7 rounded-full bg-violet-700/30 border border-violet-600/30 flex items-center justify-center text-xs text-violet-300 font-semibold shrink-0">
-                                    {student.first_name?.charAt(0)}{student.last_name?.charAt(0)}
+                                <div className="w-7 h-7 rounded-md bg-violet-700/30 border border-violet-600/30 flex items-center justify-center text-xs text-violet-300 font-semibold shrink-0">
+                                    🏫
                                 </div>
                                 <span className="text-sm text-slate-300 group-hover:text-slate-100 transition">
-                                    {student.first_name} {student.last_name}
+                                    {cls.name} <span className="text-xs text-slate-500 ml-1">({cls.students.length} students)</span>
                                 </span>
                             </label>
                         ))}
