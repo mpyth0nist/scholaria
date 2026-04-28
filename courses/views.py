@@ -2,7 +2,7 @@ from django.shortcuts import render
 from .models import *
 from rest_framework import generics
 from .serializers import *
-from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission, SAFE_METHODS
+from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
 from rest_framework.exceptions import NotFound
 from users.models import CustomUser
 from django.db.models import Q
@@ -52,6 +52,15 @@ class isCourseTeacher(BasePermission):
 
         return course_teacher == request.user
 
+class isModuleTeacher(isCourseTeacher):
+
+    lookup_field = ['course', 'teacher']
+
+class isLessonTeacher(isCourseTeacher):
+
+    lookup_field = ['module', 'course', 'teacher']
+    
+
 
 class isTeacher(BasePermission):
     
@@ -89,6 +98,11 @@ class CourseView(generics.ListAPIView):
             Q(teacher=self.request.user) | Q(student=self.request.user)
             ).distinct()
 
+class StudentClassList(generics.ListAPIView):
+    permission_classes = [IsAuthenticated]
+    queryset = StudentClass.objects.all()
+    serializer_class = StudentClassSerializer
+
 class CourseDetailView(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = CourseSerializer
@@ -110,12 +124,9 @@ class CourseCreate(generics.CreateAPIView):
     serializer_class = CourseSerializer
 
     def perform_create(self, serializer):
-
-        if serializer.is_valid():
-            serializer.save(teacher=self.request.user)
-        else:
-            print("failed")
-            print(serializer.errors)
+        course = serializer.save(teacher=self.request.user)
+        for student_class in course.student_classes.all():
+            course.student.add(*student_class.students.all())
 
 
 class CourseDelete(generics.DestroyAPIView):
@@ -131,6 +142,11 @@ class CourseUpdate(generics.UpdateAPIView):
    serializer_class = CourseSerializer
    permission_classes = [IsAuthenticated, isTeacher, isCourseTeacher]
    lookup_field = LOOKUP_FIELD
+
+   def perform_update(self, serializer):
+       course = serializer.save()
+       for student_class in course.student_classes.all():
+           course.student.add(*student_class.students.all())
 
 class ModuleList(generics.ListAPIView):
     serializer_class = ModuleSerializer
@@ -220,10 +236,6 @@ class LessonCreate(generics.CreateAPIView):
             raise
 
 
-
-
-
-
 class LessonUpdate(generics.UpdateAPIView):
     queryset = Lesson.objects.all()
     permission_classes = [IsAuthenticated]
@@ -249,6 +261,6 @@ class LessonUpdate(generics.UpdateAPIView):
 class LessonDelete(generics.DestroyAPIView):
 
     queryset = Lesson.objects.all()
-    permission_classes = [isCourseTeacher]
+    permission_classes = [IsAuthenticated, isLessonTeacher]
     lookup_field = LOOKUP_FIELD
     lookup_url_kwarg = 'lesson_id'

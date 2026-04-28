@@ -2,6 +2,7 @@ from rest_framework import status
 from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.response import Response
+from rest_framework.exceptions import ValidationError
 from .serializers import UserSerializer
 from .models import CustomUser
 from courses.models import Course
@@ -83,37 +84,82 @@ class TeacherDashboardView(APIView):
     permission_classes = [IsAuthenticated, isTeacher]
 
     def get(self, request):
+        from django.db.models import Count, Sum
+
         user = request.user
-        
+
         total_courses = Course.objects.filter(teacher=user).count()
-        
-        # Unique students in the teacher's courses
-        total_students = CustomUser.objects.filter(student_courses__teacher=user).distinct().count()
-        
-        # Engagement calculation via Quizzes
+
+        # Unique students enrolled in any of the teacher's courses
+        total_students = (
+            CustomUser.objects
+            .filter(student_courses__teacher=user)
+            .distinct()
+            .count()
+        )
+
+        # ── Engagement calculation ────────────────────────────────────────────
         teacher_quizzes = Quiz.objects.filter(teacher=user)
-        total_expected_attempts = sum(quiz.course.student.count() for quiz in teacher_quizzes)
-        actual_attempts = UserAttempt.objects.filter(quiz__in=teacher_quizzes).count()
-        
-        engagement = 0
-        if total_expected_attempts > 0:
-            engagement = int((actual_attempts / total_expected_attempts) * 100)
-            
-        recent_attempts = UserAttempt.objects.filter(quiz__teacher=user).order_by('-id')[:5]
-        recent_submissions = []
-        for attempt in recent_attempts:
-            recent_submissions.append({
+
+        if not teacher_quizzes.exists():
+            # #11: No quizzes yet — return null so the frontend can show "N/A"
+            engagement = None
+        else:
+            # #3: Single aggregate query — no Python loop (was N+1)
+            total_expected = (
+                teacher_quizzes
+                .annotate(enrolled=Count('course__student', distinct=True))
+                .aggregate(total=Sum('enrolled'))
+            )['total'] or 0
+
+            # #1/#2/#4: Count unique (student, quiz) pairs that were completed
+            # (score__isnull=False). This caps the ratio at 100% and ignores
+            # abandoned/cancelled attempts.
+            actual_completed = (
+                UserAttempt.objects
+                .filter(quiz__in=teacher_quizzes, score__isnull=False)
+                .values('student', 'quiz')
+                .distinct()
+                .count()
+            )
+
+            # #7: round() instead of int() — avoids systematic floor bias
+            engagement = (
+                round((actual_completed / total_expected) * 100)
+                if total_expected > 0 else None
+            )
+
+        # ── Recent submissions ────────────────────────────────────────────────
+        # #5: Only graded attempts (score__isnull=False) — no "Pending" clutter
+        # #6: Order by submitted_at for accurate recency, not insertion id
+        # #9: select_related avoids 2 extra queries per row
+        recent_attempts = (
+            UserAttempt.objects
+            .filter(quiz__teacher=user, score__isnull=False)
+            .select_related('student', 'quiz')
+            .order_by('-submitted_at')[:5]
+        )
+
+        recent_submissions = [
+            {
                 'id': attempt.id,
                 'student_name': f"{attempt.student.first_name} {attempt.student.last_name}",
                 'quiz_title': attempt.quiz.name,
-                'score': float(attempt.score) if attempt.score is not None else "Pending",
-            })
-            
+                # #10: score is stored as Decimal — round to 1 dp before sending
+                'score': round(float(attempt.score), 1),
+                'submitted_at': attempt.submitted_at.isoformat() if attempt.submitted_at else None,
+            }
+            for attempt in recent_attempts
+        ]
+
         return Response({
             'total_courses': total_courses,
             'total_students': total_students,
-            'engagement': engagement,
-            'recent_submissions': recent_submissions
+            'engagement': engagement,           # null when no quizzes exist
+            'recent_submissions': recent_submissions,
         })
+
+
+
 
 

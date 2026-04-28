@@ -10,7 +10,8 @@ const AddQuestions = ({
     quizData
 }) => {
 
-    const canSaveQuestion = question.question_text.trim() && question.choices.length >= 2
+    const correctCount   = question.choices.filter(c => c.is_correct).length
+    const canSaveQuestion = question.question_text.trim() && question.choices.length >= 2 && correctCount === 1
 
     return (
         <div className="flex flex-col items-center min-h-screen bg-[#0d0f1e] px-6 py-12">
@@ -65,6 +66,9 @@ const AddQuestions = ({
                     <div className="flex flex-col gap-2">
                         <label className="text-slate-400 text-xs uppercase tracking-wider">
                             Choices <span className="text-slate-500 normal-case">({question.choices.length} added, min 2)</span>
+                            {correctCount === 1 && (
+                                <span className="ml-2 text-emerald-400 normal-case">· 1 correct answer set ✓</span>
+                            )}
                         </label>
 
                         {/* Existing choices */}
@@ -75,9 +79,10 @@ const AddQuestions = ({
                                     : 'bg-slate-900/40 border-slate-700/50 text-slate-300'}`}
                             >
                                 {c.is_correct
-                                    ? <span className="text-emerald-400 font-bold">✓</span>
+                                    ? <span className="text-emerald-400 font-bold" title="Correct answer">◉</span>
                                     : <span className="text-slate-500">○</span>}
                                 {c.choice}
+                                {c.is_correct && <span className="ml-auto text-xs text-emerald-500 font-semibold">Correct</span>}
                             </div>
                         ))}
 
@@ -109,7 +114,9 @@ const AddQuestions = ({
                                 <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${choice.is_correct ? 'translate-x-5' : 'translate-x-0'}`} />
                             </div>
                             <span className="text-slate-300 text-sm">
-                                {choice.is_correct ? <span className="text-emerald-400 font-semibold">This is the correct answer</span> : 'Mark as correct answer'}
+                                {choice.is_correct
+                                    ? <span className="text-emerald-400 font-semibold">This is the correct answer <span className="text-slate-500 font-normal text-xs">(replaces any previous correct choice)</span></span>
+                                    : 'Mark as correct answer'}
                             </span>
                         </label>
                     </div>
@@ -122,6 +129,9 @@ const AddQuestions = ({
                     >
                         + Save Question
                     </button>
+                    {question.choices.length >= 2 && correctCount === 0 && (
+                        <p className="text-amber-400 text-xs text-center">⚠ Mark one choice as the correct answer before saving</p>
+                    )}
                 </div>
 
                 {/* Submit */}

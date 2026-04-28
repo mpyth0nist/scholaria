@@ -55,11 +55,19 @@ class QuizUpdate(generics.UpdateAPIView):
 class QuizDelete(generics.DestroyAPIView):
     lookup_field = 'id'
     permission_classes = [IsAuthenticated, isTeacher]
-    def get_queryset(self):
-    
-        quiz = Quiz.objects.filter(id=self.kwargs['id'])
 
-        return quiz
+    def get_queryset(self):
+        return Quiz.objects.filter(id=self.kwargs['id'])
+
+    def perform_destroy(self, instance):
+        with transaction.atomic():
+            # UserAnswer.question is PROTECT — delete answers before attempts
+            for attempt in instance.attempts.all():
+                attempt.attempt_answers.all().delete()
+            # UserAttempt.quiz is PROTECT — delete attempts before the quiz
+            instance.attempts.all().delete()
+            # Questions / Choices cascade automatically (on_delete=CASCADE)
+            instance.delete()
 
 
 class UserAttemptCreate(generics.CreateAPIView):
@@ -191,7 +199,8 @@ class SubmitQuiz(generics.UpdateAPIView):
             if correct_choice_ids == user_selected_ids and correct_choice_ids:
                 correct_answers += 1
 
-        # ── Score based on questions answered, not total quiz questions ──
+        # ── Score based on answered questions ──
         score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
 
-        serializer.save(score=score)
+        # Stamp the submission time for accurate dashboard ordering (#6)
+        serializer.save(score=score, submitted_at=timezone.now())
