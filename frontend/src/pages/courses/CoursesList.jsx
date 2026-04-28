@@ -15,38 +15,40 @@ const CoursesList = ({ page }) => {
     }, [dispatch])
 
     return (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 p-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-2">
             {courses.map(course => (
                 <div
                     key={course.id}
-                    className="bg-slate-800/60 border border-slate-700/50 rounded-xl overflow-hidden hover:border-violet-700/40 transition"
+                    className="flex flex-col bg-background border border-primary/20 rounded-xl shadow-sm hover:shadow-lg hover:border-primary/40 transition-all duration-300 overflow-hidden min-h-[360px]"
                 >
-                    {/* Thumbnail */}
-                    <div className="h-40 w-full bg-gradient-to-br from-violet-900/50 to-indigo-900/50 overflow-hidden">
+                    {/* 16:9 Thumbnail */}
+                    <div className="w-full aspect-[16/9] relative bg-primary/10 border-b border-primary/20 shrink-0 overflow-hidden">
                         {course.thumbnail ? (
-                            <img src={course.thumbnail} alt={course.course_name} className="w-full h-full object-cover" />
+                            <img 
+                                src={course.thumbnail.startsWith('http') ? course.thumbnail : `http://localhost:8000${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`} 
+                                alt={course.course_name} 
+                                className="w-full h-full object-cover" 
+                            />
                         ) : (
                             <div className="w-full h-full flex items-center justify-center text-4xl">📚</div>
                         )}
                     </div>
 
                     {/* Info */}
-                    <div className="p-4 flex flex-col gap-3">
-                        <div>
-                            <h3 className="text-slate-100 font-semibold text-base line-clamp-1">{course.course_name}</h3>
-                            {course.subject && (
-                                <p className="text-violet-400 text-xs uppercase tracking-widest mt-0.5">{course.subject}</p>
-                            )}
-                            {course.description && (
-                                <p className="text-slate-400 text-sm mt-2 line-clamp-2">{course.description}</p>
-                            )}
-                        </div>
+                    <div className="p-4 md:p-5 flex flex-col flex-1">
+                        <h3 className="text-text font-serif font-bold text-lg leading-tight line-clamp-1">{course.course_name}</h3>
+                        {course.subject && (
+                            <p className="text-primary text-xs uppercase tracking-widest mt-1 font-semibold">{course.subject}</p>
+                        )}
+                        {course.description && (
+                            <p className="text-primary text-sm mt-3 line-clamp-2 leading-relaxed font-medium">{course.description}</p>
+                        )}
 
                         {/* Actions — role-aware */}
-                        <div className="flex gap-2 pt-1 border-t border-slate-700/50">
+                        <div className="flex gap-3 pt-4 mt-auto border-t border-primary/10">
                             <button
                                 onClick={() => navigate(`/course/${course.id}/modules/`)}
-                                className="flex-1 bg-violet-700/20 hover:bg-violet-700/40 border border-violet-600/30 text-violet-300 hover:text-violet-100 text-xs font-semibold py-2 px-3 rounded-lg transition"
+                                className="flex-1 bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/30 text-sm font-semibold py-2 px-3 rounded-lg transition-colors"
                             >
                                 {isTeacher ? 'Manage Modules' : 'View Course'}
                             </button>
@@ -55,7 +57,7 @@ const CoursesList = ({ page }) => {
                             {isTeacher && (
                                 <button
                                     onClick={() => navigate(`/update-course/${course.id}`)}
-                                    className="bg-slate-700/40 hover:bg-slate-700/70 border border-slate-600/40 text-slate-300 hover:text-slate-100 text-xs font-semibold py-2 px-3 rounded-lg transition"
+                                    className="bg-background hover:bg-primary/5 border border-primary/30 text-text/80 hover:text-action text-sm font-semibold py-2 px-3 rounded-lg transition-colors"
                                 >
                                     ✏️ Edit
                                 </button>
@@ -66,12 +68,14 @@ const CoursesList = ({ page }) => {
             ))}
 
             {page !== 'Courses' && (
-                <button
-                    onClick={() => navigate('/all-courses')}
-                    className="col-span-full text-sm text-violet-400 hover:text-violet-300 underline underline-offset-2 mt-2 transition"
-                >
-                    View all courses →
-                </button>
+                <div className="col-span-full mt-4 flex justify-end">
+                    <button
+                        onClick={() => navigate('/all-courses')}
+                        className="text-sm font-medium text-action hover:text-[#a04618] underline underline-offset-4 transition-colors"
+                    >
+                        View all courses →
+                    </button>
+                </div>
             )}
         </div>
     )

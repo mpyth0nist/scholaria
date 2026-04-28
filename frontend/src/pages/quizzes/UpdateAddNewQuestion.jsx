@@ -75,9 +75,9 @@ function UpdateAddNewQuestion({ onDone }) {
     // ── Render ──────────────────────────────────────────────────────────────
 
     return (
-        <div className="w-full bg-slate-800/80 border border-violet-700/40 rounded-2xl p-6 space-y-5 shadow-2xl backdrop-blur-md">
+        <div className="w-full bg-white/60 border border-action/20 rounded-2xl p-6 space-y-5 shadow-2xl backdrop-blur-md">
 
-            <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">New Question</p>
+            <p className="text-xs font-semibold uppercase tracking-widest text-action">New Question</p>
 
             {/* Question text */}
             <textarea
@@ -85,17 +85,17 @@ function UpdateAddNewQuestion({ onDone }) {
                 placeholder="e.g. What is the capital of France?"
                 value={questionText}
                 onChange={(e) => setQuestionText(e.target.value)}
-                className="w-full p-3 rounded-xl bg-slate-900/60 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition resize-none text-sm"
+                className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none text-sm"
             />
 
             {/* Saved choices preview */}
             {choices.length > 0 && (
                 <div className="flex flex-col gap-2">
-                    <p className="text-xs text-slate-400 uppercase tracking-wider">
+                    <p className="text-xs text-primary uppercase tracking-wider">
                         Choices
-                        <span className="ml-2 text-slate-500 normal-case">({choices.length} added)</span>
+                        <span className="ml-2 text-primary/70 normal-case">({choices.length} added)</span>
                         {correctCount === 1 && (
-                            <span className="ml-2 text-emerald-400 normal-case">· 1 correct answer set ✓</span>
+                            <span className="ml-2 text-primary normal-case">· 1 correct answer set ✓</span>
                         )}
                     </p>
                     {choices.map((c, i) => (
@@ -103,18 +103,18 @@ function UpdateAddNewQuestion({ onDone }) {
                             key={i}
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg border text-sm
                                 ${c.is_correct
-                                    ? 'bg-emerald-500/10 border-emerald-600/40 text-emerald-300'
-                                    : 'bg-slate-900/40 border-slate-700/50 text-slate-300'}`}
+                                    ? 'bg-primary/10 border-primary/20 text-primary'
+                                    : 'bg-white/60 border-primary/20 text-text/80'}`}
                         >
                             {c.is_correct
-                                ? <span className="text-emerald-400 font-bold" title="Correct">◉</span>
-                                : <span className="text-slate-500">○</span>}
+                                ? <span className="text-primary font-bold" title="Correct">◉</span>
+                                : <span className="text-primary/70">○</span>}
                             <span className="flex-1">{c.text}</span>
-                            {c.is_correct && <span className="text-xs text-emerald-500 font-semibold">Correct</span>}
+                            {c.is_correct && <span className="text-xs text-primary font-semibold">Correct</span>}
                             <button
                                 type="button"
                                 onClick={() => removeChoice(i)}
-                                className="text-slate-500 hover:text-rose-400 text-xs ml-2 transition"
+                                className="text-primary/70 hover:text-action text-xs ml-2 transition"
                             >
                                 ✕
                             </button>
@@ -125,7 +125,7 @@ function UpdateAddNewQuestion({ onDone }) {
 
             {/* New choice input */}
             <div className="flex flex-col gap-2">
-                <p className="text-xs text-slate-400 uppercase tracking-wider">Add choice</p>
+                <p className="text-xs text-primary uppercase tracking-wider">Add choice</p>
                 <div className="flex gap-2">
                     <input
                         type="text"
@@ -133,13 +133,13 @@ function UpdateAddNewQuestion({ onDone }) {
                         value={draft.text}
                         onChange={(e) => handleDraftText(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addChoiceToDraft() } }}
-                        className="flex-grow p-3 rounded-xl bg-slate-900/60 border border-slate-700 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-violet-500 transition text-sm"
+                        className="flex-grow p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
                     />
                     <button
                         type="button"
                         onClick={addChoiceToDraft}
                         disabled={!canAddChoice}
-                        className="px-4 py-2 text-white font-semibold bg-violet-700 hover:bg-violet-600 rounded-xl transition disabled:opacity-40 text-sm"
+                        className="px-4 py-2 text-white font-semibold bg-action hover:bg-action rounded-xl transition disabled:opacity-40 text-sm"
                     >
                         Add
                     </button>
@@ -149,15 +149,15 @@ function UpdateAddNewQuestion({ onDone }) {
                 <label className="flex items-center gap-3 cursor-pointer select-none mt-1">
                     <div
                         onClick={() => handleDraftCorrect(!draft.is_correct)}
-                        className={`w-10 h-5 rounded-full transition-colors flex items-center px-0.5 ${draft.is_correct ? 'bg-emerald-500' : 'bg-slate-600'}`}
+                        className={`w-10 h-5 rounded-full transition-colors flex items-center px-0.5 ${draft.is_correct ? 'bg-primary' : 'bg-slate-600'}`}
                     >
                         <div className={`w-4 h-4 bg-white rounded-full shadow transition-transform ${draft.is_correct ? 'translate-x-5' : 'translate-x-0'}`} />
                     </div>
-                    <span className="text-slate-300 text-sm">
+                    <span className="text-text/80 text-sm">
                         {draft.is_correct
-                            ? <span className="text-emerald-400 font-semibold">
+                            ? <span className="text-primary font-semibold">
                                 This is the correct answer{' '}
-                                <span className="text-slate-500 font-normal text-xs">(replaces any previous correct choice)</span>
+                                <span className="text-primary/70 font-normal text-xs">(replaces any previous correct choice)</span>
                               </span>
                             : 'Mark as correct answer'}
                     </span>
@@ -166,7 +166,7 @@ function UpdateAddNewQuestion({ onDone }) {
 
             {/* Validation hint */}
             {choices.length >= 2 && correctCount === 0 && (
-                <p className="text-amber-400 text-xs">⚠ Mark one choice as the correct answer before saving</p>
+                <p className="text-action text-xs">⚠ Mark one choice as the correct answer before saving</p>
             )}
 
             {/* Actions */}
@@ -175,7 +175,7 @@ function UpdateAddNewQuestion({ onDone }) {
                     type="button"
                     onClick={handleSave}
                     disabled={!canSave}
-                    className="flex-1 py-2.5 rounded-xl font-semibold text-white bg-slate-700 hover:bg-slate-600 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm border border-slate-600"
+                    className="flex-1 py-2.5 rounded-xl font-semibold text-white bg-primary/5 hover:bg-primary/10 transition disabled:opacity-40 disabled:cursor-not-allowed text-sm border border-primary/20"
                 >
                     + Save Question
                 </button>
@@ -183,7 +183,7 @@ function UpdateAddNewQuestion({ onDone }) {
                     <button
                         type="button"
                         onClick={onDone}
-                        className="px-4 py-2.5 rounded-xl text-slate-400 hover:text-slate-200 text-sm transition"
+                        className="px-4 py-2.5 rounded-xl text-primary hover:text-text text-sm transition"
                     >
                         Cancel
                     </button>

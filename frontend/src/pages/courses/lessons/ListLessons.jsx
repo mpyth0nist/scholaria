@@ -13,7 +13,7 @@ const ListLessons = ({ module_id }) => {
     }, [module_id])
 
     if (lessons.length === 0) {
-        return <p className="text-xs text-slate-500 italic">No lessons yet.</p>
+        return <p className="text-xs text-primary/70 italic">No lessons yet.</p>
     }
 
     return (
@@ -22,10 +22,10 @@ const ListLessons = ({ module_id }) => {
                 <button
                     key={lesson.id}
                     onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
-                    className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg bg-slate-900/40 hover:bg-slate-700/40 border border-slate-700/30 hover:border-violet-700/40 transition group"
+                    className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg bg-white/60 hover:bg-primary/5 border border-primary/20 hover:border-action/20 transition group"
                 >
-                    <span className="text-violet-400 text-xs">📄</span>
-                    <span className="text-sm text-slate-300 group-hover:text-slate-100 transition">{lesson.title}</span>
+                    <span className="text-action text-xs">📄</span>
+                    <span className="text-sm text-text/80 group-hover:text-text transition">{lesson.title}</span>
                 </button>
             ))}
         </div>

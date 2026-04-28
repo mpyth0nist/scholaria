@@ -6,16 +6,17 @@ const NavButton = ({ label, isActive, onClick, children }) => (
         <button
             onClick={onClick}
             className={`
-                w-full text-left px-4 py-3 rounded-md text-sm font-bold tracking-widest uppercase transition-all duration-200
+                relative overflow-hidden w-full text-left px-4 py-3 rounded-md text-sm font-bold tracking-widest uppercase transition-all duration-200 z-10 group
                 ${isActive
-                    ? 'bg-slate-300 text-[#0d0f1e] shadow-md'
-                    : 'bg-[#1a1d2e] text-slate-200 hover:bg-[#1f2340]'}
+                    ? 'text-white shadow-md bg-primary'
+                    : 'text-text hover:text-white'}
             `}
         >
-            {label}
+            <span className="relative z-20">{label}</span>
+            <div className={`absolute inset-0 bg-primary transform origin-left transition-transform duration-300 -z-10 ${isActive ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}`}></div>
         </button>
         {isActive && children && (
-            <div className="ml-3 mt-1 flex flex-col gap-1 border-l border-slate-600/50 pl-3">
+            <div className="ml-3 mt-2 flex flex-col gap-2 border-l-2 border-primary/30 pl-3">
                 {children}
             </div>
         )}
@@ -25,7 +26,7 @@ const NavButton = ({ label, isActive, onClick, children }) => (
 const SubNavButton = ({ label, onClick }) => (
     <button
         onClick={onClick}
-        className="text-left text-xs text-slate-400 hover:text-slate-200 py-1.5 px-2 rounded hover:bg-[#1f2340] transition-colors tracking-wide uppercase"
+        className="text-left text-sm font-bold text-primary hover:text-action py-2 px-3 rounded hover:bg-primary/10 transition-colors tracking-wide uppercase"
     >
         {label}
     </button>
@@ -40,11 +41,11 @@ const Sidebar = (props) => {
     const toggle = (menu) => setActiveMenu(prev => prev === menu ? null : menu)
 
     return (
-        <div className="h-full bg-[#161929] flex flex-col px-4 py-6 gap-3 border-r border-violet-900/40">
+        <div className="h-full bg-background flex flex-col px-4 py-6 gap-3 border-r border-primary/20 shadow-sm">
             {/* Brand */}
             <div className="mb-4 px-2">
-                <span className="text-violet-400 text-xs font-bold tracking-[0.3em] uppercase">Scholaria</span>
-                <div className="h-px bg-violet-800/30 mt-3" />
+                <span className="text-primary font-serif text-lg font-bold tracking-[0.2em] uppercase">Scholaria</span>
+                <div className="h-px bg-primary/20 mt-3" />
             </div>
 
             {isTeacher ? (

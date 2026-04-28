@@ -52,8 +52,8 @@ const ToolBtn = ({ onClick, active, title, children }) => (
         onMouseDown={(e) => { e.preventDefault(); onClick() }}
         className={`px-2.5 py-1.5 rounded-md text-sm font-medium transition select-none
             ${active
-                ? 'bg-violet-600 text-white'
-                : 'text-slate-300 hover:bg-slate-600/60 hover:text-slate-100'}`}
+                ? 'bg-action text-white'
+                : 'text-text/80 hover:bg-primary/10 hover:text-text'}`}
     >
         {children}
     </button>
@@ -205,10 +205,10 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
     const activeFontLabel = FONTS.find(f => f.value === activeFont)?.label ?? 'Font'
 
     return (
-        <div className="flex flex-col rounded-xl border border-slate-700/60 overflow-hidden focus-within:border-violet-500 transition">
+        <div className="flex flex-col rounded-xl border border-primary/20 overflow-hidden focus-within:border-action transition">
 
             {/* ── toolbar ── */}
-            <div className="flex flex-wrap items-center gap-1 px-3 py-2 bg-slate-900/80 border-b border-slate-700/60">
+            <div className="flex flex-wrap items-center gap-1 px-3 py-2 bg-white/60 border-b border-primary/20">
 
                 {/* Font family */}
                 <div className="relative">
@@ -216,25 +216,25 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                         type="button"
                         title="Font family"
                         onMouseDown={(e) => { e.preventDefault(); setShowFonts(v => !v); setShowColors(false); setShowSizes(false) }}
-                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-slate-300 hover:bg-slate-600/60 hover:text-slate-100 transition select-none min-w-[108px] justify-between"
+                        className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-text/80 hover:bg-primary/10 hover:text-text transition select-none min-w-[108px] justify-between"
                         style={{ fontFamily: activeFont }}
                     >
                         <span>{activeFontLabel}</span>
                         <span className="text-xs opacity-60 ml-1">▾</span>
                     </button>
                     {showFonts && (
-                        <div className="absolute top-full left-0 mt-1 z-30 bg-slate-800 border border-slate-600/60 rounded-xl py-1.5 shadow-2xl min-w-[190px]">
-                            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 px-3 pt-1 pb-2">Font Family</p>
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-white/60 border border-primary/20 rounded-xl py-1.5 shadow-2xl min-w-[190px]">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 px-3 pt-1 pb-2">Font Family</p>
                             {FONTS.map(f => (
                                 <button
                                     key={f.value}
                                     type="button"
                                     onMouseDown={(e) => { e.preventDefault(); applyFont(f.value) }}
                                     className={`w-full text-left px-4 py-2.5 transition flex flex-col gap-0.5
-                                        ${activeFont === f.value ? 'bg-violet-700/20 text-violet-300' : 'text-slate-200 hover:bg-slate-700/50'}`}
+                                        ${activeFont === f.value ? 'bg-action/10 text-action' : 'text-text hover:bg-primary/5'}`}
                                 >
                                     <span style={{ fontFamily: f.value }} className="text-base leading-tight">{f.label}</span>
-                                    <span className="text-xs text-slate-500" style={{ fontFamily: f.value }}>The quick brown fox</span>
+                                    <span className="text-xs text-primary/70" style={{ fontFamily: f.value }}>The quick brown fox</span>
                                 </button>
                             ))}
                         </div>
@@ -247,21 +247,21 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                         type="button"
                         title="Font size"
                         onMouseDown={(e) => { e.preventDefault(); setShowSizes(v => !v); setShowColors(false); setShowFonts(false) }}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm text-slate-300 hover:bg-slate-600/60 hover:text-slate-100 transition select-none min-w-[52px] justify-between"
+                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm text-text/80 hover:bg-primary/10 hover:text-text transition select-none min-w-[52px] justify-between"
                     >
                         <span>{fontSize}px</span>
                         <span className="text-xs opacity-60">▾</span>
                     </button>
                     {showSizes && (
-                        <div className="absolute top-full left-0 mt-1 z-30 bg-slate-800 border border-slate-600/60 rounded-xl py-1.5 shadow-2xl min-w-[90px]">
-                            <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 px-3 pt-1 pb-2">Size</p>
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-white/60 border border-primary/20 rounded-xl py-1.5 shadow-2xl min-w-[90px]">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 px-3 pt-1 pb-2">Size</p>
                             {FONT_SIZES.map(px => (
                                 <button
                                     key={px}
                                     type="button"
                                     onMouseDown={(e) => { e.preventDefault(); applyFontSize(px) }}
                                     className={`w-full text-left px-4 py-1.5 transition
-                                        ${fontSize === px ? 'bg-violet-700/20 text-violet-300 font-semibold' : 'text-slate-200 hover:bg-slate-700/50'}`}
+                                        ${fontSize === px ? 'bg-action/10 text-action font-semibold' : 'text-text hover:bg-primary/5'}`}
                                     style={{ fontSize: `${Math.min(px, 18)}px` }}
                                 >
                                     {px}px
@@ -321,15 +321,15 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                         type="button"
                         title="Font color"
                         onMouseDown={(e) => { e.preventDefault(); setShowColors(v => !v); setShowFonts(false); setShowSizes(false) }}
-                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-slate-300 hover:bg-slate-600/60 hover:text-slate-100 transition select-none"
+                        className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-text/80 hover:bg-primary/10 hover:text-text transition select-none"
                     >
                         <span className="font-bold" style={{ color: activeColor }}>A</span>
                         <span className="w-4 h-1 rounded-sm" style={{ backgroundColor: activeColor }} />
                         <span className="text-xs opacity-60">▾</span>
                     </button>
                     {showColors && (
-                        <div className="absolute top-full left-0 mt-1 z-30 bg-slate-800 border border-slate-600/60 rounded-xl p-3 shadow-2xl flex flex-col gap-2 min-w-max">
-                            <p className="text-xs font-semibold uppercase tracking-widest text-slate-400 mb-1">Color</p>
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-white/60 border border-primary/20 rounded-xl p-3 shadow-2xl flex flex-col gap-2 min-w-max">
+                            <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">Color</p>
                             <div className="grid grid-cols-4 gap-2">
                                 {COLORS.map(c => (
                                     <button
@@ -360,10 +360,10 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                 onMouseUp={syncState}
                 onBlur={closeAll}
                 data-placeholder={placeholder}
-                className="min-h-[200px] px-5 py-4 bg-slate-900/60 text-slate-200 leading-relaxed outline-none
-                    empty:before:content-[attr(data-placeholder)] empty:before:text-slate-500 empty:before:pointer-events-none
-                    [&_h1]:text-3xl [&_h1]:font-bold   [&_h1]:text-slate-100 [&_h1]:mb-2  [&_h1]:mt-3
-                    [&_h2]:text-xl  [&_h2]:font-semibold [&_h2]:text-slate-100 [&_h2]:mb-1.5 [&_h2]:mt-2.5
+                className="min-h-[200px] px-5 py-4 bg-white/60 text-text leading-relaxed outline-none
+                    empty:before:content-[attr(data-placeholder)] empty:before:text-primary/70 empty:before:pointer-events-none
+                    [&_h1]:text-3xl [&_h1]:font-bold   [&_h1]:text-text [&_h1]:mb-2  [&_h1]:mt-3
+                    [&_h2]:text-xl  [&_h2]:font-semibold [&_h2]:text-text [&_h2]:mb-1.5 [&_h2]:mt-2.5
                     [&_p]:mb-2   [&_p]:leading-relaxed
                     [&_div]:mb-1 [&_div]:leading-relaxed
                     [&_strong]:font-bold [&_em]:italic [&_u]:underline
@@ -380,9 +380,9 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
 
 export const LessonContent = ({ html }) => (
     <div
-        className="text-slate-200 leading-relaxed
-            [&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:text-slate-100 [&_h1]:mb-3 [&_h1]:mt-4
-            [&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:text-slate-100 [&_h2]:mb-2 [&_h2]:mt-3
+        className="text-text leading-relaxed
+            [&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:text-text [&_h1]:mb-3 [&_h1]:mt-4
+            [&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:text-text [&_h2]:mb-2 [&_h2]:mt-3
             [&_p]:mb-3   [&_p]:leading-relaxed
             [&_div]:mb-1 [&_div]:leading-relaxed
             [&_strong]:font-bold [&_em]:italic [&_u]:underline

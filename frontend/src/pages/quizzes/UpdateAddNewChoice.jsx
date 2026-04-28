@@ -45,7 +45,7 @@ function UpdateAddNewChoice({ updateNewQuestionData }) {
                 type="button"
                 onClick={handleAddChoice}
                 // Primary action button style
-                className="px-4 py-2 text-white font-medium bg-cyan-600 rounded-lg hover:bg-cyan-500 transition duration-150 shadow-md"
+                className="px-4 py-2 text-white font-medium bg-primary rounded-lg hover:bg-primary transition duration-150 shadow-md"
             >
                 Add Choice
             </button>

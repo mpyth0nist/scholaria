@@ -37,15 +37,15 @@ const LessonCreate = ({ module_id, onCreated }) => {
     }
 
     return (
-        <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-4 border-t border-slate-700/50 pt-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-violet-400">Add a Lesson</p>
+        <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-4 border-t border-primary/20 pt-5">
+            <p className="text-xs font-semibold uppercase tracking-widest text-action">Add a Lesson</p>
 
             <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Lesson title"
-                className="bg-slate-900/60 border border-slate-700/60 rounded-lg px-4 py-3 text-base text-slate-200 placeholder-slate-500 outline-none focus:border-violet-500 transition"
+                className="bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
             />
 
             <RichTextEditor
@@ -54,8 +54,8 @@ const LessonCreate = ({ module_id, onCreated }) => {
                 placeholder="Write lesson content…"
             />
 
-            <label className="flex items-center gap-2 text-sm text-slate-400 cursor-pointer">
-                <span className="bg-slate-700/60 border border-slate-600 rounded-lg px-3 py-2 hover:bg-slate-700 transition text-slate-300">
+            <label className="flex items-center gap-2 text-sm text-primary cursor-pointer">
+                <span className="bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 hover:bg-primary/5 transition text-text/80">
                     {attachment ? attachment.name : 'Attach file (optional)'}
                 </span>
                 <input type="file" className="hidden" onChange={(e) => setAttachment(e.target.files[0])} />
@@ -64,7 +64,7 @@ const LessonCreate = ({ module_id, onCreated }) => {
             <button
                 type="submit"
                 disabled={loading}
-                className="self-start bg-violet-600 hover:bg-violet-500 active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all disabled:opacity-50"
+                className="self-start bg-action hover:bg-action active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all disabled:opacity-50"
             >
                 {loading ? 'Adding…' : 'Add Lesson'}
             </button>

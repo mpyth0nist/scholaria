@@ -5,7 +5,7 @@ from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
 from .serializers import UserSerializer
 from .models import CustomUser
-from courses.models import Course
+from courses.models import Course, UserLessonProgress
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -101,21 +101,15 @@ class TeacherDashboardView(APIView):
         # ── Engagement calculation ────────────────────────────────────────────
         teacher_quizzes = Quiz.objects.filter(teacher=user)
 
-        if not teacher_quizzes.exists():
-            # #11: No quizzes yet — return null so the frontend can show "N/A"
-            engagement = None
-        else:
-            # #3: Single aggregate query — no Python loop (was N+1)
-            total_expected = (
+        quiz_engagement = None
+        if teacher_quizzes.exists():
+            total_expected_attempts = (
                 teacher_quizzes
                 .annotate(enrolled=Count('course__student', distinct=True))
                 .aggregate(total=Sum('enrolled'))
             )['total'] or 0
 
-            # #1/#2/#4: Count unique (student, quiz) pairs that were completed
-            # (score__isnull=False). This caps the ratio at 100% and ignores
-            # abandoned/cancelled attempts.
-            actual_completed = (
+            actual_completed_attempts = (
                 UserAttempt.objects
                 .filter(quiz__in=teacher_quizzes, score__isnull=False)
                 .values('student', 'quiz')
@@ -123,11 +117,33 @@ class TeacherDashboardView(APIView):
                 .count()
             )
 
-            # #7: round() instead of int() — avoids systematic floor bias
-            engagement = (
-                round((actual_completed / total_expected) * 100)
-                if total_expected > 0 else None
-            )
+            quiz_engagement = (actual_completed_attempts / total_expected_attempts) if total_expected_attempts > 0 else None
+
+        teacher_courses = Course.objects.filter(teacher=user)
+        course_engagement = None
+        if teacher_courses.exists():
+            total_expected_lessons = 0
+            from courses.models import Lesson
+            for c in teacher_courses:
+                s_count = c.student.count()
+                l_count = Lesson.objects.filter(module__course=c).count()
+                total_expected_lessons += (s_count * l_count)
+            
+            actual_completed_lessons = UserLessonProgress.objects.filter(
+                lesson__module__course__in=teacher_courses
+            ).count()
+            
+            course_engagement = (actual_completed_lessons / total_expected_lessons) if total_expected_lessons > 0 else None
+
+        # Combine both metrics into a single engagement percentage
+        if quiz_engagement is not None and course_engagement is not None:
+            engagement = round(((quiz_engagement + course_engagement) / 2) * 100)
+        elif quiz_engagement is not None:
+            engagement = round(quiz_engagement * 100)
+        elif course_engagement is not None:
+            engagement = round(course_engagement * 100)
+        else:
+            engagement = None
 
         # ── Recent submissions ────────────────────────────────────────────────
         # #5: Only graded attempts (score__isnull=False) — no "Pending" clutter

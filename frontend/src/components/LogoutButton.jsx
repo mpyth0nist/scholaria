@@ -33,7 +33,7 @@ function LogoutButton({ className = '' }) {
             disabled={loading}
             className={`
                 group flex items-center gap-2 px-3 py-1.5 rounded-lg
-                text-sm font-medium text-gray-400
+                text-sm font-medium text-primary
                 hover:text-red-400 hover:bg-red-500/10
                 active:scale-95
                 transition-all duration-150 ease-in-out
