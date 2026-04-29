@@ -12,7 +12,7 @@ const CourseItem = ({ course, isTeacher, isSelected, onClick }) => {
                 <div className="w-full h-[168px] shrink-0 relative bg-primary/10 border-b border-primary/20 overflow-hidden">
                     {course.thumbnail ? (
                         <img
-                            src={course.thumbnail.startsWith('http') ? course.thumbnail : `http://localhost:8000${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`}
+                            src={course.thumbnail.startsWith('http') ? course.thumbnail : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`}
                             alt={course.course_name}
                             className="w-full h-full object-cover"
                         />

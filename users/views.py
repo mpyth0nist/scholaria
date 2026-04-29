@@ -159,12 +159,12 @@ class TeacherDashboardView(APIView):
         teacher_courses = Course.objects.filter(teacher=user)
         course_engagement = None
         if teacher_courses.exists():
-            total_expected_lessons = 0
             from courses.models import Lesson
-            for c in teacher_courses:
-                s_count = c.student.count()
-                l_count = Lesson.objects.filter(module__course=c).count()
-                total_expected_lessons += (s_count * l_count)
+            total_expected_lessons = (
+                Lesson.objects.filter(module__course__in=teacher_courses)
+                .annotate(enrolled=Count('module__course__student', distinct=True))
+                .aggregate(total=Sum('enrolled'))
+            )['total'] or 0
             
             actual_completed_lessons = UserLessonProgress.objects.filter(
                 lesson__module__course__in=teacher_courses
