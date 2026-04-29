@@ -217,8 +217,11 @@ class LessonDetailView(generics.ListAPIView):
     serializer_class = LessonSerializer
 
     def get_queryset(self):
-
-        return Lesson.objects.filter(id=self.kwargs['lesson_id'])
+        return Lesson.objects.filter(
+            id=self.kwargs['lesson_id']
+        ).filter(
+            Q(module__course__teacher=self.request.user) | Q(module__course__student=self.request.user)
+        ).distinct()
     
 
 
