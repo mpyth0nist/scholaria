@@ -3,7 +3,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.exceptions import ValidationError
-from .serializers import UserSerializer
+from .serializers import UserSerializer, AdminUserSerializer
 from .models import CustomUser
 from courses.models import Course, UserLessonProgress
 from rest_framework.views import APIView
@@ -11,9 +11,50 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework_simplejwt.tokens import RefreshToken
 from rest_framework.pagination import PageNumberPagination
 from rest_framework import filters
+from rest_framework.permissions import BasePermission
 
 from courses.views import isTeacher
 from quizzes.models import Quiz, UserAttempt
+
+class isAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return request.user and request.user.is_authenticated and request.user.role == 'ADMIN'
+
+class StandardResultsSetPagination(PageNumberPagination):
+    page_size = 10
+    page_size_query_param = 'size'
+    max_page_size = 50
+
+class AdminUserListView(generics.ListAPIView):
+    permission_classes = [IsAuthenticated, isAdmin]
+    serializer_class = AdminUserSerializer
+    pagination_class = StandardResultsSetPagination
+    filter_backends = [filters.SearchFilter, filters.OrderingFilter]
+    search_fields = ['username', 'first_name', 'last_name', 'email']
+    # allow ordering by name or age (birth_date)
+    ordering_fields = ['first_name', 'last_name', 'username', 'birth_date']
+    ordering = ['id']
+
+    def get_queryset(self):
+        return CustomUser.objects.all()
+
+class AdminUserCreateView(generics.CreateAPIView):
+    permission_classes = [IsAuthenticated, isAdmin]
+    serializer_class = AdminUserSerializer
+    queryset = CustomUser.objects.all()
+
+class AdminUserUpdateView(generics.UpdateAPIView):
+    permission_classes = [IsAuthenticated, isAdmin]
+    serializer_class = AdminUserSerializer
+    queryset = CustomUser.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'user_id'
+
+class AdminUserDeleteView(generics.DestroyAPIView):
+    permission_classes = [IsAuthenticated, isAdmin]
+    queryset = CustomUser.objects.all()
+    lookup_field = 'id'
+    lookup_url_kwarg = 'user_id'
 
 
 class CreateUserView(generics.CreateAPIView):
@@ -29,11 +70,6 @@ class LoggedUserView(APIView):
 
         serializer = UserSerializer(request.user)
         return Response(serializer.data)
-
-class StandardResultsSetPagination(PageNumberPagination):
-    page_size = 10
-    page_size_query_param = 'size'
-    max_page_size = 50
 
 class ListStudentsView(generics.ListAPIView):
     permission_classes = [IsAuthenticated, isTeacher]
@@ -68,9 +104,10 @@ class LogoutView(APIView):
 class UpdateUserView(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated]
     serializer_class = UserSerializer
-    queryset = CustomUser.objects.all()
-    lookup_field = 'id'
-    lookup_url_kwarg = 'user_id'
+
+    def get_object(self):
+        # Enforce that the user can only update their own profile
+        return self.request.user
 
     def perform_update(self, serializer):
         if serializer.is_valid():
