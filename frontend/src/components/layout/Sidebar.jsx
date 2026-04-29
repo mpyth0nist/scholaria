@@ -33,7 +33,8 @@ const SubNavButton = ({ label, onClick }) => (
 );
 
 const Sidebar = (props) => {
-    const isTeacher = (props.role.toUpperCase() === 'TEACHER')
+    const isTeacher = (props.role?.toUpperCase() === 'TEACHER')
+    const isAdmin = (props.role?.toUpperCase() === 'ADMIN')
     const [activeMenu, setActiveMenu] = useState(null)
     const navigate = useNavigate()
     const location = useLocation()
@@ -78,6 +79,14 @@ const Sidebar = (props) => {
                         label="Students"
                         isActive={location.pathname === '/students/'}
                         onClick={() => navigate('/students/')}
+                    />
+                </>
+            ) : isAdmin ? (
+                <>
+                    <NavButton
+                        label="Manage Users"
+                        isActive={location.pathname === '/admin/dashboard' || location.pathname === '/dashboard'}
+                        onClick={() => navigate('/admin/dashboard')}
                     />
                 </>
             ) : (

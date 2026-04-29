@@ -14,6 +14,13 @@ const initialState = {
     studentsLoading: false,
     dashboardMetrics: null,
     dashboardLoading: false,
+    
+    // Admin state
+    adminUsers: [],
+    adminUsersCount: 0,
+    adminUsersNext: null,
+    adminUsersPrevious: null,
+    adminUsersLoading: false,
 }
 
 export const fetchUser = createAsyncThunk('fetchUser', async () => {
@@ -52,6 +59,54 @@ export const fetchStudents = createAsyncThunk('fetchStudents', async (params = {
     return res.data
 })
 
+// --- Admin Thunks ---
+export const fetchAdminUsers = createAsyncThunk('fetchAdminUsers', async (params = {}) => {
+    const query = new URLSearchParams()
+    if (params.page) query.append('page', params.page)
+    if (params.size) query.append('size', params.size)
+    if (params.search) query.append('search', params.search)
+    if (params.ordering) query.append('ordering', params.ordering)
+
+    const url = query.toString() ? `api/users/admin/list/?${query.toString()}` : 'api/users/admin/list/'
+    const res = await api.get(url, {
+        headers: { "Authorization": `Bearer ${token}` }
+    })
+    return res.data
+})
+
+export const adminCreateUser = createAsyncThunk('adminCreateUser', async (userData, { rejectWithValue }) => {
+    try {
+        const res = await api.post('api/users/admin/create/', userData, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        return res.data
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
+})
+
+export const adminUpdateUser = createAsyncThunk('adminUpdateUser', async ({ id, data }, { rejectWithValue }) => {
+    try {
+        const res = await api.patch(`api/users/admin/update/${id}/`, data, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        return res.data
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
+})
+
+export const adminDeleteUser = createAsyncThunk('adminDeleteUser', async (id, { rejectWithValue }) => {
+    try {
+        await api.delete(`api/users/admin/delete/${id}/`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        return id
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
+})
+
 const userSlice = createSlice({
     name: 'user',
     initialState,
@@ -88,6 +143,39 @@ const userSlice = createSlice({
         })
         builder.addCase(fetchTeacherDashboard.rejected, (state) => {
             state.dashboardLoading = false
+        })
+
+        // --- Admin Reducers ---
+        builder.addCase(fetchAdminUsers.pending, (state) => {
+            state.adminUsersLoading = true
+        })
+        builder.addCase(fetchAdminUsers.fulfilled, (state, action) => {
+            state.adminUsers = action.payload.results || action.payload
+            state.adminUsersCount = action.payload.count || action.payload.length || 0
+            state.adminUsersNext = action.payload.next || null
+            state.adminUsersPrevious = action.payload.previous || null
+            state.adminUsersLoading = false
+        })
+        builder.addCase(fetchAdminUsers.rejected, (state) => {
+            state.adminUsersLoading = false
+        })
+
+        builder.addCase(adminCreateUser.fulfilled, (state, action) => {
+            // Unshift new user to the top
+            state.adminUsers.unshift(action.payload)
+            state.adminUsersCount += 1
+        })
+
+        builder.addCase(adminUpdateUser.fulfilled, (state, action) => {
+            const index = state.adminUsers.findIndex(u => u.id === action.payload.id)
+            if (index !== -1) {
+                state.adminUsers[index] = action.payload
+            }
+        })
+
+        builder.addCase(adminDeleteUser.fulfilled, (state, action) => {
+            state.adminUsers = state.adminUsers.filter(u => u.id !== action.payload)
+            state.adminUsersCount -= 1
         })
     }
 })
