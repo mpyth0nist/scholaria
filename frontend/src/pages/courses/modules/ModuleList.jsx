@@ -140,12 +140,13 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
                     <div className="flex gap-3">
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title"
                             className="flex-1 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
-                        <input type="number" value={order} onChange={(e) => setOrder(parseInt(e.target.value, 10))} placeholder="Order"
+                        <input type="number" value={order} onChange={(e) => setOrder(Math.max(1, parseInt(e.target.value, 10) || 1))} placeholder="Order"
+                            min="1"
                             className="w-24 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
                     </div>
                     <div className="flex gap-2">
                         <button type="submit" className="bg-action hover:bg-action active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all">Save</button>
-                        <button type="button" onClick={() => setEditing(false)} className="text-primary hover:text-text text-sm px-4 py-2.5 rounded-lg hover:bg-primary/5 transition">Cancel</button>
+                        <button type="button" onClick={() => setEditing(false)} className="text-text/70 hover:text-text text-sm px-4 py-2.5 rounded-lg border border-primary/20 hover:bg-primary/5 transition">Cancel</button>
                     </div>
                 </form>
             )}
@@ -263,7 +264,7 @@ const StudentModuleCard = ({ module, navigate }) => {
                                 <span className={`text-sm shrink-0 ${lesson.done ? 'text-primary' : 'text-action'}`}>
                                     {lesson.done ? '✅' : '📄'}
                                 </span>
-                                <span className={`text-base transition flex-1 text-left ${lesson.done ? 'text-primary line-through' : 'text-text group-hover:text-white'}`}>
+                                <span className={`text-base transition flex-1 text-left ${lesson.done ? 'text-primary line-through' : 'text-text/80 group-hover:text-action'}`}>
                                     {lesson.title}
                                 </span>
                                 {!lesson.done && (
@@ -388,7 +389,8 @@ const ModulesList = () => {
                         <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
                             placeholder="Module title" autoFocus
                             className="flex-1 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
-                        <input type="number" value={newOrder} onChange={(e) => setNewOrder(parseInt(e.target.value, 10))}
+                        <input type="number" value={newOrder} onChange={(e) => setNewOrder(Math.max(1, parseInt(e.target.value, 10) || 1))}
+                            min="1"
                             placeholder="Order"
                             className="w-24 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
                     </div>
@@ -398,7 +400,7 @@ const ModulesList = () => {
                             {adding ? 'Creating…' : 'Create Module'}
                         </button>
                         <button type="button" onClick={() => setShowForm(false)}
-                            className="text-primary hover:text-text text-sm px-4 py-2.5 rounded-lg hover:bg-primary/5 transition">
+                            className="text-text/70 hover:text-text text-sm px-4 py-2.5 rounded-lg border border-primary/20 hover:bg-primary/5 transition">
                             Cancel
                         </button>
                     </div>
@@ -417,20 +419,22 @@ const ModulesList = () => {
                 </div>
             ) : (
                 <div className="flex flex-col gap-4">
-                    {modules.map(module => isTeacher ? (
-                        <TeacherModuleCard
-                            key={module.id}
-                            module={module}
-                            onDelete={handleDelete}
-                            onUpdate={handleUpdate}
-                            navigate={navigate}
-                        />
+                    {modules.map((module, i) => isTeacher ? (
+                        <div key={module.id} className="animate-item-enter" style={{ animationDelay: `${i * 0.07}s` }}>
+                            <TeacherModuleCard
+                                module={module}
+                                onDelete={handleDelete}
+                                onUpdate={handleUpdate}
+                                navigate={navigate}
+                            />
+                        </div>
                     ) : (
-                        <StudentModuleCard
-                            key={module.id}
-                            module={module}
-                            navigate={navigate}
-                        />
+                        <div key={module.id} className="animate-item-enter" style={{ animationDelay: `${i * 0.07}s` }}>
+                            <StudentModuleCard
+                                module={module}
+                                navigate={navigate}
+                            />
+                        </div>
                     ))}
                 </div>
             )}

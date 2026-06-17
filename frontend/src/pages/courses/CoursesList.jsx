@@ -16,22 +16,35 @@ const CoursesList = ({ page }) => {
 
     return (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-2">
-            {courses.map(course => (
+            {courses.map((course, i) => (
                 <div
                     key={course.id}
-                    className="flex flex-col bg-background border border-primary/20 rounded-xl shadow-sm hover:shadow-lg hover:border-primary/40 transition-all duration-300 overflow-hidden min-h-[360px]"
+                    className="animate-scale-in btn-press flex flex-col bg-background border border-primary/20 rounded-xl shadow-sm hover:shadow-lg hover:border-primary/40 transition-all duration-300 overflow-hidden min-h-[360px]"
+                    style={{ animationDelay: `${i * 0.07}s` }}
                 >
                     {/* 16:9 Thumbnail */}
                     <div className="w-full aspect-[16/9] relative bg-primary/10 border-b border-primary/20 shrink-0 overflow-hidden">
                         {course.thumbnail ? (
-                            <img 
-                                src={course.thumbnail.startsWith('http') ? course.thumbnail : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`} 
-                                alt={course.course_name} 
-                                className="w-full h-full object-cover" 
+                            <img
+                                src={
+                                    course.thumbnail.startsWith('http')
+                                        ? course.thumbnail
+                                        : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`
+                                }
+                                alt={course.course_name}
+                                className="w-full h-full object-cover"
+                                onError={(e) => {
+                                    e.currentTarget.style.display = 'none'
+                                    e.currentTarget.nextSibling.style.display = 'flex'
+                                }}
                             />
-                        ) : (
-                            <div className="w-full h-full flex items-center justify-center text-4xl">📚</div>
-                        )}
+                        ) : null}
+                        <div
+                            className="w-full h-full flex items-center justify-center text-4xl"
+                            style={{ display: course.thumbnail ? 'none' : 'flex' }}
+                        >
+                            📚
+                        </div>
                     </div>
 
                     {/* Info */}
@@ -41,23 +54,23 @@ const CoursesList = ({ page }) => {
                             <p className="text-primary text-xs uppercase tracking-widest mt-1 font-semibold">{course.subject}</p>
                         )}
                         {course.description && (
-                            <p className="text-primary text-sm mt-3 line-clamp-2 leading-relaxed font-medium">{course.description}</p>
+                            <p className="text-text/60 text-sm mt-2.5 line-clamp-2 leading-relaxed">{course.description}</p>
                         )}
 
                         {/* Actions — role-aware */}
-                        <div className="flex gap-3 pt-4 mt-auto border-t border-primary/10">
+                        <div className="flex gap-2.5 pt-4 mt-auto border-t border-primary/10">
                             <button
                                 onClick={() => navigate(`/course/${course.id}/modules/`)}
-                                className="flex-1 bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/30 text-sm font-semibold py-2 px-3 rounded-lg transition-colors"
+                                className="btn-press flex-1 bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 text-xs font-bold py-2 px-3 rounded-lg transition-colors tracking-wide uppercase"
                             >
-                                {isTeacher ? 'Manage Modules' : 'View Course'}
+                                {isTeacher ? 'Manage' : 'View Course'}
                             </button>
 
                             {/* Teacher-only actions */}
                             {isTeacher && (
                                 <button
                                     onClick={() => navigate(`/update-course/${course.id}`)}
-                                    className="bg-background hover:bg-primary/5 border border-primary/30 text-text/80 hover:text-action text-sm font-semibold py-2 px-3 rounded-lg transition-colors"
+                                    className="btn-press bg-background hover:bg-primary/5 border border-primary/20 text-text/60 hover:text-action text-xs font-bold py-2 px-3 rounded-lg transition-colors"
                                 >
                                     ✏️ Edit
                                 </button>

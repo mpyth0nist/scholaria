@@ -27,16 +27,16 @@ function Student() {
                 <h1 className="text-2xl font-serif font-bold text-text">
                     Welcome back, <span className="text-action">{firstName}</span> 👋
                 </h1>
-                <p className="text-primary font-medium text-sm mt-1">Here's an overview of your enrolled courses and upcoming quizzes.</p>
+                <p className="text-text/50 font-medium text-sm mt-1">Here's an overview of your enrolled courses and upcoming quizzes.</p>
             </div>
 
             {/* ── stats row ── */}
             <div className="grid grid-cols-2 gap-4">
-                <div className="bg-white/60 border border-primary/20 shadow-sm rounded-xl p-5 hover:-translate-y-0.5 transition-transform duration-300">
+                <div className="animate-scale-in bg-white/60 border border-primary/20 shadow-sm rounded-xl p-5 hover:-translate-y-0.5 transition-transform duration-300" style={{ animationDelay: '0.05s' }}>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-2">Enrolled Courses</p>
                     <p className="text-4xl font-serif font-bold text-text">{courses.length}</p>
                 </div>
-                <div className="bg-white/60 border border-primary/20 shadow-sm rounded-xl p-5 hover:-translate-y-0.5 transition-transform duration-300">
+                <div className="animate-scale-in bg-white/60 border border-primary/20 shadow-sm rounded-xl p-5 hover:-translate-y-0.5 transition-transform duration-300" style={{ animationDelay: '0.1s' }}>
                     <p className="text-primary text-xs font-bold uppercase tracking-widest mb-2">Quizzes Available</p>
                     <p className="text-4xl font-serif font-bold text-text">{quizzes.length}</p>
                 </div>
@@ -61,16 +61,27 @@ function Student() {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">
-                        {courses.slice(0, 4).map(course => (
+                        {courses.slice(0, 4).map((course, i) => (
                             <button
                                 key={course.id}
                                 onClick={() => navigate(`/course/${course.id}/modules/`)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/10 hover:border-primary/30 transition-colors text-left group"
+                                className="animate-item-enter btn-press flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/10 hover:border-primary/30 transition-colors text-left group"
+                                style={{ animationDelay: `${i * 0.06}s` }}
                             >
                                 <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center text-lg shrink-0 overflow-hidden">
-                                    {course.thumbnail
-                                        ? <img src={course.thumbnail} alt="" className="w-full h-full object-cover" />
-                                        : '📚'}
+                                    {course.thumbnail ? (
+                                        <img
+                                            src={
+                                                course.thumbnail.startsWith('http')
+                                                    ? course.thumbnail
+                                                    : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${course.thumbnail.startsWith('/') ? '' : '/'}${course.thumbnail}`
+                                            }
+                                            alt={course.course_name}
+                                            className="w-full h-full object-cover"
+                                            onError={(e) => { e.currentTarget.style.display = 'none'; e.currentTarget.nextSibling.style.display = 'flex' }}
+                                        />
+                                    ) : null}
+                                    <span style={{ display: course.thumbnail ? 'none' : 'flex' }} className="w-full h-full items-center justify-center">📚</span>
                                 </div>
                                 <div className="flex flex-col min-w-0">
                                     <span className="text-sm text-text font-bold group-hover:text-action truncate transition-colors">{course.course_name}</span>
@@ -102,11 +113,12 @@ function Student() {
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">
-                        {quizzes.slice(0, 4).map(quiz => (
+                        {quizzes.slice(0, 4).map((quiz, i) => (
                             <button
                                 key={quiz.id}
                                 onClick={() => navigate(`/quizzes/${quiz.id}/`)}
-                                className="flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/10 hover:border-primary/30 transition-colors text-left group"
+                                className="animate-item-enter btn-press flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/10 hover:border-primary/30 transition-colors text-left group"
+                                style={{ animationDelay: `${i * 0.06}s` }}
                             >
                                 <div className="w-9 h-9 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-lg shrink-0">
                                     📝
@@ -114,7 +126,7 @@ function Student() {
                                 <div className="flex flex-col min-w-0">
                                     <span className="text-sm text-text font-bold group-hover:text-action truncate transition-colors">{quiz.name}</span>
                                     {quiz.due_date && (
-                                        <span className="text-xs text-action/80 font-semibold">Due: {new Date(quiz.due_date).toLocaleDateString()}</span>
+                                        <span className="text-xs text-text/50 font-medium">Due: {new Date(quiz.due_date).toLocaleDateString()}</span>
                                     )}
                                 </div>
                                 <span className="ml-auto bg-action hover:bg-[#a04618] text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors shadow-sm">

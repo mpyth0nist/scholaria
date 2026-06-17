@@ -31,13 +31,13 @@ function Teacher() {
                     <h1 className="text-3xl font-serif font-bold text-text">
                         Teacher Dashboard
                     </h1>
-                    <p className="text-primary mt-1 font-medium">Welcome back! Here is an overview of your active classes.</p>
+                    <p className="text-text/50 mt-1 font-medium text-sm">Welcome back! Here is an overview of your active classes.</p>
                 </div>
             </div>
 
             {/* Metrics Row */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div className="bg-white/60 backdrop-blur-md rounded-xl p-6 border border-primary/20 shadow-sm hover:-translate-y-1 transition duration-300">
+                <div className="animate-scale-in bg-white/60 backdrop-blur-md rounded-xl p-6 border border-primary/20 shadow-sm hover:-translate-y-1 transition duration-300" style={{ animationDelay: '0.05s' }}>
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-primary text-sm font-bold tracking-wide uppercase">Total Courses</p>
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">📚</div>
@@ -45,7 +45,7 @@ function Teacher() {
                     <h3 className="text-4xl font-serif font-bold text-text">{dashboardMetrics.total_courses}</h3>
                 </div>
 
-                <div className="bg-white/60 backdrop-blur-md rounded-xl p-6 border border-primary/20 shadow-sm hover:-translate-y-1 transition duration-300">
+                <div className="animate-scale-in bg-white/60 backdrop-blur-md rounded-xl p-6 border border-primary/20 shadow-sm hover:-translate-y-1 transition duration-300" style={{ animationDelay: '0.1s' }}>
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-primary text-sm font-bold tracking-wide uppercase">Total Students</p>
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">👥</div>
@@ -53,7 +53,7 @@ function Teacher() {
                     <h3 className="text-4xl font-serif font-bold text-text">{dashboardMetrics.total_students}</h3>
                 </div>
 
-                <div className="bg-white/60 backdrop-blur-md rounded-xl p-6 border border-primary/20 shadow-sm hover:-translate-y-1 transition duration-300">
+                <div className="animate-scale-in bg-white/60 backdrop-blur-md rounded-xl p-6 border border-primary/20 shadow-sm hover:-translate-y-1 transition duration-300" style={{ animationDelay: '0.15s' }}>
                     <div className="flex items-center justify-between mb-2">
                         <p className="text-primary text-sm font-bold tracking-wide uppercase">Class Engagement</p>
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">🚀</div>
@@ -97,8 +97,11 @@ function Teacher() {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {dashboardMetrics.recent_submissions.map((sub) => (
-                                            <tr key={sub.id} className="border-b border-primary/10 hover:bg-primary/5 transition-colors">
+                                        {dashboardMetrics.recent_submissions.map((sub, i) => (
+                                            <tr key={sub.id}
+                                                className="animate-item-enter border-b border-primary/10 hover:bg-primary/5 transition-colors"
+                                                style={{ animationDelay: `${i * 0.05}s` }}
+                                            >
                                                 <td className="py-4 px-4 font-medium text-text flex items-center gap-3">
                                                     <div className="h-8 w-8 rounded-full bg-primary/20 flex items-center justify-center text-xs font-bold text-primary shadow-sm border border-primary/30">
                                                         {sub.student_name.charAt(0)}

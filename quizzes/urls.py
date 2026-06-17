@@ -1,7 +1,10 @@
-from .views import *
-from django.urls import path, include
-from django.conf import settings
-from django.conf.urls.static import static
+from django.urls import path
+
+from .views import (
+    QuizList, QuizCreate, QuizUpdate, QuizDelete, QuizDetailedView,
+    UserAttemptCreate, UserAttemptDelete, SubmitQuiz,
+    AnswerCreate, AnswerUpdate,
+)
 
 urlpatterns = [
     path('list/', QuizList.as_view(), name="show-quizzes"),

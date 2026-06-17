@@ -167,7 +167,7 @@ const AdminDashboard = () => {
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-serif font-bold text-text">Admin Dashboard</h1>
-                    <p className="text-primary mt-1">Manage users, roles, and platform access.</p>
+                    <p className="text-text/50 mt-1 text-sm">Manage users, roles, and platform access.</p>
                 </div>
                 <button onClick={openCreate} className="bg-action hover:bg-[#a04618] text-white px-5 py-2.5 rounded-lg font-semibold shadow-md transition transform active:scale-95 flex items-center gap-2">
                     <span className="text-xl leading-none">+</span> New User
@@ -252,7 +252,7 @@ const AdminDashboard = () => {
 
                 {/* Pagination */}
                 <div className="mt-auto px-6 py-4 border-t border-primary/20 bg-background flex items-center justify-between">
-                    <span className="text-sm text-primary">
+                    <span className="text-sm text-text/50">
                         Showing <span className="font-bold text-text">{(page - 1) * size + 1}</span> to <span className="font-bold text-text">{Math.min(page * size, adminUsersCount)}</span> of <span className="font-bold text-text">{adminUsersCount}</span> users
                     </span>
                     <div className="flex gap-2">

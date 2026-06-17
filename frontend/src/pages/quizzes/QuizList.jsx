@@ -38,8 +38,8 @@ const QuizList = () => {
             {/* ── header ── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-bold text-text">Quizzes</h1>
-                    <p className="text-primary text-sm mt-1">
+                    <h1 className="text-2xl font-serif font-bold text-text">Quizzes</h1>
+                    <p className="text-text/50 text-sm mt-1">
                         {quizzes.length} quiz{quizzes.length !== 1 ? 'zes' : ''} available
                     </p>
                 </div>
@@ -64,10 +64,11 @@ const QuizList = () => {
             ) : (
                 /* ── quiz list ── */
                 <div className="flex flex-col gap-3">
-                    {quizzes.map(quiz => (
+                    {quizzes.map((quiz, i) => (
                         <div
                             key={quiz.id}
-                            className="group bg-white/60 border border-primary/20 rounded-xl px-5 py-4 hover:border-action/20 transition flex items-center gap-4"
+                            className="animate-item-enter btn-press group bg-white/60 border border-primary/20 rounded-xl px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-4"
+                            style={{ animationDelay: `${i * 0.05}s` }}
                         >
                             {/* icon */}
                             <div className="w-10 h-10 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-xl shrink-0">
@@ -88,7 +89,7 @@ const QuizList = () => {
                                 </button>
                                 <div className="flex items-center gap-3 mt-1">
                                     {quiz.description && (
-                                        <p className="text-xs text-primary/70 truncate max-w-xs">{quiz.description}</p>
+                                        <p className="text-xs text-text/50 truncate max-w-xs">{quiz.description}</p>
                                     )}
                                     {quiz.due_date && (
                                         <span className={`text-xs font-medium px-2 py-0.5 rounded-full border ${

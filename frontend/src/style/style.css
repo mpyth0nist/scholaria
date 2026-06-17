@@ -15,7 +15,7 @@
   --font-size-body: 1rem;
 }
 
-/* Global resets for body */
+/* ── Global resets ──────────────────────────────────────────────────────── */
 @layer base {
   body {
     background-color: var(--color-background);
@@ -23,21 +23,76 @@
     font-family: var(--font-sans);
   }
   
-  h1 {
-    font-family: var(--font-serif);
-    font-size: var(--font-size-h1);
-    font-weight: 700;
+  h1 { font-family: var(--font-serif); font-size: var(--font-size-h1); font-weight: 700; }
+  h2 { font-family: var(--font-serif); font-size: var(--font-size-h2); font-weight: 600; }
+  h3 { font-family: var(--font-serif); font-size: var(--font-size-h3); font-weight: 500; }
+}
+
+/* ── Keyframes ──────────────────────────────────────────────────────────── */
+
+/* Page enter: fade + slide up */
+@keyframes page-enter {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* List item stagger: fade + slide from left */
+@keyframes item-enter {
+  from { opacity: 0; transform: translateX(-8px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+/* Card scale-in */
+@keyframes scale-in {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Recent course bubble pop-in: starts transparent + small, springs to full */
+@keyframes course-bubble-enter {
+  0%   { opacity: 0;    transform: scale(0.82) translateY(8px); }
+  60%  { opacity: 0.85; transform: scale(1.04) translateY(-2px); }
+  100% { opacity: 1;    transform: scale(1)    translateY(0); }
+}
+
+/* Expanded course card: blooms in from slightly transparent + scaled down */
+@keyframes card-expand {
+  0%   { opacity: 0;    transform: scale(0.92); }
+  50%  { opacity: 0.7;  transform: scale(1.02); }
+  100% { opacity: 1;    transform: scale(1); }
+}
+
+/* ── Animation utility classes ──────────────────────────────────────────── */
+@layer utilities {
+
+  .animate-page-enter {
+    animation: page-enter 0.3s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  
-  h2 {
-    font-family: var(--font-serif);
-    font-size: var(--font-size-h2);
-    font-weight: 600;
+
+  .animate-item-enter {
+    animation: item-enter 0.25s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
-  
-  h3 {
-    font-family: var(--font-serif);
-    font-size: var(--font-size-h3);
-    font-weight: 500;
+
+  .animate-scale-in {
+    animation: scale-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Recent course idle bubble */
+  .animate-course-bubble {
+    animation: course-bubble-enter 0.45s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  }
+
+  /* Expanded course detail card */
+  .animate-card-expand {
+    animation: card-expand 0.35s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  /* Button press: scale + opacity dip for tactile transparency feel */
+  .btn-press {
+    transition: transform 0.12s ease, opacity 0.12s ease, box-shadow 0.12s ease;
+  }
+  .btn-press:active {
+    transform: scale(0.95);
+    opacity: 0.72;
   }
 }
