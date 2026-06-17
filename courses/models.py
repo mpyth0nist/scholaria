@@ -1,6 +1,6 @@
 from django.db import models
 from users.models import CustomUser
-from django.core.validators import MinLengthValidator
+from django.core.validators import MinLengthValidator, MinValueValidator
 
 # Create your models here.
 
@@ -29,7 +29,7 @@ class Course(models.Model):
 class Module(models.Model):
     title = models.CharField(max_length=255)
     course = models.ForeignKey(Course, related_name="module_course", on_delete=models.CASCADE)
-    order = models.IntegerField(default=0)
+    order = models.IntegerField(default=1, validators=[MinValueValidator(1)])
     done = models.BooleanField(default=False)
 
     def __str__(self):

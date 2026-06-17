@@ -9,7 +9,7 @@ export const fetchQuizzes = createAsyncThunk("fetchQuizzes", async () => {
 
 export const fetchQuiz = createAsyncThunk("fetchQuiz", async (quizId) => {
     const res = await api.get(`api/quizzes/${quizId}/`)
-    return res.data[0]
+    return res.data
 })
 
 export const addQuiz = createAsyncThunk("addQuiz", async (quiz, { rejectWithValue }) => {

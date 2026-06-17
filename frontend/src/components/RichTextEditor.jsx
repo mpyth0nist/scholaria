@@ -4,15 +4,16 @@ import { useRef, useState, useCallback, useEffect } from 'react'
 // CONSTANTS
 // ─────────────────────────────────────────────────────────────────────────────
 
+// Colors are chosen for legibility on a white/cream background (WCAG AA+).
 const COLORS = [
-    { label: 'White',   value: '#f1f5f9' },
-    { label: 'Silver',  value: '#94a3b8' },
-    { label: 'Violet',  value: '#a78bfa' },
-    { label: 'Sky',     value: '#38bdf8' },
-    { label: 'Emerald', value: '#34d399' },
-    { label: 'Amber',   value: '#fbbf24' },
-    { label: 'Rose',    value: '#fb7185' },
-    { label: 'Orange',  value: '#fb923c' },
+    { label: 'Default',  value: '#132A13' },  // dark green — main text
+    { label: 'Slate',    value: '#334155' },  // dark slate
+    { label: 'Violet',   value: '#5b21b6' },  // deep violet
+    { label: 'Sky',      value: '#0369a1' },  // deep sky blue
+    { label: 'Emerald',  value: '#065f46' },  // deep emerald
+    { label: 'Amber',    value: '#92400e' },  // dark amber/brown
+    { label: 'Rose',     value: '#be123c' },  // deep rose
+    { label: 'Orange',   value: '#c2410c' },  // dark orange (action)
 ]
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32]
@@ -375,6 +376,58 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// COLOR FIXER — maps old light-on-dark palette to dark-on-light equivalents.
+// This ensures content authored before the palette change renders correctly.
+// ─────────────────────────────────────────────────────────────────────────────
+
+const LIGHT_TO_DARK = {
+    // hex values the old palette used (lowercase, no alpha)
+    '#f1f5f9': '#132A13',  // 'White'   → default text
+    '#94a3b8': '#334155',  // 'Silver'  → slate-700
+    '#a78bfa': '#5b21b6',  // 'Violet'  → violet-800
+    '#38bdf8': '#0369a1',  // 'Sky'     → sky-700
+    '#34d399': '#065f46',  // 'Emerald' → emerald-900
+    '#fbbf24': '#92400e',  // 'Amber'   → amber-900
+    '#fb7185': '#be123c',  // 'Rose'    → rose-700
+    '#fb923c': '#c2410c',  // 'Orange'  → orange-700
+}
+
+/**
+ * Walks all inline `color` style declarations in saved HTML and replaces
+ * any known light-palette hex value with its dark counterpart.
+ * rgb(r, g, b) values from execCommand are also normalised.
+ */
+const fixLessonColors = (html) => {
+    if (!html) return ''
+
+    // Also handle rgb() format that browsers emit from execCommand
+    const RGB_TO_HEX = {
+        'rgb(241, 245, 249)': '#f1f5f9',
+        'rgb(148, 163, 184)': '#94a3b8',
+        'rgb(167, 139, 250)': '#a78bfa',
+        'rgb(56, 189, 248)':  '#38bdf8',
+        'rgb(52, 211, 153)':  '#34d399',
+        'rgb(251, 191, 36)':  '#fbbf24',
+        'rgb(251, 113, 133)': '#fb7185',
+        'rgb(251, 146, 60)':  '#fb923c',
+    }
+
+    // Replace rgb() representations first so later hex replacement covers all cases
+    let fixed = html
+    Object.entries(RGB_TO_HEX).forEach(([rgb, hex]) => {
+        fixed = fixed.replaceAll(rgb, hex)
+    })
+
+    // Replace hex representations (case-insensitive)
+    Object.entries(LIGHT_TO_DARK).forEach(([light, dark]) => {
+        const re = new RegExp(light.replace('#', '#'), 'gi')
+        fixed = fixed.replace(re, dark)
+    })
+
+    return fixed
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // LESSON CONTENT RENDERER  (read-only)
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -389,7 +442,7 @@ export const LessonContent = ({ html }) => (
             [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
             [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
             [&_span]:leading-[inherit]"
-        dangerouslySetInnerHTML={{ __html: html || '' }}
+        dangerouslySetInnerHTML={{ __html: fixLessonColors(html) }}
     />
 )
 

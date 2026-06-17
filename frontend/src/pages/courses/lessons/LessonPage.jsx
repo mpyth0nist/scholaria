@@ -28,7 +28,7 @@ const LessonPage = () => {
     const fetchLesson = async () => {
         try {
             const res = await api.get(`api/courses/lessons/${lesson_id}/`)
-            const data = res.data[0]
+            const data = res.data
             setLesson(data)
             setForm({ title: data.title, content: data.content, attachments: null })
         } catch (err) {
@@ -128,7 +128,7 @@ const LessonPage = () => {
                 <h1 className="text-3xl font-bold text-text leading-snug">{lesson.title}</h1>
 
                 {/* content card — module title badge in top-right corner */}
-                <div className="relative bg-white/60 border border-primary/20 rounded-xl p-7">
+                <div className="relative bg-white border border-primary/20 rounded-xl p-7">
                     {lesson.module_title && (
                         <span className="absolute top-4 right-4 text-xs font-semibold text-action bg-action/10 border border-action/20 px-2.5 py-1 rounded-full">
                             {lesson.module_title}
@@ -158,7 +158,7 @@ const LessonPage = () => {
                             <span className="text-primary text-base font-semibold">✓ Marked as Read</span>
                             <button
                                 onClick={() => navigate(-1)}
-                                className="text-base text-action hover:text-action transition"
+                                className="text-base text-action font-semibold hover:underline transition"
                             >
                                 ← Back to modules
                             </button>
@@ -167,7 +167,7 @@ const LessonPage = () => {
                         <button
                             onClick={handleMarkRead}
                             disabled={marking}
-                            className="flex items-center gap-2 bg-primary hover:bg-primary active:scale-95 text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50"
+                            className="flex items-center gap-2 bg-primary hover:bg-[#3a6347] active:scale-95 text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50"
                         >
                             {marking ? (
                                 <>
