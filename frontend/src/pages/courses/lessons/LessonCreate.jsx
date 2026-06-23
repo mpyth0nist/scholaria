@@ -3,11 +3,11 @@ import api from '../../../api'
 import RichTextEditor from '../../../components/RichTextEditor'
 
 const LessonCreate = ({ module_id, onCreated }) => {
-    const [title, setTitle]           = useState('')
-    const [content, setContent]       = useState('')
-    const [attachment, setAttachment] = useState(null)
-    const [video, setVideo]           = useState(null)
-    const [loading, setLoading]       = useState(false)
+    const [title, setTitle] = useState('')
+    const [content, setContent] = useState('')
+    const [attachments, setAttachments] = useState(null)
+    const [video, setVideo] = useState(null)
+    const [loading, setLoading] = useState(false)
 
     const handleSubmit = async (e) => {
         e.preventDefault()
@@ -17,16 +17,14 @@ const LessonCreate = ({ module_id, onCreated }) => {
         const formData = new FormData()
         formData.append('title', title)
         formData.append('content', content)
-        if (attachment) formData.append('attachments', attachment)
+        if (formData.attachments) formData.append('attachments', attachments)
         if (video) formData.append('video', video)
 
         try {
-            await api.post(`api/courses/${module_id}/add-lesson/`, formData, {
-                headers: { 'Content-Type': 'multipart/form-data' }
-            })
+            await api.post(`api/courses/${module_id}/add-lesson/`, formData)
             setTitle('')
             setContent('')
-            setAttachment(null)
+            setattachments(null)
             setVideo(null)
             if (onCreated) onCreated()
         } catch (err) {
@@ -56,9 +54,9 @@ const LessonCreate = ({ module_id, onCreated }) => {
 
             <label className="flex items-center gap-2 text-sm text-primary cursor-pointer">
                 <span className="bg-primary/5 border border-primary/20 rounded-lg px-3 py-2 hover:bg-primary/5 transition text-text/80">
-                    {attachment ? attachment.name : 'Attach file (optional)'}
+                    {attachments ? attachments.name : 'Attach file (optional)'}
                 </span>
-                <input type="file" className="hidden" onChange={(e) => setAttachment(e.target.files[0])} />
+                <input type="file" className="hidden" onChange={(e) => setAttachments(e.target.files[0])} />
             </label>
 
             <button

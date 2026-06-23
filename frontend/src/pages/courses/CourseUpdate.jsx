@@ -1,27 +1,26 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import { useSelector, useDispatch } from 'react-redux'
-import { fetchSelectedCourse, updateCourse, deleteCourse } from "../../features/courses/coursesSlice"
-import { fetchUser, fetchStudents } from "../../features/users/userSlice"
+import { fetchSelectedCourse, updateCourse, deleteCourse, fetchClasses } from "../../features/courses/coursesSlice"
+import { fetchUser } from "../../features/users/userSlice"
 import NotFound from '../NotFound'
 
 // ── reusable field wrapper ────────────────────────────────────────────────────
 const Field = ({ label, children }) => (
     <div className="flex flex-col gap-1.5">
-        <label className="text-xs font-semibold uppercase tracking-widest text-action">{label}</label>
+        <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">{label}</label>
         {children}
     </div>
 )
 
-const inputClass =
-    'bg-white/60 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text placeholder-slate-500 outline-none focus:border-action transition'
+const inputClass = 'w-full premium-input'
 
 // ── delete confirmation modal ────────────────────────────────────────────────
 const DeleteModal = ({ courseName, onConfirm, onCancel }) => (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm">
         <div className="bg-background border border-primary/20 rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl">
-            <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-2xl mx-auto mb-4">
-                🗑️
+            <div className="w-12 h-12 rounded-full bg-red-500/10 border border-red-500/30 flex items-center justify-center text-[10px] font-bold text-red-500 mx-auto mb-4">
+                DEL
             </div>
             <h2 className="text-lg font-bold text-text text-center">Delete Course?</h2>
             <p className="text-primary text-sm text-center mt-2 leading-relaxed">
@@ -55,8 +54,7 @@ function CourseUpdate() {
 
     const selectedCourse = useSelector(state => state.courses.selectedCourse)
     const role = useSelector(state => state.users.user?.role)
-    const students = useSelector(state => state.users.students)
-    const studentsLoading = useSelector(state => state.users.studentsLoading)
+    const availableClasses = useSelector(state => state.courses.classes) || []
 
     const [courseData, setCourseData] = useState({})
     const [submitting, setSubmitting] = useState(false)
@@ -67,12 +65,12 @@ function CourseUpdate() {
     useEffect(() => {
         dispatch(fetchSelectedCourse(id))
         dispatch(fetchUser())
-        dispatch(fetchStudents({ size: 1000 }))
+        dispatch(fetchClasses())
     }, [])
 
     useEffect(() => {
-        if (selectedCourse && selectedCourse.length > 0) {
-            setCourseData(selectedCourse[0])
+        if (selectedCourse && selectedCourse.id) {
+            setCourseData(selectedCourse)
         }
     }, [selectedCourse])
 
@@ -81,14 +79,14 @@ function CourseUpdate() {
         setCourseData(prev => ({ ...prev, [k]: v }))
     }
 
-    const toggleStudent = (studentId) => {
+    const toggleClass = (classId) => {
         setSaved(false)
         setCourseData(prev => {
-            const current = prev.student || []
-            const next = current.includes(studentId)
-                ? current.filter(s => s !== studentId)
-                : [...current, studentId]
-            return { ...prev, student: next }
+            const current = prev.student_classes || []
+            const next = current.includes(classId)
+                ? current.filter(c => c !== classId)
+                : [...current, classId]
+            return { ...prev, student_classes: next }
         })
     }
 
@@ -141,8 +139,8 @@ function CourseUpdate() {
                         <span>/</span>
                         <span className="text-primary">Edit Course</span>
                     </div>
-                    <h1 className="text-2xl font-bold text-text">Edit Course</h1>
-                    <p className="text-primary text-sm mt-0.5">
+                    <h1 className="text-3xl font-serif font-bold text-text">Edit Course</h1>
+                    <p className="text-text/50 font-medium text-sm mt-1.5">
                         Update course details and manage enrolled students.
                     </p>
                 </div>
@@ -160,7 +158,7 @@ function CourseUpdate() {
                 )}
 
                 {/* form card */}
-                <form onSubmit={handleSubmit} className="bg-white/60 border border-primary/20 rounded-xl p-6 flex flex-col gap-5">
+                <form onSubmit={handleSubmit} className="premium-card p-6 flex flex-col gap-5">
 
                     <Field label="Course Title">
                         <input
@@ -194,36 +192,79 @@ function CourseUpdate() {
                         />
                     </Field>
 
-                    {/* Enrolled students */}
-                    <Field label="Enrolled Students">
-                        {studentsLoading ? (
-                            <p className="text-primary/70 text-sm italic animate-pulse">Loading students…</p>
-                        ) : students.length === 0 ? (
-                            <p className="text-primary/70 text-sm italic">No students registered yet.</p>
+                    <Field label="Thumbnail">
+                        <div className="flex flex-col gap-2">
+                            <label className="flex items-center gap-3 cursor-pointer group w-fit">
+                                <span className="bg-primary/5 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text/80 hover:bg-primary/10 transition group-hover:border-action/30 font-sans font-medium">
+                                    {courseData.thumbnail instanceof File 
+                                        ? courseData.thumbnail.name 
+                                        : courseData.thumbnail 
+                                            ? 'Change image…' 
+                                            : 'Choose image…'}
+                                </span>
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    className="hidden"
+                                    onChange={e => handleUpdate('thumbnail', e.target.files[0])}
+                                />
+                            </label>
+                            {courseData.thumbnail && (
+                                <div className="flex items-center gap-2 mt-1">
+                                    <span className="text-xs text-text/50 font-sans font-medium">Current:</span>
+                                    {courseData.thumbnail instanceof File ? (
+                                        <span className="text-xs text-primary font-sans font-semibold">{courseData.thumbnail.name}</span>
+                                    ) : (
+                                        <a 
+                                            href={courseData.thumbnail.startsWith('http') ? courseData.thumbnail : `${import.meta.env.VITE_API_URL || 'http://localhost:8000'}${courseData.thumbnail}`} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer" 
+                                            className="text-xs text-action hover:underline font-sans font-semibold truncate max-w-[200px]"
+                                        >
+                                            {courseData.thumbnail.split('/').pop()}
+                                        </a>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    </Field>
+
+                    {/* Enroll Classes */}
+                    <Field label="Enroll Classes">
+                        {availableClasses.length === 0 ? (
+                            <p className="text-primary/70 text-sm italic">No classes available yet.</p>
                         ) : (
-                            <div className="max-h-44 overflow-y-auto flex flex-col gap-1 pr-1">
-                                {students.map(student => {
-                                    const enrolled = (courseData.student || []).includes(student.id)
+                            <div className="bg-background/40 border border-primary/10 rounded-xl p-3 max-h-56 overflow-y-auto flex flex-col gap-2 pr-1 shadow-inner">
+                                {availableClasses.map(cls => {
+                                    const enrolled = (courseData.student_classes || []).includes(cls.id)
                                     return (
                                         <label
-                                            key={student.id}
-                                            className={`flex items-center gap-3 px-3 py-2.5 rounded-lg cursor-pointer transition group
-                                                ${enrolled ? 'bg-action/10 border border-action/20' : 'hover:bg-primary/5 border border-transparent'}`}
+                                            key={cls.id}
+                                            className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group
+                                                ${enrolled 
+                                                    ? 'bg-primary/10 border border-primary/30 shadow-sm' 
+                                                    : 'bg-white/40 border border-primary/10 hover:bg-primary/5 hover:border-primary/25'}`}
                                         >
                                             <input
                                                 type="checkbox"
-                                                className="accent-violet-500 w-4 h-4"
+                                                className="accent-primary w-4 h-4 cursor-pointer"
                                                 checked={enrolled}
-                                                onChange={() => toggleStudent(student.id)}
+                                                onChange={() => toggleClass(cls.id)}
                                             />
-                                            <div className="w-7 h-7 rounded-full bg-action/10 border border-action/20 flex items-center justify-center text-xs text-action font-semibold shrink-0">
-                                                {student.first_name?.charAt(0)}{student.last_name?.charAt(0)}
+                                            <div className={`w-7 h-7 rounded-md flex items-center justify-center text-[10px] font-bold shrink-0 transition-colors duration-200
+                                                ${enrolled ? 'bg-primary/20 border border-primary/30 text-primary' : 'bg-primary/5 border border-primary/10 text-primary/70'}`}>
+                                                CLS
                                             </div>
-                                            <span className="text-sm text-text/80 group-hover:text-text transition">
-                                                {student.first_name} {student.last_name}
-                                            </span>
+                                            <div className="flex flex-col">
+                                                <span className={`text-sm font-semibold transition-colors duration-200 ${enrolled ? 'text-text' : 'text-text/70 group-hover:text-text'}`}>
+                                                    {cls.name}
+                                                </span>
+                                                <span className="text-[11px] text-primary/70">
+                                                    {cls.students.length} student{cls.students.length !== 1 ? 's' : ''}
+                                                </span>
+                                            </div>
                                             {enrolled && (
-                                                <span className="ml-auto text-xs text-action font-medium">Enrolled</span>
+                                                <span className="ml-auto text-xs text-primary font-semibold tracking-wide bg-primary/10 px-2 py-0.5 rounded-full">Enrolled</span>
                                             )}
                                         </label>
                                     )

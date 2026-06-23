@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchUser } from '../features/users/userSlice'
 
-const TeacherCard = () => {
+const TeacherCard = ({ className = "" }) => {
     const teacher = useSelector(state => state.users.user)
     const dispatch = useDispatch()
 
@@ -15,7 +15,7 @@ const TeacherCard = () => {
     }
 
     return (
-        <div className="bg-white/60 backdrop-blur-md border border-primary/20 rounded-xl p-6 shadow-sm relative overflow-hidden group">
+        <div className={`premium-card p-6 relative overflow-hidden group flex flex-col ${className}`}>
             {/* Decorative background glow */}
             <div className="absolute -right-6 -top-6 w-32 h-32 bg-primary/5 rounded-full blur-2xl group-hover:bg-primary/10 transition-all duration-500"></div>
             
@@ -29,7 +29,7 @@ const TeacherCard = () => {
                 </div>
             </div>
 
-            <div className="space-y-3 relative z-10 pt-4 border-t border-primary/10">
+            <div className="space-y-3 relative z-10 pt-4 border-t border-primary/10 mt-auto">
                 <div className="flex justify-between items-center">
                     <span className="text-primary text-sm font-semibold">Email Address</span>
                     <span className="text-text text-sm truncate max-w-[150px]" title={teacher.email}>{teacher.email}</span>

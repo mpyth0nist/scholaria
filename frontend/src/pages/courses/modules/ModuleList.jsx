@@ -33,13 +33,13 @@ const AddLessonForm = ({ moduleId, onCreated }) => {
 
     return (
         <form onSubmit={handleSubmit} className="mt-5 flex flex-col gap-3 border-t border-primary/20 pt-5">
-            <p className="text-xs font-semibold uppercase tracking-widest text-action">Add a Lesson</p>
+            <p className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Add a Lesson</p>
             <input
                 type="text"
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Lesson title"
-                className="bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
+                className="w-full premium-input"
             />
             <RichTextEditor
                 value={content}
@@ -97,9 +97,9 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
     }
 
     return (
-        <div className="bg-white/60 border border-primary/20 rounded-xl overflow-hidden transition hover:border-action/20">
+        <div className="premium-card overflow-hidden">
             {/* card header */}
-            <div className="flex items-center justify-between px-6 py-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5">
                 <div className="flex items-center gap-4">
                     <span className="w-9 h-9 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-action text-sm font-bold shrink-0">
                         {module.order}
@@ -111,24 +111,24 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
                         )}
                     </div>
                 </div>
-                <div className="flex items-center gap-1">
+                <div className="flex flex-wrap items-center gap-1 sm:ml-auto w-full sm:w-auto justify-end">
                     <button
                         onClick={() => { setEditing(prev => !prev); setExpanded(false) }}
                         className="text-sm text-primary hover:text-action px-3 py-2 rounded-lg hover:bg-primary/5 transition"
                     >
-                        ✏️ Edit
+                        Edit
                     </button>
                     <button
                         onClick={handleToggle}
                         className="text-sm text-primary hover:text-action px-3 py-2 rounded-lg hover:bg-primary/5 transition"
                     >
-                        {expanded ? '▲ Hide' : '▼ Lessons'}
+                        {expanded ? 'Hide' : 'Lessons'}
                     </button>
                     <button
                         onClick={() => onDelete(module.id)}
                         className="text-sm text-red-400/70 hover:text-red-400 px-3 py-2 rounded-lg hover:bg-red-500/10 transition"
                     >
-                        🗑 Delete
+                        Delete
                     </button>
                 </div>
             </div>
@@ -137,12 +137,12 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
             {editing && (
                 <form onSubmit={handleUpdate} className="px-6 pb-5 flex flex-col gap-3 border-t border-primary/20 pt-5">
                     <p className="text-xs font-semibold uppercase tracking-widest text-action">Edit Module</p>
-                    <div className="flex gap-3">
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <input type="text" value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Title"
-                            className="flex-1 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
+                            className="flex-1 premium-input" />
                         <input type="number" value={order} onChange={(e) => setOrder(Math.max(1, parseInt(e.target.value, 10) || 1))} placeholder="Order"
                             min="1"
-                            className="w-24 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
+                            className="w-full sm:w-24 premium-input" />
                     </div>
                     <div className="flex gap-2">
                         <button type="submit" className="bg-action hover:bg-action active:scale-95 text-white text-sm font-semibold px-5 py-2.5 rounded-lg transition-all">Save</button>
@@ -163,7 +163,11 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
                                 onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
                                 className="flex items-center gap-4 w-full text-left px-4 py-4 rounded-lg bg-white/60 hover:bg-primary/5 border border-primary/20 hover:border-action/20 transition group"
                             >
-                                <span className="text-action text-sm shrink-0">📄</span>
+                                <div className="w-8 h-8 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-action shrink-0">
+                                    <svg className="w-4 h-4 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                </div>
                                 <span className="text-base text-text/80 group-hover:text-text transition flex-1">{lesson.title}</span>
                                 {lesson.done && <span className="ml-auto text-primary text-sm">✓</span>}
                             </button>
@@ -206,14 +210,14 @@ const StudentModuleCard = ({ module, navigate }) => {
     const totalCount = lessons.length
 
     return (
-        <div className={`rounded-xl overflow-hidden border transition ${module.done
-            ? 'bg-primary/10 border-primary/20'
-            : 'bg-white/60 border-primary/20 hover:border-action/20'}`}>
+        <div className={`overflow-hidden transition ${module.done
+            ? 'bg-primary/10 border border-primary/20 rounded-xl'
+            : 'premium-card'}`}>
 
             {/* header */}
             <button
                 onClick={handleToggle}
-                className="w-full flex items-center justify-between px-6 py-5 text-left"
+                className="w-full flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-5 text-left"
             >
                 <div className="flex items-center gap-4">
                     <span className={`w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold border shrink-0 ${module.done
@@ -229,7 +233,7 @@ const StudentModuleCard = ({ module, navigate }) => {
                     </div>
                 </div>
 
-                <div className="flex items-center gap-4 shrink-0">
+                <div className="flex items-center justify-between sm:justify-start gap-4 shrink-0 w-full sm:w-auto border-t border-primary/10 sm:border-0 pt-3 sm:pt-0">
                     {totalCount > 0 && (
                         <div className="flex items-center gap-2">
                             <div className="w-24 h-1.5 bg-primary/5 rounded-full overflow-hidden">
@@ -261,9 +265,19 @@ const StudentModuleCard = ({ module, navigate }) => {
                                     ? 'bg-primary/10 border-primary/20'
                                     : 'bg-white/60 border-primary/20 hover:bg-primary/5 hover:border-action/20'}`}
                             >
-                                <span className={`text-sm shrink-0 ${lesson.done ? 'text-primary' : 'text-action'}`}>
-                                    {lesson.done ? '✅' : '📄'}
-                                </span>
+                                    {lesson.done ? (
+                                        <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0">
+                                            <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                            </svg>
+                                        </div>
+                                    ) : (
+                                        <div className="w-8 h-8 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-action shrink-0">
+                                            <svg className="w-4 h-4 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                            </svg>
+                                        </div>
+                                    )}
                                 <span className={`text-base transition flex-1 text-left ${lesson.done ? 'text-primary line-through' : 'text-text/80 group-hover:text-action'}`}>
                                     {lesson.title}
                                 </span>
@@ -346,10 +360,10 @@ const ModulesList = () => {
             {/* ── page header ── */}
             <div className="flex items-start justify-between">
                 <div>
-                    <h1 className="text-3xl font-bold text-text">
+                    <h1 className="text-3xl font-serif font-bold text-text">
                         {isTeacher ? 'Course Modules' : 'Course Content'}
                     </h1>
-                    <p className="text-primary text-base mt-1.5">
+                    <p className="text-text/50 font-medium text-sm mt-1.5">
                         {isTeacher
                             ? `${modules.length} module${modules.length !== 1 ? 's' : ''} in this course`
                             : `${completedModules} of ${modules.length} modules completed`}
@@ -383,16 +397,16 @@ const ModulesList = () => {
 
             {/* teacher-only: add module form */}
             {isTeacher && showForm && (
-                <form onSubmit={handleAddModule} className="bg-white/60 border border-action/20 rounded-xl p-6 flex flex-col gap-4">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-action">New Module</p>
-                    <div className="flex gap-3">
+                <form onSubmit={handleAddModule} className="premium-card p-6 border-action/30 flex flex-col gap-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">New Module</p>
+                    <div className="flex flex-col sm:flex-row gap-3">
                         <input type="text" value={newTitle} onChange={(e) => setNewTitle(e.target.value)}
                             placeholder="Module title" autoFocus
-                            className="flex-1 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
+                            className="flex-1 premium-input" />
                         <input type="number" value={newOrder} onChange={(e) => setNewOrder(Math.max(1, parseInt(e.target.value, 10) || 1))}
                             min="1"
                             placeholder="Order"
-                            className="w-24 bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition" />
+                            className="w-full sm:w-24 premium-input" />
                     </div>
                     <div className="flex gap-2">
                         <button type="submit" disabled={adding}
@@ -409,8 +423,12 @@ const ModulesList = () => {
 
             {/* modules list */}
             {modules.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-primary/70 gap-4">
-                    <span className="text-5xl">{isTeacher ? '📦' : '📭'}</span>
+                <div className="flex flex-col items-center justify-center py-24 text-primary/70 gap-3">
+                    <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary/50">
+                        <svg className="w-5 h-5 text-primary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                    </div>
                     <p className="text-base italic">
                         {isTeacher
                             ? 'No modules yet. Add one above to get started.'

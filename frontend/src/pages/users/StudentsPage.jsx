@@ -82,8 +82,8 @@ const StudentsPage = () => {
             {/* ── Page header ── */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-white tracking-tight">Students</h1>
-                    <p className="text-sm text-primary mt-1">
+                    <h1 className="text-3xl font-serif font-bold text-text">Students</h1>
+                    <p className="text-text/50 font-medium text-sm mt-1.5">
                         {loading && students.length === 0 ? 'Loading…' : `${studentsCount} student${studentsCount !== 1 ? 's' : ''} total`}
                     </p>
                 </div>
@@ -98,16 +98,16 @@ const StudentsPage = () => {
                     <input
                         id="student-search"
                         type="text"
-                        placeholder="Search server..."
+                        placeholder="Search students..."
                         value={search}
                         onChange={e => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 rounded-lg bg-white/60 border border-primary/20 text-text placeholder-gray-500 text-sm focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition"
+                        className="w-full pl-9 pr-4 py-2 text-sm premium-input"
                     />
                 </div>
             </div>
 
             {/* ── Table card ── */}
-            <div className="rounded-xl border border-[#2f2f2f] bg-[#1e1e1e] overflow-hidden shadow-xl relative">
+            <div className="premium-card overflow-hidden relative">
                 
                 {/* Thin loading indicator across the top for page transitions */}
                 {loading && students.length > 0 && (
@@ -140,53 +140,53 @@ const StudentsPage = () => {
                     <div className="overflow-x-auto relative">
                         <table className="w-full text-sm text-left">
                             <thead>
-                                <tr className="border-b border-[#2f2f2f] bg-[#242424]">
-                                    <th className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider">#</th>
+                                <tr className="border-b border-primary/20 bg-primary/10">
+                                    <th className="hidden sm:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider">#</th>
                                     <th 
-                                        className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider cursor-pointer hover:bg-[#2f2f2f] transition-colors group select-none"
+                                        className="px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider cursor-pointer hover:bg-primary/15 transition-colors group select-none"
                                         onClick={() => handleSort('first_name')}
                                     >
                                         Student <SortIcon active={sortConfig.key === 'first_name'} direction={sortConfig.direction} />
                                     </th>
                                     <th 
-                                        className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider cursor-pointer hover:bg-[#2f2f2f] transition-colors group select-none"
+                                        className="hidden md:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider cursor-pointer hover:bg-primary/15 transition-colors group select-none"
                                         onClick={() => handleSort('username')}
                                     >
                                         Username <SortIcon active={sortConfig.key === 'username'} direction={sortConfig.direction} />
                                     </th>
                                     <th 
-                                        className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider cursor-pointer hover:bg-[#2f2f2f] transition-colors group select-none"
+                                        className="hidden md:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider cursor-pointer hover:bg-primary/15 transition-colors group select-none"
                                         onClick={() => handleSort('email')}
                                     >
                                         Email <SortIcon active={sortConfig.key === 'email'} direction={sortConfig.direction} />
                                     </th>
                                     <th 
-                                        className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider cursor-pointer hover:bg-[#2f2f2f] transition-colors group select-none"
+                                        className="px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider cursor-pointer hover:bg-primary/15 transition-colors group select-none"
                                         onClick={() => handleSort('birth_date')}
                                     >
                                         Age <SortIcon active={sortConfig.key === 'birth_date'} direction={sortConfig.direction === 'asc' ? 'desc' : 'asc'} />
                                     </th>
-                                    <th className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider">Date of Birth</th>
-                                    <th className="px-5 py-3 text-xs font-semibold text-primary uppercase tracking-wider">
+                                    <th className="hidden sm:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider">Date of Birth</th>
+                                    <th className="hidden md:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider">
                                         Courses
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className={`divide-y divide-[#2a2a2a] ${loading ? 'opacity-50' : 'opacity-100'} transition-opacity delay-75`}>
+                            <tbody className={`divide-y divide-primary/10 ${loading ? 'opacity-50' : 'opacity-100'} transition-opacity delay-75`}>
                                 {students.map((student, idx) => (
                                     <tr
                                         key={student.id}
-                                        className="hover:bg-[#242424] transition-colors duration-150 group"
+                                        className="hover:bg-primary/5 transition-colors duration-150 group"
                                     >
                                         {/* Row number uses ID now, or we can use computed index */}
-                                        <td className="px-5 py-4 text-primary/70 tabular-nums">{(page - 1) * 10 + idx + 1}</td>
+                                        <td className="hidden sm:table-cell px-5 py-4 text-primary/70 tabular-nums">{(page - 1) * 10 + idx + 1}</td>
 
                                         {/* Avatar + full name */}
                                         <td className="px-5 py-4">
                                             <div className="flex items-center gap-3">
                                                 <Avatar first={student.first_name} last={student.last_name} />
                                                 <div>
-                                                    <p className="font-medium text-white group-hover:text-action transition-colors">
+                                                    <p className="font-semibold text-text group-hover:text-action transition-colors">
                                                         {student.first_name || '—'} {student.last_name || ''}
                                                     </p>
                                                     <p className="text-xs text-primary/70">ID #{student.id}</p>
@@ -195,15 +195,15 @@ const StudentsPage = () => {
                                         </td>
 
                                         {/* Username */}
-                                        <td className="px-5 py-4">
+                                        <td className="hidden md:table-cell px-5 py-4">
                                             <span className="font-mono text-primary text-xs bg-primary/10 px-2 py-1 rounded">
                                                 @{student.username}
                                             </span>
                                         </td>
 
                                         {/* Email */}
-                                        <td className="px-5 py-4 text-text/80">
-                                            {student.email || <span className="text-gray-600">—</span>}
+                                        <td className="hidden md:table-cell px-5 py-4 text-text/85">
+                                            {student.email || <span className="text-primary/50">—</span>}
                                         </td>
 
                                         {/* Age */}
@@ -215,7 +215,7 @@ const StudentsPage = () => {
                                         </td>
 
                                         {/* Birth date */}
-                                        <td className="px-5 py-4 text-primary tabular-nums">
+                                        <td className="hidden sm:table-cell px-5 py-4 text-primary/80 tabular-nums">
                                             {student.birth_date
                                                 ? new Date(student.birth_date).toLocaleDateString('en-GB', {
                                                     day: '2-digit', month: 'short', year: 'numeric'
@@ -224,20 +224,20 @@ const StudentsPage = () => {
                                         </td>
 
                                         {/* Courses enrolled count */}
-                                        <td className="px-5 py-4">
+                                        <td className="hidden md:table-cell px-5 py-4">
                                             {student.student_courses && student.student_courses.length > 0 ? (
                                                 <div className="flex flex-wrap gap-1 max-w-xs">
                                                     {student.student_courses.map(course => (
                                                         <span
                                                             key={course.id}
-                                                            className="text-xs bg-action/10 text-action border border-action/20 rounded px-2 py-0.5"
+                                                            className="text-xs bg-action/10 text-action border border-action/20 rounded px-2 py-0.5 font-semibold"
                                                         >
                                                             {course.course_name}
                                                         </span>
                                                     ))}
                                                 </div>
                                             ) : (
-                                                <span className="text-xs text-gray-600 italic">No courses</span>
+                                                <span className="text-xs text-primary/50 italic">No courses</span>
                                             )}
                                         </td>
                                     </tr>
@@ -249,8 +249,8 @@ const StudentsPage = () => {
 
                 {/* ── Footer Pagination ── */}
                 {studentsCount > 0 && (
-                    <div className="px-5 py-3 border-t border-[#2f2f2f] bg-[#1a1a1a] flex flex-col sm:flex-row items-center justify-between gap-4">
-                        <p className="text-xs text-primary/70">
+                    <div className="px-5 py-3 border-t border-primary/20 bg-primary/5 flex flex-col sm:flex-row items-center justify-between gap-4">
+                        <p className="text-xs text-primary/80">
                             Showing <span className="text-text/80 font-medium">{(page - 1) * 10 + 1}</span> to <span className="text-text/80 font-medium">{Math.min(page * 10, studentsCount)}</span> of <span className="text-text/80 font-medium">{studentsCount}</span> entries
                         </p>
                         
@@ -258,17 +258,17 @@ const StudentsPage = () => {
                             <button
                                 onClick={() => setPage(p => p - 1)}
                                 disabled={!studentsPrevious || loading}
-                                className="px-3 py-1.5 text-xs font-medium text-text/80 bg-white/60 rounded hover:bg-[#3a3a3a] disabled:opacity-40 disabled:cursor-not-allowed transition-colors border border-[#3f3f3f]"
+                                className="px-3.5 py-1.5 text-xs font-semibold text-text/80 bg-white/60 border border-primary/20 rounded-lg hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 Previous
                             </button>
-                            <span className="text-xs text-primary/70 px-2 font-medium">
+                            <span className="text-xs text-primary/80 px-2 font-medium">
                                 Page {page}
                             </span>
                             <button
                                 onClick={() => setPage(p => p + 1)}
                                 disabled={!studentsNext || loading}
-                                className="px-3 py-1.5 text-xs font-medium text-white bg-action rounded hover:bg-action disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                                className="px-3.5 py-1.5 text-xs font-semibold text-white bg-action rounded-lg hover:bg-action active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                             >
                                 Next
                             </button>

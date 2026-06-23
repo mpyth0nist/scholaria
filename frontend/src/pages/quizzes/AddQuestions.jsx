@@ -130,7 +130,7 @@ const AddQuestions = ({
                         + Save Question
                     </button>
                     {question.choices.length >= 2 && correctCount === 0 && (
-                        <p className="text-action text-xs text-center">⚠ Mark one choice as the correct answer before saving</p>
+                        <p className="text-action text-xs text-center">Note: Mark one choice as the correct answer before saving</p>
                     )}
                 </div>
 

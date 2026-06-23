@@ -38,8 +38,8 @@ const QuizList = () => {
             {/* ── header ── */}
             <div className="flex items-center justify-between">
                 <div>
-                    <h1 className="text-2xl font-serif font-bold text-text">Quizzes</h1>
-                    <p className="text-text/50 text-sm mt-1">
+                    <h1 className="text-3xl font-serif font-bold text-text">Quizzes</h1>
+                    <p className="text-text/50 font-medium text-sm mt-1.5">
                         {quizzes.length} quiz{quizzes.length !== 1 ? 'zes' : ''} available
                     </p>
                 </div>
@@ -55,9 +55,13 @@ const QuizList = () => {
 
             {/* ── empty state ── */}
             {quizzes.length === 0 ? (
-                <div className="flex flex-col items-center justify-center py-24 text-primary/70 gap-4">
-                    <span className="text-5xl">📝</span>
-                    <p className="text-sm italic">
+                <div className="flex flex-col items-center justify-center py-24 text-primary/70 gap-3">
+                    <div className="h-10 w-10 bg-primary/10 rounded-full flex items-center justify-center text-primary/50">
+                        <svg className="w-5 h-5 text-primary/50" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0a2 2 0 01-2 2H6a2 2 0 01-2-2m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                        </svg>
+                    </div>
+                    <p className="text-sm italic text-primary/60">
                         {isTeacher ? 'No quizzes yet. Create your first one above.' : 'No quizzes available yet.'}
                     </p>
                 </div>
@@ -71,8 +75,10 @@ const QuizList = () => {
                             style={{ animationDelay: `${i * 0.05}s` }}
                         >
                             {/* icon */}
-                            <div className="w-10 h-10 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-xl shrink-0">
-                                📝
+                            <div className="w-10 h-10 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-action shrink-0">
+                                <svg className="w-5 h-5 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
                             </div>
 
                             {/* info */}
@@ -117,13 +123,13 @@ const QuizList = () => {
                                             onClick={() => navigate(`/quizzes/update-quiz/${quiz.id}`)}
                                             className="text-xs text-primary hover:text-action px-3 py-1.5 rounded-lg hover:bg-primary/5 transition"
                                         >
-                                            ✏️ Edit
+                                            Edit
                                         </button>
                                         <button
                                             onClick={() => dispatch(deleteQuiz(quiz.id))}
                                             className="text-xs text-red-400/60 hover:text-red-400 px-3 py-1.5 rounded-lg hover:bg-red-500/10 transition"
                                         >
-                                            🗑 Delete
+                                            Delete
                                         </button>
                                     </>
                                 ) : quiz.my_score != null ? (

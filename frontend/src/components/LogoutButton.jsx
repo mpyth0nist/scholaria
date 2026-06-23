@@ -57,7 +57,7 @@ function LogoutButton({ className = '' }) {
                 />
             </svg>
 
-            <span className="hidden sm:inline">
+            <span className="inline-block">
                 {loading ? 'Signing out…' : 'Sign out'}
             </span>
         </button>

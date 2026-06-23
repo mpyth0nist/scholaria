@@ -17,7 +17,7 @@ export const addQuiz = createAsyncThunk("addQuiz", async (quiz, { rejectWithValu
         const res = await api.post('api/quizzes/create_quiz/', quiz)
         return res.data
     } catch (err) {
-        console.error('❌ Quiz create error:', err.response?.status, JSON.stringify(err.response?.data, null, 2))
+        console.error('Quiz create error:', err.response?.status, JSON.stringify(err.response?.data, null, 2))
         return rejectWithValue(err.response?.data)
     }
 })

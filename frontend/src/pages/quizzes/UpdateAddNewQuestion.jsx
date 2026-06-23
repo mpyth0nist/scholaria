@@ -1,4 +1,4 @@
-import { useState }   from 'react'
+import { useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { addQuestion } from '../../features/quizzes/quizSlice'
 
@@ -19,12 +19,12 @@ function UpdateAddNewQuestion({ onDone }) {
     const dispatch = useDispatch()
 
     const [questionText, setQuestionText] = useState('')
-    const [choices,      setChoices]      = useState([])
-    const [draft,        setDraft]        = useState(EMPTY_CHOICE)
+    const [choices, setChoices] = useState([])
+    const [draft, setDraft] = useState(EMPTY_CHOICE)
 
-    const correctCount   = choices.filter(c => c.is_correct).length
-    const canAddChoice   = draft.text.trim().length > 0
-    const canSave        = questionText.trim() && choices.length >= 2 && correctCount === 1
+    const correctCount = choices.filter(c => c.is_correct).length
+    const canAddChoice = draft.text.trim().length > 0
+    const canSave = questionText.trim() && choices.length >= 2 && correctCount === 1
 
     // ── Draft choice handlers ───────────────────────────────────────────────
 
@@ -75,9 +75,9 @@ function UpdateAddNewQuestion({ onDone }) {
     // ── Render ──────────────────────────────────────────────────────────────
 
     return (
-        <div className="w-full bg-white/60 border border-action/20 rounded-2xl p-6 space-y-5 shadow-2xl backdrop-blur-md">
+        <div className="w-full premium-card p-6 space-y-5 border-action/30">
 
-            <p className="text-xs font-semibold uppercase tracking-widest text-action">New Question</p>
+            <p className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">New Question</p>
 
             {/* Question text */}
             <textarea
@@ -85,13 +85,13 @@ function UpdateAddNewQuestion({ onDone }) {
                 placeholder="e.g. What is the capital of France?"
                 value={questionText}
                 onChange={(e) => setQuestionText(e.target.value)}
-                className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none text-sm"
+                className="w-full premium-input resize-none text-sm"
             />
 
             {/* Saved choices preview */}
             {choices.length > 0 && (
                 <div className="flex flex-col gap-2">
-                    <p className="text-xs text-primary uppercase tracking-wider">
+                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary font-sans">
                         Choices
                         <span className="ml-2 text-primary/70 normal-case">({choices.length} added)</span>
                         {correctCount === 1 && (
@@ -125,7 +125,7 @@ function UpdateAddNewQuestion({ onDone }) {
 
             {/* New choice input */}
             <div className="flex flex-col gap-2">
-                <p className="text-xs text-primary uppercase tracking-wider">Add choice</p>
+                <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-primary font-sans">Add choice</p>
                 <div className="flex gap-2">
                     <input
                         type="text"
@@ -133,7 +133,7 @@ function UpdateAddNewQuestion({ onDone }) {
                         value={draft.text}
                         onChange={(e) => handleDraftText(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addChoiceToDraft() } }}
-                        className="flex-grow p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+                        className="flex-grow premium-input text-sm"
                     />
                     <button
                         type="button"
@@ -158,7 +158,7 @@ function UpdateAddNewQuestion({ onDone }) {
                             ? <span className="text-primary font-semibold">
                                 This is the correct answer{' '}
                                 <span className="text-primary/70 font-normal text-xs">(replaces any previous correct choice)</span>
-                              </span>
+                            </span>
                             : 'Mark as correct answer'}
                     </span>
                 </label>
@@ -166,7 +166,7 @@ function UpdateAddNewQuestion({ onDone }) {
 
             {/* Validation hint */}
             {choices.length >= 2 && correctCount === 0 && (
-                <p className="text-action text-xs">⚠ Mark one choice as the correct answer before saving</p>
+                <p className="text-action text-xs">Note: Mark one choice as the correct answer before saving</p>
             )}
 
             {/* Actions */}
