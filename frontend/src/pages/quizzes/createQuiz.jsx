@@ -4,18 +4,18 @@ const CreateQuiz = ({ quizData, coursesList, handleQuizFieldChange, toggleNext }
 
     return (
         <div className="flex flex-col items-center min-h-screen bg-background px-6 py-12">
-            <div className="w-full max-w-lg bg-white/60 border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-md space-y-6">
+            <div className="w-full max-w-lg premium-card p-8 space-y-6">
 
                 <div>
-                    <h1 className="text-2xl font-bold text-text">Create New Quiz</h1>
-                    <p className="text-primary text-sm mt-1">Step 1 of 2 — Basic Details</p>
+                    <h1 className="text-3xl font-serif font-bold text-text">Create New Quiz</h1>
+                    <p className="text-text/50 font-medium text-sm mt-1.5">Step 1 of 2 — Basic Details</p>
                 </div>
 
                 {/* Name */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-text/80 text-sm font-semibold tracking-wide uppercase">Quiz Title *</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Quiz Title *</label>
                     <input
-                        className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-action transition"
+                        className="w-full premium-input"
                         type="text"
                         value={quizData.name}
                         placeholder="e.g. Chapter 4 Quiz"
@@ -25,10 +25,10 @@ const CreateQuiz = ({ quizData, coursesList, handleQuizFieldChange, toggleNext }
 
                 {/* Description */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-text/80 text-sm font-semibold tracking-wide uppercase">Description</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Description</label>
                     <textarea
                         rows={3}
-                        className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none"
+                        className="w-full premium-input resize-none"
                         value={quizData.description}
                         placeholder="What is this quiz about?"
                         onChange={(e) => handleQuizFieldChange('description', e.target.value)}
@@ -37,9 +37,9 @@ const CreateQuiz = ({ quizData, coursesList, handleQuizFieldChange, toggleNext }
 
                 {/* Due Date */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-text/80 text-sm font-semibold tracking-wide uppercase">Due Date *</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Due Date *</label>
                     <input
-                        className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white focus:outline-none focus:ring-2 focus:ring-primary transition"
+                        className="w-full premium-input"
                         type="date"
                         value={quizData.due_date}
                         onChange={(e) => handleQuizFieldChange('due_date', e.target.value)}
@@ -48,7 +48,7 @@ const CreateQuiz = ({ quizData, coursesList, handleQuizFieldChange, toggleNext }
 
                 {/* Course Selection */}
                 <div className="flex flex-col gap-2">
-                    <label className="text-text/80 text-sm font-semibold tracking-wide uppercase">Assign to Course *</label>
+                    <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Assign to Course *</label>
                     {coursesList?.length > 0 ? (
                         <div className="space-y-2 max-h-48 overflow-y-auto pr-1">
                             {coursesList.map((course) => (

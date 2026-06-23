@@ -187,3 +187,124 @@ class SubmitQuiz(generics.UpdateAPIView):
 
         score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
         serializer.save(score=score, submitted_at=timezone.now())
+
+
+# ── Document Assignment Views ─────────────────────────────────────────────────
+
+from .models import Assignment, Submission
+from .serializers import (
+    AssignmentSerializer, StudentAssignmentSerializer,
+    SubmissionSerializer, GradeSubmissionSerializer,
+)
+
+
+class AssignmentList(generics.ListAPIView):
+    """Lists assignments relevant to the authenticated user."""
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.request.user.role == 'Teacher':
+            return AssignmentSerializer
+        return StudentAssignmentSerializer
+
+    def get_queryset(self):
+        from django.db.models import Q
+        user = self.request.user
+        if user.role == 'Teacher':
+            return Assignment.objects.filter(teacher=user).prefetch_related('submissions')
+        # Students see assignments for courses they are enrolled in
+        return Assignment.objects.filter(
+            Q(course__student=user) | Q(course__student_classes__students=user)
+        ).distinct().prefetch_related('submissions')
+
+
+class AssignmentCreate(generics.CreateAPIView):
+    """Teacher uploads a new assignment (PDF + metadata)."""
+    permission_classes = [IsAuthenticated, isTeacher]
+    serializer_class = AssignmentSerializer
+
+    def perform_create(self, serializer):
+        serializer.save(teacher=self.request.user)
+
+
+class AssignmentDetail(generics.RetrieveAPIView):
+    """Returns a single assignment."""
+    permission_classes = [IsAuthenticated]
+    lookup_field = 'id'
+
+    def get_serializer_class(self):
+        if self.request.user.role == 'Teacher':
+            return AssignmentSerializer
+        return StudentAssignmentSerializer
+
+    def get_queryset(self):
+        from django.db.models import Q
+        user = self.request.user
+        if user.role == 'Teacher':
+            return Assignment.objects.filter(teacher=user).prefetch_related('submissions')
+        return Assignment.objects.filter(
+            Q(course__student=user) | Q(course__student_classes__students=user)
+        ).distinct().prefetch_related('submissions')
+
+
+class AssignmentUpdate(generics.UpdateAPIView):
+    """Teacher updates assignment metadata or replaces the document PDF."""
+    permission_classes = [IsAuthenticated, isTeacher]
+    serializer_class = AssignmentSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Assignment.objects.filter(teacher=self.request.user)
+
+
+class AssignmentDelete(generics.DestroyAPIView):
+    """Teacher deletes an assignment (and all submissions cascade)."""
+    permission_classes = [IsAuthenticated, isTeacher]
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        return Assignment.objects.filter(teacher=self.request.user)
+
+
+class SubmissionCreateUpdate(generics.CreateAPIView):
+    """
+    Student submits (or re-submits) their answer PDF.
+    - First call  → creates a Submission (HTTP 201).
+    - Repeat call → updates the existing file if due date not exceeded (HTTP 200).
+    - Blocked     → past due date (HTTP 403).
+    """
+    permission_classes = [IsAuthenticated, isStudent]
+    serializer_class = SubmissionSerializer
+
+    def create(self, request, *args, **kwargs):
+        assignment = get_object_or_404(Assignment, id=self.kwargs['assignment_id'])
+
+        if assignment.due_date < timezone.localdate():
+            raise PermissionDenied("The due date for this assignment has passed.")
+
+        existing = Submission.objects.filter(
+            assignment=assignment, student=request.user
+        ).first()
+
+        if existing:
+            # Re-upload: update the file field
+            serializer = self.get_serializer(existing, data=request.data, partial=True)
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=200)
+
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save(assignment=assignment, student=request.user)
+        return Response(serializer.data, status=201)
+
+
+class GradeSubmission(generics.UpdateAPIView):
+    """Teacher sets score + optional feedback on a student submission."""
+    permission_classes = [IsAuthenticated, isTeacher]
+    serializer_class = GradeSubmissionSerializer
+    lookup_field = 'id'
+
+    def get_queryset(self):
+        # Scoped to submissions belonging to the teacher's own assignments
+        return Submission.objects.filter(assignment__teacher=self.request.user)

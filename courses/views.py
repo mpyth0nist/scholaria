@@ -165,6 +165,7 @@ class CourseUpdate(generics.UpdateAPIView):
 
     def perform_update(self, serializer):
         course = serializer.save()
+        course.student.clear()
         for student_class in course.student_classes.all():
             course.student.add(*student_class.students.all())
 

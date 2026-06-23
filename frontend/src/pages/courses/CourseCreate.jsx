@@ -156,8 +156,8 @@ const CreateCourse = () => {
                                             : [...prev.student_classes, cls.id]
                                     }))}
                                 />
-                                <div className="w-7 h-7 rounded-md bg-action/10 border border-action/20 flex items-center justify-center text-xs text-action font-semibold shrink-0">
-                                    🏫
+                                <div className="w-7 h-7 rounded-md bg-action/10 border border-action/20 flex items-center justify-center text-[10px] text-action font-bold shrink-0">
+                                    CLS
                                 </div>
                                 <span className="text-sm text-text/80 group-hover:text-text transition">
                                     {cls.name} <span className="text-xs text-primary/70 ml-1">({cls.students.length} students)</span>
@@ -207,7 +207,7 @@ const CreateCourse = () => {
     const ChoiceStep = (
         <div className="flex flex-col gap-6">
             <div className="text-center">
-                <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-2xl mx-auto mb-4">✅</div>
+                <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-xs font-bold text-primary font-sans mx-auto mb-4">DONE</div>
                 <h2 className="text-xl font-bold text-text">
                     "{createdCourse?.course_name}" created!
                 </h2>
@@ -220,7 +220,7 @@ const CreateCourse = () => {
                     onClick={() => navigate(`/course/${createdCourse.id}/modules/`)}
                     className="flex flex-col items-start gap-3 p-5 bg-action/10 border border-action/20 rounded-xl hover:bg-action/10 hover:border-action/20 active:scale-95 transition-all text-left group"
                 >
-                    <span className="text-3xl">📦</span>
+                    <span className="text-xs font-bold text-action font-sans tracking-wider bg-action/10 border border-action/20 px-2 py-0.5 rounded">MOD</span>
                     <div>
                         <p className="text-sm font-semibold text-text group-hover:text-white transition">Add Modules & Lessons</p>
                         <p className="text-xs text-primary mt-1 leading-relaxed">Start building out the course content right now.</p>
@@ -233,7 +233,7 @@ const CreateCourse = () => {
                     onClick={() => navigate('/all-courses')}
                     className="flex flex-col items-start gap-3 p-5 bg-white/60 border border-primary/20 rounded-xl hover:bg-primary/5 hover:border-primary/20 active:scale-95 transition-all text-left group"
                 >
-                    <span className="text-3xl">🗂️</span>
+                    <span className="text-xs font-bold text-primary font-sans tracking-wider bg-primary/10 border border-primary/20 px-2 py-0.5 rounded">LIST</span>
                     <div>
                         <p className="text-sm font-semibold text-text group-hover:text-white transition">Save & Finish Later</p>
                         <p className="text-xs text-primary mt-1 leading-relaxed">The course is saved. You can add content from your Courses page anytime.</p>
@@ -263,10 +263,10 @@ const CreateCourse = () => {
 
             {/* page title */}
             <div>
-                <h1 className="text-2xl font-bold text-text">
+                <h1 className="text-3xl font-serif font-bold text-text">
                     {step === 'form' ? 'Create New Course' : 'Course Created'}
                 </h1>
-                <p className="text-primary text-sm mt-1">
+                <p className="text-text/50 font-medium text-sm mt-1.5">
                     {step === 'form'
                         ? 'Fill in the details below. You can always edit this later.'
                         : 'Choose how you want to continue.'}
@@ -274,7 +274,7 @@ const CreateCourse = () => {
             </div>
 
             {/* content */}
-            <div className="bg-white/60 border border-primary/20 rounded-xl p-6">
+            <div className="premium-card p-6">
                 {step === 'form' ? FormStep : ChoiceStep}
             </div>
         </div>
