@@ -1,11 +1,11 @@
-import { useDispatch, useSelector }                                      from 'react-redux'
-import { fetchQuiz, updateQuiz }                                          from '../../features/quizzes/quizSlice'
-import { updateQuizName, updateQuizDescription }                          from '../../features/quizzes/quizSlice'
-import { updateQuestionText, deleteQuestion, deleteChoice }               from '../../features/quizzes/quizSlice'
-import { addChoiceToQuestion }                                            from '../../features/quizzes/quizSlice'
-import { useState, useEffect }                                            from 'react'
-import { useParams, useNavigate }                                         from 'react-router-dom'
-import UpdateAddNewQuestion                                               from './UpdateAddNewQuestion'
+import { useDispatch, useSelector } from 'react-redux'
+import { fetchQuiz, updateQuiz } from '../../features/quizzes/quizSlice'
+import { updateQuizName, updateQuizDescription } from '../../features/quizzes/quizSlice'
+import { updateQuestionText, deleteQuestion, deleteChoice } from '../../features/quizzes/quizSlice'
+import { addChoiceToQuestion } from '../../features/quizzes/quizSlice'
+import { useState, useEffect } from 'react'
+import { useParams, useNavigate } from 'react-router-dom'
+import UpdateAddNewQuestion from './UpdateAddNewQuestion'
 import { ChevronDown, ChevronUp, Trash2, Plus, Save, ArrowLeft, PlusCircle } from 'lucide-react'
 
 const EMPTY_DRAFT = { text: '', is_correct: false }
@@ -19,8 +19,7 @@ function ChoiceRow({ choice, choiceId, questionId, allChoiceIds, allChoices }) {
     const isCorrect = choice?.is_correct ?? false
 
     const handleCorrectToggle = () => {
-        if (isCorrect) return  // can't un-mark the only correct answer — use another choice
-        // Mark this one correct, clear others in this question via updateChoice
+        if (isCorrect) return
         allChoiceIds.forEach(cid => {
             dispatch({ type: 'quiz/updateChoiceCorrect', payload: { id: cid, is_correct: cid === choiceId } })
         })
@@ -74,7 +73,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
     const dispatch = useDispatch()
 
     // Local draft for the new-choice form inside this question
-    const [draft,       setDraft]       = useState(EMPTY_DRAFT)
+    const [draft, setDraft] = useState(EMPTY_DRAFT)
     const [showAddForm, setShowAddForm] = useState(false)
 
     const correctCount = question.choicesIds.filter(id => choicesData[id]?.is_correct).length
@@ -84,7 +83,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
         if (!draft.text.trim()) return
         dispatch(addChoiceToQuestion({
             questionId,
-            choice:     draft.text.trim(),
+            choice: draft.text.trim(),
             is_correct: draft.is_correct,
         }))
         setDraft(EMPTY_DRAFT)
@@ -105,7 +104,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
                 <div className="flex items-center gap-2 shrink-0">
                     {correctCount === 1
                         ? <span className="text-xs text-primary bg-primary/10 border border-primary/20 px-2 py-0.5 rounded-full">✓ Answer set</span>
-                        : <span className="text-xs text-action bg-action/10 border border-amber-700/30 px-2 py-0.5 rounded-full">⚠ No answer</span>}
+                        : <span className="text-xs text-action bg-action/10 border border-amber-700/30 px-2 py-0.5 rounded-full">No answer</span>}
                     <span className="text-primary/70 text-xs">{question.choicesIds.length} choice{question.choicesIds.length !== 1 ? 's' : ''}</span>
                     {expanded
                         ? <ChevronUp className="w-4 h-4 text-primary" />
@@ -145,7 +144,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
                             />
                         ))}
                         {correctCount === 0 && question.choicesIds.length >= 2 && (
-                            <p className="text-action text-xs">⚠ Click ○ on a choice to mark it as the correct answer</p>
+                            <p className="text-action text-xs">Note: Click ○ on a choice to mark it as the correct answer</p>
                         )}
                     </div>
 
@@ -161,7 +160,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
                                     value={draft.text}
                                     onChange={(e) => setDraft(d => ({ ...d, text: e.target.value }))}
                                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChoice() } }}
-                                    className="flex-grow p-2.5 rounded-lg bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+                                    className="flex-grow p-2.5 rounded-lg bg-white/60 border border-primary/20 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
                                     autoFocus
                                 />
                                 <button
@@ -194,7 +193,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
                                         ? <span className="text-primary font-semibold">
                                             Correct answer{' '}
                                             <span className="text-primary/70 font-normal text-xs">(replaces previous)</span>
-                                          </span>
+                                        </span>
                                         : 'Mark as correct answer'}
                                 </span>
                             </label>
@@ -227,18 +226,18 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
 
 const UpdateQuiz = () => {
 
-    const dispatch   = useDispatch()
-    const navigate   = useNavigate()
+    const dispatch = useDispatch()
+    const navigate = useNavigate()
     const { quiz_id } = useParams()
 
-    const quizData     = useSelector(state => state.quizzes.currentQuiz)
+    const quizData = useSelector(state => state.quizzes.currentQuiz)
     const questionsData = useSelector(state => state.quizzes.currentQuizQuestions)
-    const choicesData  = useSelector(state => state.quizzes.currentQuizChoices)
-    const loading      = useSelector(state => state.quizzes.loading)
+    const choicesData = useSelector(state => state.quizzes.currentQuizChoices)
+    const loading = useSelector(state => state.quizzes.loading)
 
-    const [expandedId,     setExpandedId]    = useState(null)
+    const [expandedId, setExpandedId] = useState(null)
     const [showAddQuestion, setShowAddQuestion] = useState(false)
-    const [status,          setStatus]        = useState(null) // 'saving' | 'saved' | 'error'
+    const [status, setStatus] = useState(null) // 'saving' | 'saved' | 'error'
 
     useEffect(() => { dispatch(fetchQuiz(quiz_id)) }, [quiz_id])
 
@@ -272,8 +271,8 @@ const UpdateQuiz = () => {
                         <ArrowLeft className="w-4 h-4" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-text">Edit Quiz</h1>
-                        <p className="text-primary text-sm">{questionIds.length} question{questionIds.length !== 1 ? 's' : ''}</p>
+                        <h1 className="text-3xl font-serif font-bold text-text">Edit Quiz</h1>
+                        <p className="text-text/50 font-medium text-sm mt-1.5">{questionIds.length} question{questionIds.length !== 1 ? 's' : ''}</p>
                     </div>
                 </div>
 
@@ -290,26 +289,26 @@ const UpdateQuiz = () => {
                 )}
 
                 {/* Basic fields */}
-                <div className="bg-white/60 border border-primary/20 rounded-2xl p-6 space-y-4 shadow-xl backdrop-blur-md">
-                    <p className="text-xs font-semibold uppercase tracking-widest text-action">Quiz Details</p>
+                <div className="premium-card p-6 space-y-4">
+                    <p className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Quiz Details</p>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-text/80 text-sm font-semibold uppercase tracking-wide">Title *</label>
+                        <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Title *</label>
                         <input
                             type="text"
                             value={quizData.name}
                             onChange={(e) => dispatch(updateQuizName(e.target.value))}
-                            className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition"
+                            className="w-full premium-input"
                         />
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-text/80 text-sm font-semibold uppercase tracking-wide">Description</label>
+                        <label className="text-xs font-bold uppercase tracking-[0.15em] text-action font-sans">Description</label>
                         <textarea
                             rows={3}
                             value={quizData.description}
                             onChange={(e) => dispatch(updateQuizDescription(e.target.value))}
-                            className="w-full p-3 rounded-xl bg-white/60 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none"
+                            className="w-full premium-input resize-none"
                         />
                     </div>
                 </div>

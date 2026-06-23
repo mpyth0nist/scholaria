@@ -1,4 +1,4 @@
-from .models import *
+from .models import Quiz, Question, Choice, UserAttempt, UserAnswer, Assignment, Submission
 
 from rest_framework import serializers
 
@@ -163,3 +163,87 @@ class UserAttemptSerializer(serializers.ModelSerializer):
         model = UserAttempt
         fields = ['id', 'quiz', 'student', 'score', 'answers']
         read_only_fields = ['student', 'score', 'quiz']
+
+
+# ── Document Assignment Serializers ───────────────────────────────────────────
+
+def _relative(url):
+    """Strip scheme+host from a file URL so the frontend controls the base."""
+    if not url:
+        return None
+    from urllib.parse import urlparse
+    parsed = urlparse(url)
+    if not parsed.scheme:
+        return url
+    return parsed.path + (f"?{parsed.query}" if parsed.query else "")
+
+
+class SubmissionSerializer(serializers.ModelSerializer):
+    """Used by students to create / update their submission file."""
+    student_name = serializers.SerializerMethodField()
+
+    def get_student_name(self, obj):
+        return f"{obj.student.first_name} {obj.student.last_name}".strip() or obj.student.username
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret.get('file'):
+            ret['file'] = _relative(ret['file'])
+        return ret
+
+    class Meta:
+        model = Submission
+        fields = ['id', 'assignment', 'student', 'student_name', 'file', 'submitted_at', 'score', 'feedback']
+        read_only_fields = ['assignment', 'student', 'submitted_at', 'score', 'feedback']
+
+
+class AssignmentSerializer(serializers.ModelSerializer):
+    """Full serializer for teachers: includes all submissions."""
+    submissions = SubmissionSerializer(many=True, read_only=True)
+    # Not required on PATCH (partial updates)
+    document = serializers.FileField(required=False)
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret.get('document'):
+            ret['document'] = _relative(ret['document'])
+        return ret
+
+    class Meta:
+        model = Assignment
+        fields = ['id', 'name', 'description', 'course', 'due_date', 'document', 'submissions']
+        read_only_fields = ['teacher']
+
+
+class StudentAssignmentSerializer(serializers.ModelSerializer):
+    """
+    Read-only serializer for students.
+    Exposes only the requesting student's own submission (injected via context).
+    """
+    my_submission = serializers.SerializerMethodField()
+
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret.get('document'):
+            ret['document'] = _relative(ret['document'])
+        return ret
+
+    class Meta:
+        model = Assignment
+        fields = ['id', 'name', 'description', 'course', 'due_date', 'document', 'my_submission']
+
+    def get_my_submission(self, obj):
+        request = self.context.get('request')
+        if not request or not request.user.is_authenticated:
+            return None
+        sub = obj.submissions.filter(student=request.user).first()
+        if sub is None:
+            return None
+        return SubmissionSerializer(sub, context=self.context).data
+
+
+class GradeSubmissionSerializer(serializers.ModelSerializer):
+    """Teacher patches score + feedback on an existing Submission."""
+    class Meta:
+        model = Submission
+        fields = ['id', 'score', 'feedback']

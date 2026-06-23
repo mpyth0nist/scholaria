@@ -81,3 +81,35 @@ class UserAnswer(models.Model):
 
     def __str__(self):
         return f"Answer for '{self.question.question_text[:20]}'"
+
+
+# ── Document Assignments ──────────────────────────────────────────────────────
+
+class Assignment(models.Model):
+    """A teacher-uploaded PDF assignment sheet for a course."""
+    name        = models.CharField(max_length=200)
+    description = models.CharField(max_length=255, null=True, blank=True)
+    teacher     = models.ForeignKey(CustomUser, related_name='assignments', on_delete=models.CASCADE)
+    course      = models.ForeignKey(Course, related_name='assignments', on_delete=models.CASCADE)
+    due_date    = models.DateField()
+    document    = models.FileField(upload_to='assignment_docs/')
+
+    def __str__(self):
+        return self.name
+
+
+class Submission(models.Model):
+    """A student's uploaded answer to an Assignment."""
+    assignment   = models.ForeignKey(Assignment, related_name='submissions', on_delete=models.CASCADE)
+    student      = models.ForeignKey(CustomUser, related_name='submissions', on_delete=models.CASCADE)
+    file         = models.FileField(upload_to='submission_docs/')
+    submitted_at = models.DateTimeField(auto_now_add=True)
+    # null = not yet graded
+    score        = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)
+    feedback     = models.TextField(blank=True, default='')
+
+    class Meta:
+        unique_together = ('assignment', 'student')
+
+    def __str__(self):
+        return f"{self.student} — {self.assignment}"

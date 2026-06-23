@@ -19,6 +19,10 @@ import PassQuiz from './pages/quizzes/PassQuiz.jsx'
 import UpdateQuiz from './pages/quizzes/UpdateQuiz.jsx'
 import StudentsPage from './pages/users/StudentsPage.jsx'
 import AdminDashboard from './pages/Dashboards/AdminDashboard.jsx'
+import AssignmentList from './pages/assignments/AssignmentList.jsx'
+import AssignmentPage from './pages/assignments/AssignmentPage.jsx'
+import CreateAssignmentPage from './pages/assignments/CreateAssignmentPage.jsx'
+import UpdateAssignmentPage from './pages/assignments/UpdateAssignmentPage.jsx'
 
 // Role-aware dashboard: renders Admin, Teacher or Student view based on Redux role
 const DashboardPage = () => {
@@ -48,6 +52,9 @@ function App() {
 
           <Route path='quizzes/:quiz_id/' element={<Dashboard><PassQuiz /></Dashboard>} />
 
+          <Route path='assignments/list/' element={<Dashboard><AssignmentList /></Dashboard>} />
+          <Route path='assignments/:assignment_id/' element={<Dashboard><AssignmentPage /></Dashboard>} />
+
           {/* ── teacher-only routes ───────────────────────────────── */}
           <Route element={<RoleProtectedRoute allowedRoles={['Teacher']} />}>
             <Route path='/update-course/:id' element={<Dashboard><CourseUpdate /></Dashboard>} />
@@ -55,6 +62,8 @@ function App() {
             <Route path='quizzes/create-quiz/' element={<Dashboard><CreateQuizPage /></Dashboard>} />
             <Route path='quizzes/update-quiz/:quiz_id' element={<Dashboard><UpdateQuiz /></Dashboard>} />
             <Route path='students/' element={<Dashboard><StudentsPage /></Dashboard>} />
+            <Route path='assignments/create/' element={<Dashboard><CreateAssignmentPage /></Dashboard>} />
+            <Route path='assignments/:assignment_id/update/' element={<Dashboard><UpdateAssignmentPage /></Dashboard>} />
           </Route>
 
           {/* ── admin-only routes ─────────────────────────────────── */}

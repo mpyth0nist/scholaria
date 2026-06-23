@@ -59,6 +59,14 @@ class LessonSerializer(serializers.ModelSerializer):
             student=request.user, lesson=obj
         ).exists()
 
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret.get('attachments'):
+            ret['attachments'] = relative_url(ret['attachments'])
+        if ret.get('video'):
+            ret['video'] = relative_url(ret['video'])
+        return ret
+
     class Meta:
         model = Lesson
         fields = ['id', 'title', 'content', 'attachments', 'video', 'done', 'module_title']
@@ -99,15 +107,13 @@ class ModuleSerializer(serializers.ModelSerializer):
 
 class CourseSerializer(serializers.ModelSerializer):
     done = serializers.SerializerMethodField()
-    thumbnail = serializers.SerializerMethodField()
+    thumbnail = serializers.ImageField(required=False, allow_null=True)
 
-    def get_thumbnail(self, obj):
-        if not obj.thumbnail:
-            return None
-        request = self.context.get('request')
-        if request:
-            return relative_url(request.build_absolute_uri(obj.thumbnail.url))
-        return obj.thumbnail.url
+    def to_representation(self, instance):
+        ret = super().to_representation(instance)
+        if ret.get('thumbnail'):
+            ret['thumbnail'] = relative_url(ret['thumbnail'])
+        return ret
 
     def get_done(self, obj):
         request = self.context.get('request')

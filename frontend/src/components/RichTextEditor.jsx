@@ -431,17 +431,18 @@ const fixLessonColors = (html) => {
 // LESSON CONTENT RENDERER  (read-only)
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const LessonContent = ({ html }) => (
+export const LessonContent = ({ html, className = '' }) => (
     <div
-        className="text-text leading-relaxed
-            [&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:text-text [&_h1]:mb-3 [&_h1]:mt-4
-            [&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:text-text [&_h2]:mb-2 [&_h2]:mt-3
+        className={`leading-relaxed
+            [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-4
+            [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
             [&_p]:mb-3   [&_p]:leading-relaxed
             [&_div]:mb-1 [&_div]:leading-relaxed
             [&_strong]:font-bold [&_em]:italic [&_u]:underline
             [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
             [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
-            [&_span]:leading-[inherit]"
+            [&_span]:leading-[inherit]
+            ${className}`}
         dangerouslySetInnerHTML={{ __html: fixLessonColors(html) }}
     />
 )

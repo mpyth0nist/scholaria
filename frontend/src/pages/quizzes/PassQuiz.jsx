@@ -143,7 +143,7 @@ const PassQuiz = () => {
         return (
             <div className="flex items-center justify-center min-h-screen bg-background p-6">
                 <div className="bg-white/60 border border-red-700/40 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
-                    <div className="text-5xl mb-4">⚠️</div>
+                    <div className="text-3xl font-serif text-red-400 font-bold mb-4">Warning</div>
                     <h2 className="text-xl font-bold text-red-400 mb-2">Cannot Start Quiz</h2>
                     <p className="text-primary text-sm mb-8">{message}</p>
                     <button
@@ -169,7 +169,7 @@ const PassQuiz = () => {
                         {score.toFixed(0)}%
                     </div>
                     <p className={`text-lg font-semibold mb-1 ${passed ? 'text-primary' : 'text-red-300'}`}>
-                        {passed ? '🎉 Quiz Passed!' : '😔 Quiz Failed'}
+                        {passed ? 'Quiz Passed!' : 'Quiz Failed'}
                     </p>
                     <p className="text-primary text-sm mb-8">
                         {/* #16 Show actually-answered count, not total quiz length */}
@@ -272,7 +272,7 @@ const PassQuiz = () => {
                     {/* Error message */}
                     {error && (
                         <p className="text-red-400 text-sm mb-4 flex items-center gap-2">
-                            <span>⚠</span> {error}
+                            <span>!</span> {error}
                         </p>
                     )}
 
