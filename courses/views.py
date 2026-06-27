@@ -3,7 +3,7 @@ import logging
 from django.shortcuts import get_object_or_404
 from django.db.models import Q, Prefetch
 from rest_framework import generics, status
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, PermissionDenied
 from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -72,6 +72,15 @@ class isStudent(BasePermission):
         return request.user and request.user.is_authenticated and request.user.role == 'Student'
 
 
+class isAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user
+            and request.user.is_authenticated
+            and request.user.role == 'ADMIN'
+        )
+
+
 class isCourseStudent(BasePermission):
     lookup_field = ['student']
 
@@ -94,14 +103,16 @@ class StudentClassCreate(generics.CreateAPIView):
 
 
 class StudentClassUpdate(generics.UpdateAPIView):
-    permission_classes = [IsAuthenticated, isTeacher]
+    """Only admins may restructure student classes (no per-teacher ownership model)."""
+    permission_classes = [IsAuthenticated, isAdmin]
     queryset = StudentClass.objects.all()
     serializer_class = StudentClassSerializer
     lookup_field = 'id'
 
 
 class StudentClassDelete(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated, isTeacher]
+    """Only admins may delete student classes."""
+    permission_classes = [IsAuthenticated, isAdmin]
     queryset = StudentClass.objects.all()
     lookup_field = 'id'
 
@@ -177,8 +188,13 @@ class ModuleList(generics.ListAPIView):
     serializer_class = ModuleSerializer
 
     def get_queryset(self):
-        module_course = get_object_or_404(Course, id=self.kwargs['course_id'])
         user = self.request.user
+        # Enforce enrollment: teacher must own the course OR student must be enrolled
+        module_course = get_object_or_404(
+            Course,
+            Q(teacher=user) | Q(student=user),
+            id=self.kwargs['course_id'],
+        )
         # Prefetch lessons and their progress in a single extra query each,
         # preventing N+1 inside ModuleSerializer.get_done()
         return Module.objects.filter(course=module_course).prefetch_related(
@@ -192,28 +208,43 @@ class ModuleList(generics.ListAPIView):
 
 
 class ModuleCreate(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated, isCourseTeacher]
+    """
+    Creates a module inside a course.
+    → isTeacher: only teachers may create modules.
+    → Ownership is verified explicitly: the requesting teacher must own the parent course.
+      (isCourseTeacher uses has_object_permission which CreateAPIView never calls,
+       so we enforce ownership manually in perform_create.)
+    """
+    permission_classes = [IsAuthenticated, isTeacher]
     serializer_class = ModuleSerializer
 
     def perform_create(self, serializer):
+        course_id = self.request.data.get('course')
+        course = get_object_or_404(Course, id=course_id)
+        if course.teacher != self.request.user:
+            raise PermissionDenied("You do not own this course.")
         serializer.save()
 
 
 class ModuleUpdate(generics.UpdateAPIView):
+    """Only the teacher who owns the parent course may update its modules."""
     permission_classes = [IsAuthenticated, isTeacher]
-    queryset = Module.objects.all()
     serializer_class = ModuleSerializer
     lookup_field = 'id'
     lookup_url_kwarg = 'module_id'
 
+    def get_queryset(self):
+        return Module.objects.filter(course__teacher=self.request.user)
+
 
 class ModuleDelete(generics.DestroyAPIView):
+    """Only the teacher who owns the parent course may delete its modules."""
     permission_classes = [IsAuthenticated, isTeacher]
     lookup_field = 'id'
     lookup_url_kwarg = 'module_id'
 
     def get_queryset(self):
-        return Module.objects.all()
+        return Module.objects.filter(course__teacher=self.request.user)
 
 
 # ── Lesson views ──────────────────────────────────────────────────────────────
@@ -256,26 +287,39 @@ class LessonDetailView(generics.RetrieveAPIView):
 
 
 class LessonCreate(generics.CreateAPIView):
+    """
+    Creates a lesson inside a module.
+    → isTeacher: only teachers may create lessons.
+    → Ownership: the requesting teacher must own the module's parent course.
+    """
     permission_classes = [IsAuthenticated, isTeacher]
     serializer_class = LessonSerializer
 
     def perform_create(self, serializer):
         try:
-            linked_module = Module.objects.get(id=self.kwargs['module_id'])
-            serializer.save(module=linked_module)
+            linked_module = Module.objects.select_related('course').get(id=self.kwargs['module_id'])
         except Module.DoesNotExist:
             raise NotFound(f"Module with id {self.kwargs['module_id']} does not exist")
+
+        if linked_module.course.teacher != self.request.user:
+            raise PermissionDenied("You do not own the course this module belongs to.")
+
+        try:
+            serializer.save(module=linked_module)
         except Exception:
             logger.exception("Unexpected error while creating lesson")
             raise
 
 
 class LessonUpdate(generics.UpdateAPIView):
+    """Only the teacher who owns the lesson's parent course may update it."""
     permission_classes = [IsAuthenticated, isTeacher]
-    queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     lookup_url_kwarg = 'lesson_id'
     lookup_field = LOOKUP_FIELD
+
+    def get_queryset(self):
+        return Lesson.objects.filter(module__course__teacher=self.request.user)
 
     def perform_update(self, serializer):
         lesson = serializer.save()
@@ -302,9 +346,21 @@ class LessonDelete(generics.DestroyAPIView):
 
 
 class LessonMarkRead(APIView):
-    permission_classes = [IsAuthenticated]
+    """
+    Marks a lesson as read for the requesting student.
+    → Only enrolled students may mark progress (teachers and unenrolled
+      users are rejected to prevent fake progress records).
+    """
+    permission_classes = [IsAuthenticated, isStudent]
 
     def post(self, request, lesson_id):
-        lesson = get_object_or_404(Lesson, id=lesson_id)
+        lesson = get_object_or_404(
+            Lesson.objects.select_related('module__course'),
+            id=lesson_id,
+        )
+        course = lesson.module.course
+        # Verify the student is actually enrolled in this course
+        if not course.student.filter(pk=request.user.pk).exists():
+            raise PermissionDenied("You are not enrolled in this course.")
         UserLessonProgress.objects.get_or_create(student=request.user, lesson=lesson)
         return Response({"status": "marked as read"}, status=status.HTTP_200_OK)

@@ -18,6 +18,19 @@ class UserSerializer(serializers.ModelSerializer):
         user = CustomUser.objects.create_user(**validated_data)
         return user
 
+    def update(self, instance, validated_data):
+        # Prevent self-promotion: users cannot change their own role via this serializer.
+        # Role changes must go through AdminUserSerializer (admin-only endpoints).
+        validated_data.pop('role', None)
+
+        password = validated_data.pop('password', None)
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+        if password:
+            instance.set_password(password)
+        instance.save()
+        return instance
+
     def validate_role(self, value):
         if value == 'ADMIN':
             raise serializers.ValidationError("You cannot register or set your role as an Admin.")

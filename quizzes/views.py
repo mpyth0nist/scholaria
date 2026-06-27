@@ -2,6 +2,7 @@ import logging
 
 from django.shortcuts import get_object_or_404
 from django.db import transaction
+from django.db.models import Q
 from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied, ValidationError
@@ -19,9 +20,22 @@ logger = logging.getLogger(__name__)
 
 
 class QuizList(generics.ListAPIView):
+    """
+    Lists quizzes scoped to the requesting user:
+    → Teachers see only their own quizzes.
+    → Students see quizzes for courses they are enrolled in.
+    """
     permission_classes = [IsAuthenticated]
-    queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'Teacher':
+            return Quiz.objects.filter(teacher=user)
+        # Students: quizzes belonging to enrolled courses
+        return Quiz.objects.filter(
+            Q(course__student=user) | Q(course__student_classes__students=user)
+        ).distinct()
 
 
 class QuizDetailedView(generics.RetrieveAPIView):
@@ -48,10 +62,13 @@ class QuizCreate(generics.CreateAPIView):
 
 
 class QuizUpdate(generics.UpdateAPIView):
+    """Only the quiz's owner (teacher) may update it."""
     permission_classes = [IsAuthenticated, isTeacher]
-    queryset = Quiz.objects.all()
     serializer_class = QuizSerializer
     lookup_field = 'id'
+
+    def get_queryset(self):
+        return Quiz.objects.filter(teacher=self.request.user)
 
 
 class QuizDelete(generics.DestroyAPIView):

@@ -1,7 +1,0 @@
-POST http://localhost:8000/api/users/token/
-Content-Type: application/json
-
-{
-    "username":"oussama_teacher",
-    "password": 1234
-}

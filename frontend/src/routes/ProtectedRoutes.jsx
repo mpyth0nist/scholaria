@@ -41,7 +41,6 @@ function ProtectedRoutes(){
     
     const auth = async () => {
         const token = localStorage.getItem(ACCESS_TOKEN)
-        console.log("auth called")
         if (!token){
             setisAuthorized(false)
             return
