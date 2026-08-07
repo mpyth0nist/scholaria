@@ -1,7 +1,8 @@
 from django.db import models
+from django.db.models import ForeignKey
 from users.models import CustomUser
 from django.core.validators import MinLengthValidator, MinValueValidator
-
+from pgvector.django import HnswIndex, VectorField
 # Create your models here.
 
 class StudentClass(models.Model):
@@ -43,7 +44,18 @@ class Lesson(models.Model):
     video = models.FileField(upload_to= 'lesson_vids/', blank=True, null=True)
     module = models.ForeignKey(Module, related_name="lesson_module", on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
+    embedding = VectorField(dimensions=384, null=True, blank=True)
 
+    class Meta:
+        indexes = [
+            HnswIndex(
+                name='lesson_index',
+                fields=['embedding'],
+                m=16,
+                ef_construction=64,
+                opclasses=["vector_cosine_ops"]
+            )
+        ]
     def __str__(self):
         return self.title
 

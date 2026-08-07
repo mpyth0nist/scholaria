@@ -58,9 +58,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'scholaria',
     'users',
     'courses',
     'quizzes',
+    'llm',
     'rest_framework',
     'corsheaders'
 ]

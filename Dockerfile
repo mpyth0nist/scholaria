@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     postgresql-client \
     jpegoptim \
-    optipng \
+    optipng
     
 COPY requirements.txt /app/
 
@@ -21,4 +21,4 @@ COPY . /app/
 
 EXPOSE 8000
 
-CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]

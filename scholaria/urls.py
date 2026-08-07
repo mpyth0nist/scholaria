@@ -22,6 +22,7 @@ urlpatterns = [
     path('api/users/', include('users.urls')),
     path('api/courses/', include('courses.urls')),
     path('api/quizzes/', include('quizzes.urls')),
+    path('api/llm/', include('llm.urls')),
     path('health/', health_check, name='health_check'),
 ]
 
