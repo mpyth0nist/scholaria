@@ -1,5 +1,5 @@
-from services.chunking import chunk_text
-from services.embeddings import embed_data
+from utils.chunking import chunk_text
+from utils.embeddings import embed_data
 from courses.models import Lesson
 
 def store_lesson(lesson: Lesson):
@@ -11,10 +11,6 @@ def store_lesson(lesson: Lesson):
     lesson.save()
 
 
-lessons = Lesson.objects.all()
 
-for lesson in lessons:
-
-    store_lesson(lesson)
 
     

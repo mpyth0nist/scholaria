@@ -3,7 +3,13 @@ from django.db.models import ForeignKey
 from users.models import CustomUser
 from django.core.validators import MinLengthValidator, MinValueValidator
 from pgvector.django import HnswIndex, VectorField
+from core.mixins import RAGSearchableMixin
+from utils.data_prepping import clean_text
+
 # Create your models here.
+
+
+
 
 class StudentClass(models.Model):
     name = models.CharField(max_length=100)
@@ -37,7 +43,7 @@ class Module(models.Model):
         return f"{self.course.course_name} - {self.title}"
 
 
-class Lesson(models.Model):
+class Lesson(RAGSearchableMixin):
     title = models.CharField(max_length=255)
     content = models.TextField()
     attachments = models.FileField(upload_to = 'lesson_docs/', null=True, blank=True)
@@ -45,6 +51,7 @@ class Lesson(models.Model):
     module = models.ForeignKey(Module, related_name="lesson_module", on_delete=models.CASCADE)
     done = models.BooleanField(default=False)
     embedding = VectorField(dimensions=384, null=True, blank=True)
+    is_chunkable = True
 
     class Meta:
         indexes = [
@@ -56,8 +63,23 @@ class Lesson(models.Model):
                 opclasses=["vector_cosine_ops"]
             )
         ]
+
+    def to_rag_document(self) -> dict:
+        stripped_content = clean_text(self.content) if self.content else ""
+        return {
+            "content": f"title : {self.title}\n\n{stripped_content}".strip(),
+            "metadata": {
+                "course_id": self.module.course_id if self.module_id else None,
+                "module_id": self.module_id,
+                "lesson_id": self.id,
+                "title": self.title,
+                "type": "lesson",
+            }
+        }
+
     def __str__(self):
         return self.title
+
 
 class UserLessonProgress(models.Model):
     student = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='lesson_progress')
