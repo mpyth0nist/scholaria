@@ -2,12 +2,10 @@ from django.db import models
 from users.models import CustomUser
 from courses.models import Course
 from django.core.validators import MinLengthValidator
-from core.mixins import RAGSearchableMixin
-
 
 # Create your models here.
 
-class Quiz(RAGSearchableMixin):
+class Quiz(models.Model):
 
     name = models.CharField(max_length=200, validators=[MinLengthValidator(5)])
     description = models.CharField(max_length=255, null=True, blank=True)
@@ -16,39 +14,12 @@ class Quiz(RAGSearchableMixin):
     done = models.BooleanField(default=False)
     due_date = models.DateField()
 
-    def to_rag_document(self) -> dict:
-        return {
-            "content": f"Quiz: {self.name}\n{self.description or ''}".strip(),
-            "metadata": {
-                "course_id": self.course_id,
-                "quiz_id": self.id,
-                "title": self.name,
-                "type": "quiz",
-            }
-        }
-
     def __str__(self):
         return self.name
 
-
-class Question(RAGSearchableMixin):
+class Question(models.Model):
     question_text = models.TextField(max_length=500)
     quiz = models.ForeignKey(Quiz, related_name="questions", on_delete=models.CASCADE)
-
-    def to_rag_document(self) -> dict:
-        choices_text = "\n".join(
-            f"{'✓' if c.is_correct else '✗'} {c.choice}"
-            for c in self.choices.all()
-        )
-        return {
-            "content": f"Question: {self.question_text}\n\nChoices:\n{choices_text}".strip(),
-            "metadata": {
-                "course_id": self.quiz.course_id,
-                "quiz_id": self.quiz_id,
-                "question_id": self.id,
-                "type": "question",
-            }
-        }
 
     def __str__(self):
         return self.question_text[:50]
@@ -114,7 +85,7 @@ class UserAnswer(models.Model):
 
 # ── Document Assignments ──────────────────────────────────────────────────────
 
-class Assignment(RAGSearchableMixin):
+class Assignment(models.Model):
     """A teacher-uploaded PDF assignment sheet for a course."""
     name        = models.CharField(max_length=200)
     description = models.CharField(max_length=255, null=True, blank=True)
@@ -123,20 +94,8 @@ class Assignment(RAGSearchableMixin):
     due_date    = models.DateField()
     document    = models.FileField(upload_to='assignment_docs/')
 
-    def to_rag_document(self) -> dict:
-        return {
-            "content": f"Assignment: {self.name}\n{self.description or ''}".strip(),
-            "metadata": {
-                "course_id": self.course_id,
-                "assignment_id": self.id,
-                "title": self.name,
-                "type": "assignment",
-            }
-        }
-
     def __str__(self):
         return self.name
-
 
 
 class Submission(models.Model):
