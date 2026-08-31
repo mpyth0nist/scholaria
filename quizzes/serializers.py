@@ -108,12 +108,17 @@ class QuizSerializer(serializers.ModelSerializer):
             return None
         if getattr(request.user, 'role', None) == 'Teacher':
             return None
-        attempt = (
-            UserAttempt.objects
-            .filter(quiz=obj, student=request.user, score__isnull=False)
-            .order_by('-id')
-            .first()
-        )
+
+        # Check for prefetched attribute
+        if hasattr(obj, '_my_graded_attempts'):
+            attempt = obj._my_graded_attempts[0] if obj._my_graded_attempts else None
+        else:
+            attempt = (
+                UserAttempt.objects
+                .filter(quiz=obj, student=request.user, score__isnull=False)
+                .order_by('-id')
+                .first()
+            )
         return float(attempt.score) if attempt else None
 
     def create(self, validated_data):
@@ -134,13 +139,25 @@ class QuizSerializer(serializers.ModelSerializer):
         instance.course = validated_data.get('course', instance.course)
         instance.due_date = validated_data.get('due_date', instance.due_date)
 
-        instance.questions.all().delete()
-        for question_data in questions_data:
-            question_serializer = QuestionSerializer(data=question_data)
-            question_serializer.is_valid(raise_exception=True)
-            question_serializer.save(quiz=instance)
-
         instance.save()
+
+        incoming_ids = {q.get('id') for q in questions_data if q.get('id')}
+        # Delete questions no longer present
+        instance.questions.exclude(id__in=incoming_ids).delete()
+
+        for question_data in questions_data:
+            question_id = question_data.get('id')
+            if question_id:
+                # Update existing question
+                question = Question.objects.get(id=question_id, quiz=instance)
+                question_serializer = QuestionSerializer(question, data=question_data)
+                question_serializer.is_valid(raise_exception=True)
+                question_serializer.save()
+            else:
+                # New question
+                question_serializer = QuestionSerializer(data=question_data)
+                question_serializer.is_valid(raise_exception=True)
+                question_serializer.save(quiz=instance)
 
         return instance
 

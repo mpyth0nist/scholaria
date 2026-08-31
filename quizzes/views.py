@@ -9,7 +9,7 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from courses.views import isTeacher, isStudent
+from courses.views import isTeacher, isStudent, isCourseTeacher
 from .models import Quiz, Question, Choice, UserAttempt, UserAnswer
 from .serializers import (
     QuizSerializer, UserQuizSerializer,
@@ -33,9 +33,16 @@ class QuizList(generics.ListAPIView):
         if user.role == 'Teacher':
             return Quiz.objects.filter(teacher=user)
         # Students: quizzes belonging to enrolled courses
+        from django.db.models import Prefetch
         return Quiz.objects.filter(
             Q(course__student=user) | Q(course__student_classes__students=user)
-        ).distinct()
+        ).distinct().prefetch_related(
+            Prefetch(
+                'attempts',
+                queryset=UserAttempt.objects.filter(student=user, score__isnull=False).order_by('-id'),
+                to_attr='_my_graded_attempts'
+            )
+        )
 
 
 class QuizDetailedView(generics.RetrieveAPIView):
@@ -76,7 +83,7 @@ class QuizDelete(generics.DestroyAPIView):
     lookup_field = 'id'
 
     def get_queryset(self):
-        return Quiz.objects.filter(id=self.kwargs['id'])
+        return Quiz.objects.filter(teacher=self.request.user)
 
     def perform_destroy(self, instance):
         with transaction.atomic():
@@ -168,6 +175,12 @@ class AnswerUpdate(generics.UpdateAPIView):
     def get_queryset(self):
         return UserAnswer.objects.filter(attempt__student=self.request.user)
 
+    def perform_update(self, serializer):
+        from rest_framework.exceptions import PermissionDenied
+        if serializer.instance.attempt.score is not None:
+            raise PermissionDenied("Cannot modify answers for a graded attempt.")
+        serializer.save()
+
 
 class SubmitQuiz(generics.UpdateAPIView):
     permission_classes = [IsAuthenticated, isStudent]
@@ -202,7 +215,8 @@ class SubmitQuiz(generics.UpdateAPIView):
             if correct_choice_ids == user_selected_ids and correct_choice_ids:
                 correct_answers += 1
 
-        score = (correct_answers / total_questions) * 100 if total_questions > 0 else 0
+        from decimal import Decimal
+        score = Decimal((correct_answers / total_questions) * 100) if total_questions > 0 else Decimal(0)
         serializer.save(score=score, submitted_at=timezone.now())
 
 

@@ -37,7 +37,7 @@ class Question(RAGSearchableMixin):
 
     def to_rag_document(self) -> dict:
         choices_text = "\n".join(
-            f"{'✓' if c.is_correct else '✗'} {c.choice}"
+            f"- {c.choice}"
             for c in self.choices.all()
         )
         return {
