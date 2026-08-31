@@ -1,66 +1,110 @@
-# pyrefly: ignore [missing-import]
-import os
-import sys
-import django
-from pgvector.django import CosineDistance
 
-
-project_root = os.path.abspath("../..") 
-if project_root not in sys.path:
-    sys.path.append(project_root)
-
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "scholaria.settings")  # Adjust 'scholaria' to your project settings folder name
-os.environ["DJANGO_ALLOW_ASYNC_UNSAFE"] = "true"
-
-django.setup()
-
+from openai import APITimeoutError
 from openai import OpenAI
-from dotenv import load_dotenv
+from pgvector.django import CosineDistance
+from rag.models import DocumentChunk
+from utils.data_prepping import clean_text
+from utils.embeddings import embedder
+from logging import getLogger
 import os
-from langchain_huggingface import HuggingFaceEmbeddings
-from courses.models import Lesson
+from openai import APIConnectionError, RateLimitError, APITimeoutError
 
-
-load_dotenv()
+logger = getLogger(__name__)
 client = OpenAI(
     api_key=os.environ.get('GROQ_API_KEY'),
     base_url='https://api.groq.com/openai/v1'
 )
 
-embeddings = HuggingFaceEmbeddings(model_name='all-MiniLM-L6-v2')
+class ServiceUnavailable(Exception):
+    ''' Exception raised when an API call is timed out or rate limited'''
 
-print('starting')
+    pass
 
-lessons_list = Lesson.objects.all()
-print(lessons_list)
-lessons_content = [f"\nTitle:{lesson.title} \nContent: {lesson.content}" for lesson in lessons_list]
-evolution_lesson = Lesson.objects.get(title="The evolution of mathematics")
-print(evolution_lesson.content)
+SYSTEM_PROMPT = '''
+ You are Scholaria Assistant, an AI learning companion embedded in the Scholaria LMS platform.
 
-print('embedding lessons data...')
-vectors = embeddings.embed_documents(lessons_content)
+        Your role is to help students understand course material and assist teachers with content-related questions.
 
-for lesson, vector in zip(lessons_list, vectors):
-    print(f"Lesson: {lesson.title} Vector: \n {vector}")
-    lesson.embedding = vector
+        ## Rules
 
-print('saving changes to database...')
-Lesson.objects.bulk_update(
-    lessons_list,
-    fields=['embedding'],
-    batch_size=100
-)
+        1. Answer ONLY using the context provided below. Do not use any outside knowledge.
+        2. If the answer is not found in the context, say clearly: "I couldn't find information about that in your course materials."
+        3. Never fabricate facts, definitions, or explanations.
+        4. Keep answers clear, concise, and educational in tone.
+        5. When relevant, mention which type of material the answer came from (e.g. "According to your lesson on X..." or "Based on a quiz in this course...").
+'''
 
-print('Done!')
 
 
 def embed_input(query : str):
-    vectorized_input = embeddings.embed_query(query)
+    vectorized_input = embedder.embed_query(query)
 
     return vectorized_input
 
-def search(query: str):
-    results = CosineDistance()
+def rag_search(query: str, courses_ids : list, top_k=5):
+
+    query_embedding = embed_input(query)
+
+    raw_data = DocumentChunk.objects.filter(course_id__in=courses_ids).annotate(
+            distance=CosineDistance(
+                'embedding',
+                query_embedding
+            )
+        ).filter(distance__lt=0.4).order_by("distance")[:top_k]
+
+    chunks = [
+        {
+            "content" : c.content,
+            "course_id" : c.course_id,
+            "source_type" : c.content_type_name,
+            "object_id" : c.object_id,
+            "distance" : round(c.distance, 4)
+        } for c in raw_data ]
+    
+    return chunks
+
+def build_context(query, courses_ids):
+
+    results = rag_search(query, courses_ids)
+    if not results:
+        raise ValueError('I dont have relevant informations to answer your question')
+
+    context = "\n\n---\n\n".join([ clean_text(r["content"]) for r in results ])
+
+    return context
+
+
+
+
+def llm(query, courses_ids, model_name):
+
+    context = build_context(query, courses_ids)
+
+    try:
+        answer = client.chat.completions.create(
+            model=model_name,
+            messages=[
+                {"role" : "system", 'content': SYSTEM_PROMPT},
+                {"role" : "user", "content": f' Question : {query} \n Context: {context}'}]
+        )
+    except (APITimeoutError, RateLimitError, APIConnectionError) as error:
+        logger.exception('GROQ API Error')
+        raise error
+
+    return answer.choices[0].message.content
+
+
+
+    
+
+
+
+
+
+
+    
+
+
 
 
 

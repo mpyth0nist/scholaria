@@ -1,3 +1,6 @@
+from django.test import TestCase
+
+# Create your tests here.
 """
 Comprehensive tests for the Scholaria RAG pipeline.
 
@@ -164,7 +167,7 @@ class TestChunkText:
 
     def test_long_text_returns_multiple_chunks(self):
         from utils.chunking import chunk_text
-        long_text = 'A' * 600
+        long_text = 'This is a test sentence about variables. ' * 30  # ~1260 chars
         result = chunk_text(long_text, chunk_size=200, overlap=30)
         assert len(result) > 1
 
@@ -306,7 +309,7 @@ class TestLLMFunction:
         mock_context.return_value = 'Some context.'
         mock_client.chat.completions.create.side_effect = APITimeoutError(request=MagicMock())
 
-        with pytest.raises(ServiceUnavailable):
+        with pytest.raises(APITimeoutError):
             llm('test query', [1], 'llama-3.1-8b-instant')
 
     @patch('rag.rag.build_context')

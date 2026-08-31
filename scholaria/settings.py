@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     'courses',
     'quizzes',
     'llm',
+    'rag',
     'rest_framework',
     'corsheaders'
 ]
