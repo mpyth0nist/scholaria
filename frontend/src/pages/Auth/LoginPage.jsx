@@ -1,8 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants.js'
 import '../../style/style.css'
 import api from '../../api.js'
 import { useNavigate } from 'react-router-dom'
+import { jwtDecode } from 'jwt-decode'
 
 
 function LoginPage() {
@@ -13,6 +14,20 @@ function LoginPage() {
     const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem(ACCESS_TOKEN)
+        if (token) {
+            try {
+                const decoded = jwtDecode(token)
+                if (decoded.exp > (Date.now() / 1000)) {
+                    navigate('/dashboard')
+                }
+            } catch (err) {
+                // Invalid token format, ignore and allow login
+            }
+        }
+    }, [navigate])
 
     const handleLogin = async (e) => {
         e.preventDefault()
@@ -45,22 +60,22 @@ function LoginPage() {
     }
 
     return (
-        <div className="min-h-screen bg-transparent flex items-center justify-center">
-            <div className="bg-[#e0e0e0] rounded-3xl px-8 py-10 w-[340px] flex flex-col gap-5 shadow-2xl">
+        <div className="min-h-screen bg-background flex items-center justify-center p-4">
+            <div className="premium-card px-8 py-10 w-full max-w-[340px] flex flex-col gap-5">
 
-                <h2 className="text-[#111] text-2xl font-extrabold text-center tracking-tight">
+                <h2 className="text-text text-2xl font-serif font-extrabold text-center tracking-tight">
                     Welcome to Scholaria!
                 </h2>
 
                 {error && (
-                    <div className="bg-red-100 border border-red-400 text-red-700 text-sm rounded-xl px-4 py-3 text-center">
+                    <div className="bg-red-100/80 border border-red-400 text-red-700 text-sm rounded-xl px-4 py-3 text-center">
                         {error}
                     </div>
                 )}
 
                 <form className="flex flex-col gap-4" onSubmit={handleLogin}>
                     <input
-                        className="bg-[#111] text-white placeholder-gray-400 rounded-full px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-600 transition"
+                        className="premium-input w-full"
                         onChange={(e) => setUsername(e.target.value)}
                         type="text"
                         value={username}
@@ -69,7 +84,7 @@ function LoginPage() {
                         autoComplete="username"
                     />
                     <input
-                        className="bg-[#111] text-white placeholder-gray-400 rounded-full px-5 py-3 text-sm outline-none focus:ring-2 focus:ring-gray-600 transition"
+                        className="premium-input w-full"
                         onChange={(e) => setPassword(e.target.value)}
                         type="password"
                         value={password}
@@ -80,7 +95,7 @@ function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-[#111] text-white rounded-full px-5 py-3 text-sm font-semibold mt-1 hover:bg-gray-800 active:scale-95 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="bg-action text-white rounded-full px-5 py-3 text-sm font-semibold mt-1 hover:bg-[#a04618] btn-press cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                     >
                         {loading ? 'Signing in…' : 'Log In'}
                     </button>

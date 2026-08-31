@@ -3,38 +3,24 @@ import { ACCESS_TOKEN } from '../../constants'
 import api from '../../api'
 
 
-const token = localStorage.getItem(ACCESS_TOKEN)
+// Removed module-level token logic.
+// All requests now rely on api.js interceptor for Authorization headers.
 
 
 export const fetchCourses = createAsyncThunk("fetchCourses", async () => {
-    const res = await api.get('api/courses/list/', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
+    const res = await api.get('api/courses/list/')
 
 
     return res.data
 })
 
 export const fetchClasses = createAsyncThunk("fetchClasses", async () => {
-    const res = await api.get('api/courses/classes/list/', {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
+    const res = await api.get('api/courses/classes/list/')
     return res.data
 })
 
 export const fetchSelectedCourse = createAsyncThunk("fetchSelectedCourse", async (id) => {
-    const res = await api.get(`api/courses/${id}/`, {
-        headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`
-        }
-    })
+    const res = await api.get(`api/courses/${id}/`)
 
     return res.data
 })
@@ -63,15 +49,8 @@ export const createCourse = createAsyncThunk("createCourse", async (courseData, 
 
 
 export const deleteCourse = createAsyncThunk("deleteCourse", async (id) => {
-    const res = await api.delete(`api/courses/delete/${id}/`, {
-        headers: {
-            "Authorization": `Bearer ${token}`
-        }
-    })
-
-    return res.status
-
-
+    await api.delete(`api/courses/delete/${id}/`)
+    return id
 })
 
 export const updateCourse = createAsyncThunk("updateCourse", async (updatedCourse) => {
@@ -97,16 +76,7 @@ export const updateCourse = createAsyncThunk("updateCourse", async (updatedCours
 
         }
     }
-    const res = await api.patch(`api/courses/update/${updatedCourse.id}/`,
-        formData,
-
-        {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
-        }
-
-    )
+    const res = await api.patch(`api/courses/update/${updatedCourse.id}/`, formData)
 
     return res.data
 })
@@ -142,6 +112,7 @@ const coursesSlice = createSlice({
         })
 
         builder.addCase(deleteCourse.fulfilled, (state, action) => {
+            state.courses = state.courses.filter(course => course.id !== action.payload)
         })
 
         builder.addCase(updateCourse.fulfilled, (state, action) => {

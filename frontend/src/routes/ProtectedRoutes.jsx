@@ -10,10 +10,6 @@ function ProtectedRoutes(){
 
     useEffect(() => {
         auth().catch(() => setisAuthorized(false))
-        const interval = setInterval(() => {
-            auth().catch(() => setisAuthorized(false))
-        }, 10000)
-        return () => clearInterval(interval)
     }, [])
 
     const refreshToken = async () => {

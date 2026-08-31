@@ -54,12 +54,6 @@ class isCourseTeacher(BasePermission):
         return course_teacher == request.user
 
 
-class isModuleTeacher(isCourseTeacher):
-    lookup_field = ['course', 'teacher']
-
-
-class isLessonTeacher(isCourseTeacher):
-    lookup_field = ['module', 'course', 'teacher']
 
 
 class isTeacher(BasePermission):
@@ -128,10 +122,27 @@ class CourseView(generics.ListAPIView):
     serializer_class = CourseSerializer
 
     def get_queryset(self):
+        user = self.request.user
         return Course.objects.filter(
-            Q(teacher=self.request.user) | Q(student=self.request.user)
-        ).distinct()
-
+            Q(teacher=user) | Q(student=user)
+        ).distinct().prefetch_related(
+            Prefetch(
+                'module_course',
+                queryset=Module.objects.prefetch_related(
+                    Prefetch(
+                        'lesson_module',
+                        queryset=Lesson.objects.prefetch_related(
+                            Prefetch(
+                                'user_progress',
+                                queryset=UserLessonProgress.objects.filter(student=user),
+                                to_attr='_student_progress'
+                            )
+                        )
+                    )
+                ),
+                to_attr='_prefetched_modules'
+            )
+        )
 
 class CourseDetailView(generics.RetrieveAPIView):
     '''Returns a single course object (not a list).'''
@@ -141,9 +152,27 @@ class CourseDetailView(generics.RetrieveAPIView):
     lookup_url_kwarg = 'course_id'
 
     def get_queryset(self):
+        user = self.request.user
         return Course.objects.filter(
-            Q(teacher=self.request.user) | Q(student=self.request.user)
-        ).distinct()
+            Q(teacher=user) | Q(student=user)
+        ).distinct().prefetch_related(
+            Prefetch(
+                'module_course',
+                queryset=Module.objects.prefetch_related(
+                    Prefetch(
+                        'lesson_module',
+                        queryset=Lesson.objects.prefetch_related(
+                            Prefetch(
+                                'user_progress',
+                                queryset=UserLessonProgress.objects.filter(student=user),
+                                to_attr='_student_progress'
+                            )
+                        )
+                    )
+                ),
+                to_attr='_prefetched_modules'
+            )
+        )
 
 
 class CourseCreate(generics.CreateAPIView):
@@ -324,25 +353,27 @@ class LessonUpdate(generics.UpdateAPIView):
     def perform_update(self, serializer):
         lesson = serializer.save()
 
-        # Cascade: if lesson marked done, check whether the whole module is complete
-        if lesson.done:
+        # Cascade: if lesson marked published, check whether the whole module is published
+        if lesson.is_published:
             module = lesson.module
-            if not module.lesson_module.filter(done=False).exists():
-                module.done = True
-                module.save(update_fields=['done'])
+            if not module.lesson_module.filter(is_published=False).exists():
+                module.is_published = True
+                module.save(update_fields=['is_published'])
 
-                # Cascade further: check whether all modules in the course are complete
+                # Cascade further: check whether all modules in the course are published
                 course = module.course
-                if not course.module_course.filter(done=False).exists():
-                    course.done = True
-                    course.save(update_fields=['done'])
+                if not course.module_course.filter(is_published=False).exists():
+                    course.is_published = True
+                    course.save(update_fields=['is_published'])
 
 
 class LessonDelete(generics.DestroyAPIView):
-    permission_classes = [IsAuthenticated, isLessonTeacher]
-    queryset = Lesson.objects.all()
+    permission_classes = [IsAuthenticated, isTeacher]
     lookup_field = LOOKUP_FIELD
     lookup_url_kwarg = 'lesson_id'
+
+    def get_queryset(self):
+        return Lesson.objects.filter(module__course__teacher=self.request.user)
 
 
 class LessonMarkRead(APIView):

@@ -45,7 +45,7 @@ class AdminUserListView(generics.ListAPIView):
     ordering = ['id']
 
     def get_queryset(self):
-        return CustomUser.objects.all()
+        return CustomUser.objects.all().prefetch_related('courses_taught', 'student_courses')
 
 
 class AdminUserCreateView(generics.CreateAPIView):
@@ -106,7 +106,7 @@ class ListStudentsView(generics.ListAPIView):
     ordering = ['id']
 
     def get_queryset(self):
-        return CustomUser.objects.filter(role='Student')
+        return CustomUser.objects.filter(role='Student').prefetch_related('courses_taught', 'student_courses')
 
 
 # ── Auth ──────────────────────────────────────────────────────────────────────

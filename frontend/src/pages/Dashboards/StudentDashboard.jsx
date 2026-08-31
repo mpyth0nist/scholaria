@@ -3,6 +3,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { fetchCourses } from '../../features/courses/coursesSlice'
 import { fetchQuizzes } from '../../features/quizzes/quizSlice'
+import { BookOpen, FileQuestion } from 'lucide-react'
 
 function Student() {
     const dispatch = useDispatch()
@@ -10,7 +11,9 @@ function Student() {
 
     const user = useSelector(state => state.users.user)
     const courses = useSelector(state => state.courses.courses)
+    const coursesLoading = useSelector(state => state.courses.loading)
     const quizzes = useSelector(state => state.quizzes.quizzes)
+    const quizzesLoading = useSelector(state => state.quizzes.loading)
 
     useEffect(() => {
         dispatch(fetchCourses())
@@ -54,9 +57,22 @@ function Student() {
                     </button>
                 </div>
 
-                {courses.length === 0 ? (
+                {coursesLoading ? (
+                    <div className="flex flex-col gap-2">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/5">
+                                <div className="w-9 h-9 rounded-lg bg-primary/10 shrink-0"></div>
+                                <div className="flex flex-col gap-2 w-full">
+                                    <div className="h-3.5 bg-primary/10 rounded w-1/3"></div>
+                                    <div className="h-2.5 bg-primary/10 rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : courses.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-primary/60">
-                        <p className="text-sm italic">You're not enrolled in any courses yet.</p>
+                        <BookOpen className="w-10 h-10 mb-3 text-primary/30" strokeWidth={1.5} />
+                        <p className="text-sm font-medium">You're not enrolled in any courses yet.</p>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">
@@ -109,9 +125,22 @@ function Student() {
                     </button>
                 </div>
 
-                {quizzes.length === 0 ? (
+                {quizzesLoading ? (
+                    <div className="flex flex-col gap-2">
+                        {[1, 2, 3].map(i => (
+                            <div key={i} className="animate-pulse flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 border border-primary/5">
+                                <div className="w-9 h-9 rounded-lg bg-action/10 shrink-0"></div>
+                                <div className="flex flex-col gap-2 w-full">
+                                    <div className="h-3.5 bg-primary/10 rounded w-1/3"></div>
+                                    <div className="h-2.5 bg-primary/10 rounded w-1/4"></div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                ) : quizzes.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-8 text-primary/60">
-                        <p className="text-sm italic">No quizzes assigned yet.</p>
+                        <FileQuestion className="w-10 h-10 mb-3 text-primary/30" strokeWidth={1.5} />
+                        <p className="text-sm font-medium">No quizzes assigned yet.</p>
                     </div>
                 ) : (
                     <div className="flex flex-col gap-2">

@@ -6,11 +6,11 @@ from django.contrib.auth.models import AbstractUser
 
 class CustomUser(AbstractUser):
 
-    CHOICES = {
+    CHOICES = (
         ('Teacher', 'Teacher'),
         ('Student', 'Student'),
         ('ADMIN', 'ADMIN')
-    }
+    )
     role = models.CharField(max_length=10, choices=CHOICES)
     birth_date = models.DateField(null=False, blank=False)
     REQUIRED_FIELDS = ["role", "birth_date"]

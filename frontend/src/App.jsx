@@ -1,6 +1,6 @@
 
 import './App.css'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { useSelector } from 'react-redux'
 import ProtectedRoutes from './routes/ProtectedRoutes.jsx'
 import RoleProtectedRoute from './routes/RoleProtectedRoute.jsx'
@@ -23,6 +23,7 @@ import AssignmentList from './pages/assignments/AssignmentList.jsx'
 import AssignmentPage from './pages/assignments/AssignmentPage.jsx'
 import CreateAssignmentPage from './pages/assignments/CreateAssignmentPage.jsx'
 import UpdateAssignmentPage from './pages/assignments/UpdateAssignmentPage.jsx'
+import NotFound from './pages/NotFound.jsx'
 
 // Role-aware dashboard: renders Admin, Teacher or Student view based on Redux role
 const DashboardPage = () => {
@@ -36,6 +37,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path='/' element={<Navigate to='/login' replace />} />
 
         <Route element={<ProtectedRoutes />}>
 
@@ -74,6 +76,7 @@ function App() {
         </Route>
 
         <Route element={<LoginPage />} path='/login' />
+        <Route path='*' element={<NotFound />} />
 
       </Routes>
     </BrowserRouter>
