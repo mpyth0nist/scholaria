@@ -170,15 +170,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'users.CustomUser'
 
 # CORS configuration
-if DEBUG:
-    CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() in ("true", "1", "t")
+cors_origins = os.getenv("CORS_ALLOWED_ORIGINS")
+if cors_origins:
+    CORS_ALLOWED_ORIGINS = cors_origins.split(",")
 else:
-    CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() in ("true", "1", "t")
-    cors_origins = os.getenv("CORS_ALLOWED_ORIGINS")
-    if cors_origins:
-        CORS_ALLOWED_ORIGINS = cors_origins.split(",")
-    else:
-        CORS_ALLOWED_ORIGINS = []
+    CORS_ALLOWED_ORIGINS = []
 
 CORS_ALLOW_ALL_CREDENTIALS = os.getenv("CORS_ALLOW_ALL_CREDENTIALS", "True").lower() in ("true", "1", "t")
 
