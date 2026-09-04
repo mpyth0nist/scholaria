@@ -51,7 +51,7 @@ def rag_search(query: str, courses_ids : list, top_k=5):
                 'embedding',
                 query_embedding
             )
-        ).filter(distance__lt=0.4).order_by("distance")[:top_k]
+        ).order_by("distance")[:top_k]
 
     chunks = [
         {
@@ -68,7 +68,7 @@ def build_context(query, courses_ids, max_tokens=3000):
 
     results = rag_search(query, courses_ids)
     if not results:
-        raise ValueError('I dont have relevant informations to answer your question')
+        return ""
 
     encoder = tiktoken.get_encoding("cl100k_base")
     valid_chunks = []
