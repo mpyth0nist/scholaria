@@ -20,7 +20,8 @@ class UserSerializer(serializers.ModelSerializer):
         extra_kwargs = { 'password' : {'write_only': True}}
 
     def create(self, validated_data):
-        validated_data['role'] = 'Student'
+        # Set default to 'Student' if not provided, but allow 'Teacher'
+        validated_data.setdefault('role', 'Student')
         user = CustomUser.objects.create_user(**validated_data)
         return user
 

@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import api from '../../../api'
 import { useState, useEffect } from 'react'
 import RichTextEditor, { LessonContent } from '../../../components/RichTextEditor'
+import EdahAIAssistant from '../../../components/EdahAIAssistant'
 
 // Prepend the backend origin to relative media paths (/media/...)
 // so attachments resolve to Django (8000) not the Vite dev server (5173).
@@ -38,6 +39,7 @@ const LessonPage = () => {
     const [readSize, setReadSize] = useState('lg') // base, lg, xl
     const [readFont, setReadFont] = useState('serif') // serif, sans
     const [showPrefs, setShowPrefs] = useState(false)
+    const [showAI, setShowAI] = useState(false)
 
     const fetchLesson = async () => {
         try {
@@ -236,20 +238,27 @@ const LessonPage = () => {
     )
 
     // ─────────────────────────────────────────────────────────────────────────
-    // STUDENT VIEW
-    // ─────────────────────────────────────────────────────────────────────────
     if (!isTeacher) {
         return (
-            <div className="flex flex-col gap-6 p-4 sm:p-6 max-w-3xl mx-auto w-full text-text animate-page-enter">
-                <div className="flex items-center justify-between w-full max-w-prose mx-auto gap-4">
-                    {BackButton}
-                    <button
-                        onClick={() => setShowPrefs(p => !p)}
-                        className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-action/10 border-action text-action' : 'bg-white/60 border-primary/20 text-primary hover:text-action'}`}
-                    >
-                        Aa View Settings
-                    </button>
-                </div>
+            <div className={`flex flex-col lg:flex-row items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 ${showAI ? 'max-w-6xl mx-auto' : 'max-w-3xl mx-auto'}`}>
+                <div className="flex flex-col gap-6 w-full text-text">
+                    <div className="flex items-center justify-between w-full max-w-prose mx-auto gap-4">
+                        {BackButton}
+                        <div className="flex items-center gap-2">
+                            <button
+                                onClick={() => setShowAI(p => !p)}
+                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                            >
+                                ✨ Ask Edah
+                            </button>
+                            <button
+                                onClick={() => setShowPrefs(p => !p)}
+                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                            >
+                                Aa View
+                            </button>
+                        </div>
+                    </div>
 
                 {preferencesPanel}
 
@@ -319,6 +328,8 @@ const LessonPage = () => {
                     )}
                 </div>
             </div>
+            <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
+        </div>
         )
     }
 
@@ -326,10 +337,11 @@ const LessonPage = () => {
     // TEACHER VIEW
     // ─────────────────────────────────────────────────────────────────────────
     return (
-        <div className="flex flex-col gap-6 p-4 sm:p-6 max-w-3xl mx-auto w-full text-text animate-page-enter">
-            <div className="max-w-prose w-full mx-auto">
-                {BackButton}
-            </div>
+        <div className={`flex flex-col lg:flex-row items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 ${showAI ? 'max-w-6xl mx-auto' : 'max-w-3xl mx-auto'}`}>
+            <div className="flex flex-col gap-6 w-full text-text">
+                <div className="max-w-prose w-full mx-auto">
+                    {BackButton}
+                </div>
 
             {/* view mode */}
             {!editing ? (
@@ -353,12 +365,18 @@ const LessonPage = () => {
                         </div>
                     </div>
 
-                    <div className="flex justify-end max-w-prose w-full mx-auto mb-2">
+                    <div className="flex justify-end max-w-prose w-full mx-auto mb-2 gap-2">
+                        <button
+                            onClick={() => setShowAI(p => !p)}
+                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                        >
+                            ✨ Ask Edah
+                        </button>
                         <button
                             onClick={() => setShowPrefs(p => !p)}
-                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-action/10 border-action text-action' : 'bg-white/60 border-primary/20 text-primary hover:text-action'}`}
+                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
                         >
-                            Aa View Settings
+                            Aa View
                         </button>
                     </div>
 
@@ -457,6 +475,8 @@ const LessonPage = () => {
                     </button>
                 </form>
             )}
+            </div>
+            <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} />
         </div>
     )
 }
