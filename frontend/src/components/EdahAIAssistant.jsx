@@ -61,24 +61,30 @@ const EdahAIAssistant = ({ isOpen, onClose }) => {
             const reader = res.body.getReader();
             const decoder = new TextDecoder('utf-8');
             let done = false;
+            let accumulatedText = "";
             
             while (!done) {
                 const { value, done: readerDone } = await reader.read();
                 done = readerDone;
                 if (value) {
                     const chunk = decoder.decode(value, { stream: true });
+                    accumulatedText += chunk;
                     
                     if (!aiBubbleCreated) {
                         setIsLoading(false);
-                        setMessages(prev => [...prev, { role: 'ai', content: chunk }]);
                         aiBubbleCreated = true;
-                    } else {
-                        setMessages(prev => {
-                            const newMessages = [...prev];
-                            newMessages[newMessages.length - 1].content += chunk;
-                            return newMessages;
-                        });
                     }
+                    
+                    setMessages(prev => {
+                        const newMessages = [...prev];
+                        const lastMsg = newMessages[newMessages.length - 1];
+                        if (lastMsg && lastMsg.role === 'ai') {
+                            newMessages[newMessages.length - 1] = { ...lastMsg, content: accumulatedText };
+                        } else {
+                            newMessages.push({ role: 'ai', content: accumulatedText });
+                        }
+                        return newMessages;
+                    });
                 }
             }
             if (!aiBubbleCreated) {
