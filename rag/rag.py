@@ -88,22 +88,33 @@ def build_context(query, courses_ids, max_tokens=3000):
 
 
 
+def rewrite_query(raw_query, history_msgs):
+    if not history_msgs:
+        return raw_query
+        
+    prompt = """Given the following conversation history, rewrite the user's latest query to be a standalone, highly descriptive search query that contains all necessary context from the conversation. 
+If the query is already standalone, just return the query as is. Do not include any explanations, prefixes, or conversational text. Return ONLY the rewritten query."""
+
+    messages = [{"role": "system", "content": prompt}]
+    messages.extend(history_msgs)
+    messages.append({"role": "user", "content": raw_query})
+
+    try:
+        response = client.chat.completions.create(
+            model="llama3-8b-8192",
+            messages=messages,
+            temperature=0.0,
+            max_tokens=50
+        )
+        return response.choices[0].message.content.strip().strip('"').strip("'")
+    except Exception:
+        return raw_query
+
 def llm(query, courses_ids, model_name, user, conversation_id=None):
     from llm.models import Conversation, ChatMessage, SemanticCache
     from pgvector.django import CosineDistance
 
-    # Semantic Cache check
-    query_embedding = embed_input(query)
-    cached = SemanticCache.objects.annotate(
-        distance=CosineDistance('query_embedding', query_embedding)
-    ).filter(distance__lt=0.05).order_by("distance").first()
-
-    if cached:
-        def cache_stream():
-            yield cached.response
-        return cache_stream(), conversation.id
-
-    # Get or create conversation
+    # 1. Get or create conversation
     if conversation_id:
         conversation = Conversation.objects.filter(id=conversation_id, user=user).first()
         if not conversation:
@@ -111,18 +122,36 @@ def llm(query, courses_ids, model_name, user, conversation_id=None):
     else:
         conversation = Conversation.objects.create(user=user, title=query[:50])
 
-    # Save user message
-    ChatMessage.objects.create(conversation=conversation, role='user', content=query)
-
-    # Fetch history
+    # 2. Fetch history (before saving current message, so it only contains past context)
     history_msgs = []
     for msg in conversation.messages.order_by('-created_at')[:5]:
         history_msgs.insert(0, {"role": msg.role, "content": msg.content})
 
-    context = build_context(query, courses_ids)
+    # 3. Save current user message
+    ChatMessage.objects.create(conversation=conversation, role='user', content=query)
+
+    # 4. Rewrite query with context
+    search_query = rewrite_query(query, history_msgs)
+    query_embedding = embed_input(search_query)
+
+    # 5. Semantic Cache check (using standalone search_query)
+    cached = SemanticCache.objects.annotate(
+        distance=CosineDistance('query_embedding', query_embedding)
+    ).filter(distance__lt=0.05).order_by("distance").first()
+
+    if cached:
+        # Cache hit: save the assistant response to history and return
+        ChatMessage.objects.create(conversation=conversation, role='assistant', content=cached.response)
+        def cache_stream():
+            yield cached.response
+        return cache_stream(), conversation.id
+
+    # 6. Build context and invoke LLM
+    context = build_context(search_query, courses_ids)
 
     messages = [{"role": "system", "content": f'{SYSTEM_PROMPT}\n\nContext:\n{context}'}]
     messages.extend(history_msgs)
+    messages.append({"role": "user", "content": query})
 
     try:
         response_stream = client.chat.completions.create(
@@ -144,7 +173,7 @@ def llm(query, courses_ids, model_name, user, conversation_id=None):
         
         final_text = "".join(full_response)
         ChatMessage.objects.create(conversation=conversation, role='assistant', content=final_text)
-        SemanticCache.objects.create(query_text=query, query_embedding=query_embedding, response=final_text)
+        SemanticCache.objects.create(query_text=search_query, query_embedding=query_embedding, response=final_text)
 
     return generate(), conversation.id
 
