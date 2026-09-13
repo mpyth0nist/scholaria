@@ -41,6 +41,15 @@ REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES":[
         "rest_framework.permissions.IsAuthenticated",
     ],
+    "DEFAULT_THROTTLE_CLASSES": [
+        "rest_framework.throttling.AnonRateThrottle",
+        "rest_framework.throttling.UserRateThrottle",
+    ],
+    "DEFAULT_THROTTLE_RATES": {
+        "anon": "5/min",
+        "user": "200/day",
+        "llm": "20/hour",
+    },
 
 }   
 
@@ -58,6 +67,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django.contrib.postgres',
     'scholaria',
     'users',
     'courses',
@@ -65,10 +75,12 @@ INSTALLED_APPS = [
     'llm',
     'rag',
     'rest_framework',
-    'corsheaders'
+    'corsheaders',
+    'silk'
 ]
 
 MIDDLEWARE = [
+    'silk.middleware.SilkyMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -177,7 +189,7 @@ if cors_origins:
 else:
     CORS_ALLOWED_ORIGINS = []
 
-CORS_ALLOW_ALL_CREDENTIALS = os.getenv("CORS_ALLOW_ALL_CREDENTIALS", "True").lower() in ("true", "1", "t")
+CORS_ALLOW_ALL_CREDENTIALS = os.getenv("CORS_ALLOW_ALL_CREDENTIALS", "False").lower() in ("true", "1", "t")
 
 # CSRF configuration
 csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS")

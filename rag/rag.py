@@ -28,11 +28,12 @@ SYSTEM_PROMPT = '''
 
         ## Rules
 
-        1. Answer ONLY using the context provided below. Do not use any outside knowledge.
-        2. If the answer is not found in the context, say clearly: "I couldn't find information about that in your course materials."
-        3. Never fabricate facts, definitions, or explanations.
-        4. Keep answers clear, concise, and educational in tone.
-        5. When relevant, mention which type of material the answer came from (e.g. "According to your lesson on X..." or "Based on a quiz in this course...").
+        1. Prioritize answering using the context provided below.
+        2. If the answer is found in the context, mention which type of material it came from (e.g. "According to your lesson on X..." or "Based on a quiz in this course...").
+        3. If the provided context does not contain enough information to fully answer the question, you may use your general base knowledge to provide a helpful response.
+        4. When relying on general knowledge, you MUST explicitly state that this information is not from the course materials (e.g., "I couldn't find this exact topic in your course materials, but generally speaking...").
+        5. Never fabricate facts, definitions, or explanations.
+        6. Keep answers clear, concise, and educational in tone.
 '''
 
 
@@ -89,14 +90,14 @@ def build_context(query, courses_ids, max_tokens=3000):
 
 
 def rewrite_query(raw_query, history_msgs):
-    if not history_msgs:
-        return raw_query
-        
-    prompt = """Given the following conversation history, rewrite the user's latest query to be a standalone, highly descriptive search query that contains all necessary context from the conversation. 
-If the query is already standalone, just return the query as is. Do not include any explanations, prefixes, or conversational text. Return ONLY the rewritten query."""
+    prompt = """Given the conversation history, rewrite the user's latest query to be a standalone, highly descriptive search query that contains all necessary context. 
+If the query is already standalone, just return the query as is. 
+HOWEVER, if the query is explicitly casual or completely unrelated to education, academics, or course materials (e.g., movies, sports), return EXACTLY the string 'OFF_TOPIC'.
+Do not include any explanations, prefixes, or conversational text. Return ONLY the rewritten query or 'OFF_TOPIC'."""
 
     messages = [{"role": "system", "content": prompt}]
-    messages.extend(history_msgs)
+    if history_msgs:
+        messages.extend(history_msgs)
     messages.append({"role": "user", "content": raw_query})
 
     try:
@@ -132,6 +133,14 @@ def llm(query, courses_ids, model_name, user, conversation_id=None):
 
     # 4. Rewrite query with context
     search_query = rewrite_query(query, history_msgs)
+    
+    if search_query == 'OFF_TOPIC':
+        response_text = "I'm your learning assistant. I can only help you with educational or course-related topics."
+        ChatMessage.objects.create(conversation=conversation, role='assistant', content=response_text)
+        def off_topic_stream():
+            yield response_text
+        return off_topic_stream(), conversation.id
+
     query_embedding = embed_input(search_query)
 
     # 5. Semantic Cache check (using standalone search_query)

@@ -1,4 +1,5 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
+import DOMPurify from 'dompurify';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -444,6 +445,7 @@ export const LessonContent = ({ html, className = '' }) => (
             [&_span]:leading-[inherit]
             ${className}`}
         dangerouslySetInnerHTML={{ __html: fixLessonColors(html) }}
+        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fixLessonColors(html)) }}
     />
 )
 

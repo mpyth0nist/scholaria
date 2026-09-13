@@ -3,6 +3,7 @@ from users.models import CustomUser
 from courses.models import Course
 from django.core.validators import MinLengthValidator
 from core.mixins import RAGSearchableMixin
+from utils.validators import validate_file_type, validate_file_size
 
 
 # Create your models here.
@@ -121,7 +122,7 @@ class Assignment(RAGSearchableMixin):
     teacher     = models.ForeignKey(CustomUser, related_name='assignments', on_delete=models.CASCADE)
     course      = models.ForeignKey(Course, related_name='assignments', on_delete=models.CASCADE)
     due_date    = models.DateField()
-    document    = models.FileField(upload_to='assignment_docs/')
+    document    = models.FileField(upload_to='assignment_docs/', validators=[validate_file_type, validate_file_size])
 
     def to_rag_document(self) -> dict:
         return {
@@ -143,7 +144,7 @@ class Submission(models.Model):
     """A student's uploaded answer to an Assignment."""
     assignment   = models.ForeignKey(Assignment, related_name='submissions', on_delete=models.CASCADE)
     student      = models.ForeignKey(CustomUser, related_name='submissions', on_delete=models.CASCADE)
-    file         = models.FileField(upload_to='submission_docs/')
+    file         = models.FileField(upload_to='submission_docs/', validators=[validate_file_type, validate_file_size])
     submitted_at = models.DateTimeField(auto_now_add=True)
     # null = not yet graded
     score        = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True)

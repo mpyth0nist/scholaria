@@ -5,6 +5,7 @@ from django.core.validators import MinLengthValidator, MinValueValidator
 from pgvector.django import HnswIndex, VectorField
 from core.mixins import RAGSearchableMixin
 from utils.data_prepping import clean_text
+from utils.validators import validate_file_type, validate_file_size
 
 class StudentClass(models.Model):
     name = models.CharField(max_length=100)
@@ -17,7 +18,7 @@ class Course(models.Model):
     course_name = models.CharField(max_length=90, blank=False, null=False, validators=[MinLengthValidator(3)])
     subject = models.CharField(max_length=25, blank=False, null=False, validators=[MinLengthValidator(2)])
     description = models.CharField(max_length=255, blank=True, default='')
-    thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True)
+    thumbnail = models.ImageField(upload_to='course_thumbnails/', null=True, blank=True, validators=[validate_file_type, validate_file_size])
     published = models.BooleanField(default=True)
     teacher = models.ForeignKey(CustomUser, related_name="courses_taught", on_delete=models.CASCADE)
     student = models.ManyToManyField(CustomUser, related_name="student_courses", blank=True)
@@ -41,8 +42,8 @@ class Module(models.Model):
 class Lesson(RAGSearchableMixin):
     title = models.CharField(max_length=255)
     content = models.TextField()
-    attachments = models.FileField(upload_to = 'lesson_docs/', null=True, blank=True)
-    video = models.FileField(upload_to= 'lesson_vids/', blank=True, null=True)
+    attachments = models.FileField(upload_to='lesson_docs/', null=True, blank=True, validators=[validate_file_type, validate_file_size])
+    video = models.FileField(upload_to='lesson_vids/', blank=True, null=True, validators=[validate_file_type, validate_file_size])
     module = models.ForeignKey(Module, related_name="lesson_module", on_delete=models.CASCADE)
     is_published = models.BooleanField(default=False)
     embedding = VectorField(dimensions=384, null=True, blank=True)

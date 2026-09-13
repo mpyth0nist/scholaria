@@ -7,12 +7,14 @@ from courses.models import Course
 from rag.rag import llm, ServiceUnavailable
 from django.db.models import Q
 from rest_framework.exceptions import PermissionDenied
+from scholaria.throttles import LLMRateThrottle
 
 logger = getLogger(__name__)
 
 class RAGAnswerView(APIView):
 
     permission_classes = [IsAuthenticated]
+    throttle_classes = [LLMRateThrottle]
 
     def post(self, request):
         query = request.data.get('query')
