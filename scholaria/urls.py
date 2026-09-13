@@ -1,7 +1,9 @@
 from django.contrib import admin
 from django.urls import path, include
+from django.urls import path, include, re_path
 from django.conf import settings
 from django.conf.urls.static import static
+from django.views.static import serve
 from django.http import JsonResponse
 from django.db import connections
 from django.db.utils import OperationalError
@@ -24,7 +26,11 @@ urlpatterns = [
     path('api/quizzes/', include('quizzes.urls')),
     path('api/llm/', include('llm.urls')),
     path('health/', health_check, name='health_check'),
+    path('silk/', include('silk.urls'), name='silk')
 ]
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns += [
+    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+]
