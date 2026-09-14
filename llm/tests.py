@@ -372,6 +372,7 @@ class TestRAGAnswerViewStudent:
         )
         assert res.status_code == 200
         content = b''.join(res.streaming_content).decode('utf-8')
+        res.close()
         assert content == 'Variables store data.'
         assert res['X-Conversation-Id'] == 'mocked-conv-id'
 
@@ -452,6 +453,7 @@ class TestRAGAnswerViewTeacher:
         )
         assert res.status_code == 200
         content = b''.join(res.streaming_content).decode('utf-8')
+        res.close()
         assert content == 'Teacher answer.'
 
     @patch('llm.views.llm')

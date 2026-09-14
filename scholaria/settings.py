@@ -76,7 +76,10 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-if DEBUG:
+import sys
+TESTING = 'pytest' in sys.modules
+
+if DEBUG and not TESTING:
     INSTALLED_APPS.append('silk')
 
 MIDDLEWARE = [
@@ -91,7 +94,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-if DEBUG:
+if DEBUG and not TESTING:
     MIDDLEWARE.insert(0, 'silk.middleware.SilkyMiddleware')
 
 
@@ -127,6 +130,9 @@ DATABASES = {
         'PASSWORD': os.getenv("DB_PASSWORD"),
         'HOST': os.getenv("DB_HOST"),
         'PORT': os.getenv("DB_PORT"),
+        'OPTIONS': {
+            'server_side_cursors': False,
+        }
     }
 }
 
