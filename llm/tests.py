@@ -1,4 +1,3 @@
-from django.test import TestCase
 
 # Create your tests here.
 """
@@ -10,17 +9,16 @@ Tests cover:
   - Ingestion:      ingest_searchable_object
   - API layer:      RAGAnswerView (auth, role scoping, error paths)
 """
+from unittest.mock import MagicMock, patch
+
 import pytest
-from unittest.mock import patch, MagicMock
-from django.test import override_settings
-from rest_framework.test import APIClient
-from django.urls import reverse
-
-from users.models import CustomUser
-from courses.models import Course, Module, Lesson, StudentClass
-from rag.models import DocumentChunk
 from django.contrib.contenttypes.models import ContentType
+from django.urls import reverse
+from rest_framework.test import APIClient
 
+from courses.models import Course, Lesson, Module, StudentClass
+from rag.models import DocumentChunk
+from users.models import CustomUser
 
 # ══════════════════════════════════════════════════════════════════════════════
 # Fixtures
@@ -304,7 +302,8 @@ class TestLLMFunction:
     def test_raises_service_unavailable_on_api_error(self, mock_context, mock_client):
         """llm() raises ServiceUnavailable when Groq API errors."""
         from openai import APITimeoutError
-        from rag.rag import llm, ServiceUnavailable
+
+        from rag.rag import llm
 
         mock_context.return_value = 'Some context.'
         mock_client.chat.completions.create.side_effect = APITimeoutError(request=MagicMock())

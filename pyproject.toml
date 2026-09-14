@@ -34,3 +34,15 @@ dependencies = [
     "whitenoise",
     "sentry-sdk[django]>=2.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-django>=4.8.0",
+    "pytest-mock>=3.12.0",
+    "ruff>=0.3.0",
+]
+
+[tool.ruff]
+lint.ignore = ["RUF012", "SIM102", "TRY004", "BLE001", "UP031"]
+lint.extend-select = ["I"]

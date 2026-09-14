@@ -1,5 +1,6 @@
-from django.core.management.base import BaseCommand
 from django.apps import apps
+from django.core.management.base import BaseCommand
+
 from core.mixins import RAGSearchableMixin
 from rag.ingest import ingest_searchable_object
 

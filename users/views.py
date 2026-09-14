@@ -1,19 +1,19 @@
 import logging
 
-from rest_framework import status, generics, filters
-from rest_framework.exceptions import ValidationError
-from rest_framework.permissions import IsAuthenticated, AllowAny, BasePermission
+from django.db.models import Count, Sum
+from rest_framework import filters, generics, status
 from rest_framework.pagination import PageNumberPagination
+from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from django.db.models import Count, Sum
 
-from .models import CustomUser
-from .serializers import UserSerializer, AdminUserSerializer
 from courses.models import Course, UserLessonProgress
 from courses.views import isTeacher
 from quizzes.models import Quiz, UserAttempt
+
+from .models import CustomUser
+from .serializers import AdminUserSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
 
@@ -111,8 +111,9 @@ class ListStudentsView(generics.ListAPIView):
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
-from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from django.conf import settings
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+
 
 class CookieTokenObtainPairView(TokenObtainPairView):
     def post(self, request, *args, **kwargs):

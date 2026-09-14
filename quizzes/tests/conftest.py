@@ -1,6 +1,6 @@
 import pytest
-from rest_framework.test import APIClient
 from django.urls import reverse
+from rest_framework.test import APIClient
 
 
 # ── Base unauthenticated client ───────────────────────────────────────────────
@@ -76,8 +76,8 @@ def client_filled_data(teacher_client, db):
     Returns the teacher_client after creating a course and a quiz via the API.
     Attaches `.course` and `.quiz` to the client object for use in tests.
     """
+    from quizzes.models import Choice, Quiz
     from users.models import CustomUser
-    from quizzes.models import Quiz, Choice
 
     student = CustomUser.objects.create_user(   # create_user hashes the password
         username="student",

@@ -1,10 +1,10 @@
-from django.db import models
-from users.models import CustomUser
-from courses.models import Course
 from django.core.validators import MinLengthValidator
-from core.mixins import RAGSearchableMixin
-from utils.validators import validate_file_type, validate_file_size
+from django.db import models
 
+from core.mixins import RAGSearchableMixin
+from courses.models import Course
+from users.models import CustomUser
+from utils.validators import validate_file_size, validate_file_type
 
 # Create your models here.
 

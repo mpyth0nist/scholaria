@@ -1,13 +1,24 @@
 from django.urls import path
 
 from .views import (
-    QuizList, QuizCreate, QuizUpdate, QuizDelete, QuizDetailedView,
-    UserAttemptCreate, UserAttemptDelete, SubmitQuiz,
-    AnswerCreate, AnswerUpdate,
+    AnswerCreate,
+    AnswerUpdate,
+    AssignmentCreate,
+    AssignmentDelete,
+    AssignmentDetail,
     # Assignment views
-    AssignmentList, AssignmentCreate, AssignmentDetail,
-    AssignmentUpdate, AssignmentDelete,
-    SubmissionCreateUpdate, GradeSubmission,
+    AssignmentList,
+    AssignmentUpdate,
+    GradeSubmission,
+    QuizCreate,
+    QuizDelete,
+    QuizDetailedView,
+    QuizList,
+    QuizUpdate,
+    SubmissionCreateUpdate,
+    SubmitQuiz,
+    UserAttemptCreate,
+    UserAttemptDelete,
 )
 
 urlpatterns = [

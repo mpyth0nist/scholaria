@@ -1,11 +1,12 @@
-from django.db import models
-from django.db.models import ForeignKey
-from users.models import CustomUser
 from django.core.validators import MinLengthValidator, MinValueValidator
+from django.db import models
 from pgvector.django import HnswIndex, VectorField
+
 from core.mixins import RAGSearchableMixin
+from users.models import CustomUser
 from utils.data_prepping import clean_text
-from utils.validators import validate_file_type, validate_file_size
+from utils.validators import validate_file_size, validate_file_type
+
 
 class StudentClass(models.Model):
     name = models.CharField(max_length=100)

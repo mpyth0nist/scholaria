@@ -1,7 +1,7 @@
 import logging
-from langchain_huggingface import HuggingFaceEmbeddings
-from django.conf import settings
 
+from django.conf import settings
+from langchain_huggingface import HuggingFaceEmbeddings
 
 embedder = None
 

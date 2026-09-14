@@ -1,7 +1,5 @@
 import pytest
 from django.urls import reverse
-from quizzes.models import Quiz, Question, Choice
-from rest_framework.test import APIClient
 
 
 @pytest.mark.django_db
@@ -61,7 +59,6 @@ def test_quiz_create(client_filled_data):
 @pytest.mark.django_db
 def test_quiz_submit(client_filled_data):
 
-    from quizzes.models import UserAnswer, UserAttempt
 
     # Login as Student
     res = client_filled_data.post(

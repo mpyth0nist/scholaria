@@ -1,12 +1,14 @@
 from logging import getLogger
+
+from django.db.models import Q
+from django.http import StreamingHttpResponse
+from rest_framework.exceptions import PermissionDenied
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.http import StreamingHttpResponse
-from rest_framework.permissions import IsAuthenticated
+
 from courses.models import Course
-from rag.rag import llm, ServiceUnavailable
-from django.db.models import Q
-from rest_framework.exceptions import PermissionDenied
+from rag.rag import ServiceUnavailable, llm
 from scholaria.throttles import LLMRateThrottle
 
 logger = getLogger(__name__)

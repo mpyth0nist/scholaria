@@ -1,11 +1,25 @@
 from django.urls import path
 
 from .views import (
-    StudentClassList, StudentClassCreate, StudentClassUpdate, StudentClassDelete,
-    CourseView, CourseDetailView, CourseCreate, CourseDelete, CourseUpdate,
-    ModuleList, ModuleCreate, ModuleUpdate, ModuleDelete,
-    LessonList, LessonCreate, LessonDetailView, LessonUpdate, LessonDelete,
+    CourseCreate,
+    CourseDelete,
+    CourseDetailView,
+    CourseUpdate,
+    CourseView,
+    LessonCreate,
+    LessonDelete,
+    LessonDetailView,
+    LessonList,
     LessonMarkRead,
+    LessonUpdate,
+    ModuleCreate,
+    ModuleDelete,
+    ModuleList,
+    ModuleUpdate,
+    StudentClassCreate,
+    StudentClassDelete,
+    StudentClassList,
+    StudentClassUpdate,
 )
 
 urlpatterns = [
