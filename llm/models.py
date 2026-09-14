@@ -20,4 +20,5 @@ class SemanticCache(models.Model):
     query_text = models.TextField()
     query_embedding = VectorField(dimensions=384)
     response = models.TextField()
+    course_ids = models.JSONField(default=list)
     created_at = models.DateTimeField(auto_now_add=True)

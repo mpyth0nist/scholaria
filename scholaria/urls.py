@@ -26,11 +26,11 @@ urlpatterns = [
     path('api/quizzes/', include('quizzes.urls')),
     path('api/llm/', include('llm.urls')),
     path('health/', health_check, name='health_check'),
-    path('silk/', include('silk.urls'), name='silk')
 ]
 
 if settings.DEBUG:
+    urlpatterns += [path('silk/', include('silk.urls'), name='silk')]
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-urlpatterns += [
-    re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
-]
+    urlpatterns += [
+        re_path(r'^media/(?P<path>.*)$', serve, {'document_root': settings.MEDIA_ROOT}),
+    ]
