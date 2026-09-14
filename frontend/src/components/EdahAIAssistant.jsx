@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
 import api from '../api';
-import { ACCESS_TOKEN } from '../constants';
 
 const EdahAIAssistant = ({ isOpen, onClose }) => {
     const [messages, setMessages] = useState([
@@ -30,15 +29,33 @@ const EdahAIAssistant = ({ isOpen, onClose }) => {
         let aiBubbleCreated = false;
 
         try {
-            const token = localStorage.getItem(ACCESS_TOKEN);
             let baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/';
             if (!baseURL.endsWith('/')) baseURL += '/';
+
+            // Helper to get CSRF token from cookies
+            const getCookie = (name) => {
+                let cookieValue = null;
+                if (document.cookie && document.cookie !== '') {
+                    const cookies = document.cookie.split(';');
+                    for (let i = 0; i < cookies.length; i++) {
+                        const cookie = cookies[i].trim();
+                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                            break;
+                        }
+                    }
+                }
+                return cookieValue;
+            };
+
+            const csrftoken = getCookie('csrftoken');
             
             const res = await fetch(`${baseURL}api/llm/answer/`, {
                 method: 'POST',
+                credentials: 'include', // This ensures httpOnly cookies (like access/refresh) are sent
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`
+                    'X-CSRFToken': csrftoken,
                 },
                 body: JSON.stringify({ 
                     query: userMsg.content,
