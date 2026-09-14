@@ -40,8 +40,8 @@ def _make_authenticated_client(role, username, password, email, birth_date):
         f"Token request failed for {role}: {res.status_code} {res.data}"
     )
 
-    token = res.data['access']
-    api.credentials(HTTP_AUTHORIZATION=f'Bearer {token}')  # pre-auth the client
+    # We don't need the actual cookie token for tests if we use force_authenticate
+    api.force_authenticate(user=user)
     api.user = user   # attach the user object for convenience in tests
     return api
 

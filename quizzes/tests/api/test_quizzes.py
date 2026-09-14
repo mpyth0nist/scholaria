@@ -67,8 +67,7 @@ def test_quiz_submit(client_filled_data):
         format='json',
     )
     assert res.status_code == 200, f"Student login failed: {res.data}"
-    client_filled_data.credentials(HTTP_AUTHORIZATION=f'Bearer {res.data["access"]}')
-
+    client_filled_data.force_authenticate(user=client_filled_data.student)
     quiz = client_filled_data.quiz
     questions = list(quiz.questions.all())
 

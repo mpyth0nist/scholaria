@@ -135,7 +135,7 @@ def _auth_client(user):
         format='json',
     )
     assert res.status_code == 200, f"Token failed: {res.data}"
-    client.credentials(HTTP_AUTHORIZATION=f"Bearer {res.data['access']}")
+    client.force_authenticate(user=user)
     return client
 
 
