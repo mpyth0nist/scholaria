@@ -1,6 +1,4 @@
-
 import axios from 'axios'
-import { ACCESS_TOKEN, REFRESH_TOKEN } from './constants'
 
 let baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/'
 if (!baseURL.endsWith('/')) {
@@ -8,24 +6,11 @@ if (!baseURL.endsWith('/')) {
 }
 
 const api = axios.create({
-    baseURL: baseURL
+    baseURL: baseURL,
+    withCredentials: true,
+    xsrfCookieName: 'csrftoken',
+    xsrfHeaderName: 'X-CSRFToken',
 })
-
-
-api.interceptors.request.use(
-    (config) => {
-        const token = localStorage.getItem(ACCESS_TOKEN)
-        
-        if (token){
-            config.headers.Authorization = `Bearer ${token}`
-        }
-        return config
-    },
-
-    (error) => {
-        return Promise.reject(error)
-    }
-)
 
 api.interceptors.response.use(
     (response) => {
@@ -39,24 +24,19 @@ api.interceptors.response.use(
             originalRequest._retry = true
             
             try {
-                const refreshToken = localStorage.getItem(REFRESH_TOKEN)
-                if (refreshToken) {
-                    // Make a raw axios call to avoid an infinite loop in the interceptor
-                    const res = await axios.post(`${api.defaults.baseURL}api/users/refresh/`, {
-                        refresh: refreshToken
-                    })
-                    
-                    if (res.status === 200) {
-                        localStorage.setItem(ACCESS_TOKEN, res.data.access)
-                        originalRequest.headers.Authorization = `Bearer ${res.data.access}`
-                        // Retry the original request with the new token
-                        return api(originalRequest)
-                    }
+                // The refresh cookie is sent automatically
+                const res = await axios.post(`${api.defaults.baseURL}api/users/refresh/`, {}, {
+                    withCredentials: true,
+                    xsrfCookieName: 'csrftoken',
+                    xsrfHeaderName: 'X-CSRFToken'
+                })
+                
+                if (res.status === 200) {
+                    // Retry the original request (the new access cookie is automatically included)
+                    return api(originalRequest)
                 }
             } catch (err) {
-                // If refresh token is expired or invalid, log the user out
-                localStorage.removeItem(ACCESS_TOKEN)
-                localStorage.removeItem(REFRESH_TOKEN)
+                // If refresh token is expired or invalid, redirect to login
                 window.location.href = '/login'
             }
         }

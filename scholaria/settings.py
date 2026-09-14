@@ -35,8 +35,7 @@ ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
 
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework_simplejwt.authentication.JWTAuthentication",
-
+        "users.authentication.CookieJWTAuthentication",
     ),
     "DEFAULT_PERMISSION_CLASSES":[
         "rest_framework.permissions.IsAuthenticated",
@@ -264,3 +263,13 @@ if SENTRY_DSN:
         traces_sample_rate=0.1,
         send_default_pii=False,
     )
+
+# Cookie JWT Auth Config
+JWT_AUTH_COOKIE = 'access'
+JWT_AUTH_REFRESH_COOKIE = 'refresh'
+JWT_AUTH_SAMESITE = 'Lax'
+JWT_AUTH_SECURE = not DEBUG
+
+# CSRF Config
+CSRF_COOKIE_HTTPONLY = False  # Allows frontend Axios to read it
+CSRF_USE_SESSIONS = False

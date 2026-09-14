@@ -1,33 +1,15 @@
-import { useState, useEffect } from 'react'
-import { ACCESS_TOKEN, REFRESH_TOKEN } from '../../constants.js'
+import { useState } from 'react'
 import '../../style/style.css'
 import api from '../../api.js'
 import { useNavigate } from 'react-router-dom'
-import { jwtDecode } from 'jwt-decode'
-
 
 function LoginPage() {
-
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [error, setError] = useState(null)
     const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
-
-    useEffect(() => {
-        const token = localStorage.getItem(ACCESS_TOKEN)
-        if (token) {
-            try {
-                const decoded = jwtDecode(token)
-                if (decoded.exp > (Date.now() / 1000)) {
-                    navigate('/dashboard')
-                }
-            } catch (err) {
-                // Invalid token format, ignore and allow login
-            }
-        }
-    }, [navigate])
 
     const handleLogin = async (e) => {
         e.preventDefault()
@@ -36,8 +18,6 @@ function LoginPage() {
         try {
             const res = await api.post('/api/users/token/', { username, password })
             if (res.status === 200) {
-                localStorage.setItem(ACCESS_TOKEN, res.data.access)
-                localStorage.setItem(REFRESH_TOKEN, res.data.refresh)
                 navigate('/dashboard')
             }
         } catch (err) {

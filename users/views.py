@@ -111,19 +111,74 @@ class ListStudentsView(generics.ListAPIView):
 
 # ── Auth ──────────────────────────────────────────────────────────────────────
 
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from django.conf import settings
+
+class CookieTokenObtainPairView(TokenObtainPairView):
+    def post(self, request, *args, **kwargs):
+        response = super().post(request, *args, **kwargs)
+        access = response.data.get('access')
+        refresh = response.data.get('refresh')
+        
+        if access:
+            response.set_cookie(
+                getattr(settings, 'JWT_AUTH_COOKIE', 'access'),
+                access,
+                httponly=True,
+                samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+                secure=getattr(settings, 'JWT_AUTH_SECURE', False)
+            )
+            del response.data['access']
+            
+        if refresh:
+            response.set_cookie(
+                getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'),
+                refresh,
+                httponly=True,
+                samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+                secure=getattr(settings, 'JWT_AUTH_SECURE', False)
+            )
+            del response.data['refresh']
+            
+        return response
+
+class CookieTokenRefreshView(TokenRefreshView):
+    def post(self, request, *args, **kwargs):
+        refresh = request.COOKIES.get(getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'))
+        if refresh:
+            request.data['refresh'] = refresh
+            
+        response = super().post(request, *args, **kwargs)
+        access = response.data.get('access')
+        
+        if access:
+            response.set_cookie(
+                getattr(settings, 'JWT_AUTH_COOKIE', 'access'),
+                access,
+                httponly=True,
+                samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+                secure=getattr(settings, 'JWT_AUTH_SECURE', False)
+            )
+            del response.data['access']
+            
+        return response
+
 class LogoutView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
         try:
-            refresh_token = request.data["refresh"]
-            token = RefreshToken(refresh_token)
-            token.blacklist()
+            refresh_token = request.COOKIES.get(getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'))
+            if refresh_token:
+                token = RefreshToken(refresh_token)
+                token.blacklist()
         except Exception:
-            # Log the error but still return 205 — the client clears tokens anyway
             logger.exception("Error blacklisting refresh token during logout")
 
-        return Response(status=status.HTTP_205_RESET_CONTENT)
+        response = Response(status=status.HTTP_205_RESET_CONTENT)
+        response.delete_cookie(getattr(settings, 'JWT_AUTH_COOKIE', 'access'))
+        response.delete_cookie(getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'))
+        return response
 
 
 # ── Teacher dashboard ─────────────────────────────────────────────────────────
