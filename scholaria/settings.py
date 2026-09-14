@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 import os
+import sys
 from datetime import timedelta
 from pathlib import Path
 
@@ -76,7 +77,6 @@ INSTALLED_APPS = [
     'corsheaders',
 ]
 
-import sys
 TESTING = 'pytest' in sys.modules
 
 if DEBUG and not TESTING:
