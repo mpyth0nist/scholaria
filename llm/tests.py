@@ -387,6 +387,7 @@ class TestRAGAnswerViewStudent:
             data={'query': 'test'},
             format='json',
         )
+        list(res.streaming_content)
         res.close()  # Close the streaming response to release DB cursor
 
         # Inspect what course_ids were passed
@@ -417,6 +418,7 @@ class TestRAGAnswerViewStudent:
             data={'query': 'test'},
             format='json',
         )
+        list(res.streaming_content)
         res.close()  # Close the streaming response
 
         call_args = mock_llm.call_args
@@ -477,7 +479,8 @@ class TestRAGAnswerViewTeacher:
             data={'query': 'test'},
             format='json',
         )
-        res.close()  # Close the streaming response
+        list(res.streaming_content)  # Fully consume stream to avoid dangling cursors
+        res.close()
 
         call_args = mock_llm.call_args
         courses_ids = list(call_args[0][1])
