@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import api from '../api'
-import { ACCESS_TOKEN, REFRESH_TOKEN } from '../constants'
 
 function LogoutButton({ className = '' }) {
 
@@ -10,17 +9,14 @@ function LogoutButton({ className = '' }) {
 
     const handleLogout = async () => {
         setLoading(true)
-        const refresh = localStorage.getItem(REFRESH_TOKEN)
 
         try {
-            // Blacklist the refresh token on the server
-            await api.post('api/users/logout/', { refresh })
+            // Blacklist the refresh token on the server and delete cookies
+            await api.post('api/users/logout/')
         } catch (err) {
             // Proceed with client-side logout even if server call fails
             console.error('Logout request failed:', err)
         } finally {
-            localStorage.removeItem(ACCESS_TOKEN)
-            localStorage.removeItem(REFRESH_TOKEN)
             setLoading(false)
             navigate('/login')
         }
