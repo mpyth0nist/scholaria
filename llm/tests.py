@@ -381,11 +381,12 @@ class TestRAGAnswerViewStudent:
         mock_llm.return_value = (['answer'], 'conv-id')
 
         client = _auth_client(student)
-        client.post(
+        res = client.post(
             reverse('rag_answer'),
             data={'query': 'test'},
             format='json',
         )
+        res.close()  # Close the streaming response to release DB cursor
 
         # Inspect what course_ids were passed
         call_args = mock_llm.call_args
@@ -410,11 +411,12 @@ class TestRAGAnswerViewStudent:
         mock_llm.return_value = (['answer from class course'], 'conv-id')
 
         client = _auth_client(student)
-        client.post(
+        res = client.post(
             reverse('rag_answer'),
             data={'query': 'test'},
             format='json',
         )
+        res.close()  # Close the streaming response
 
         call_args = mock_llm.call_args
         courses_ids = list(call_args[0][1])
@@ -468,11 +470,12 @@ class TestRAGAnswerViewTeacher:
         mock_llm.return_value = (['answer'], 'conv-id')
 
         client = _auth_client(teacher)
-        client.post(
+        res = client.post(
             reverse('rag_answer'),
             data={'query': 'test'},
             format='json',
         )
+        res.close()  # Close the streaming response
 
         call_args = mock_llm.call_args
         courses_ids = list(call_args[0][1])
