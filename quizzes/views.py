@@ -50,7 +50,14 @@ class QuizDetailedView(generics.RetrieveAPIView):
     permission_classes = [IsAuthenticated]
     lookup_field = 'id'
     lookup_url_kwarg = 'quiz_id'
-    queryset = Quiz.objects.all()
+
+    def get_queryset(self):
+        user = self.request.user
+        if user.role == 'Teacher':
+            return Quiz.objects.filter(teacher=user)
+        return Quiz.objects.filter(
+            Q(course__student=user) | Q(course__student_classes__students=user)
+        ).distinct()
 
     def get_serializer_class(self):
         user = self.request.user

@@ -47,7 +47,7 @@ REST_FRAMEWORK = {
     ],
     "DEFAULT_THROTTLE_RATES": {
         "anon": "5/min",
-        "user": "200/day",
+        "user": "1000/hour",
         "llm": "20/hour",
     },
 
@@ -76,11 +76,12 @@ INSTALLED_APPS = [
     'rag',
     'rest_framework',
     'corsheaders',
-    'silk'
 ]
 
+if DEBUG:
+    INSTALLED_APPS.append('silk')
+
 MIDDLEWARE = [
-    'silk.middleware.SilkyMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
@@ -91,6 +92,10 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+if DEBUG:
+    MIDDLEWARE.insert(0, 'silk.middleware.SilkyMiddleware')
+
 
 ROOT_URLCONF = 'scholaria.urls'
 
@@ -247,3 +252,15 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+
+# Sentry error tracking (only active if SENTRY_DSN is set)
+SENTRY_DSN = os.getenv("SENTRY_DSN", "")
+if SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.django import DjangoIntegration
+    sentry_sdk.init(
+        dsn=SENTRY_DSN,
+        integrations=[DjangoIntegration()],
+        traces_sample_rate=0.1,
+        send_default_pii=False,
+    )

@@ -285,6 +285,12 @@ class LessonList(generics.ListAPIView):
     def get_queryset(self):
         linked_module = get_object_or_404(Module, id=self.kwargs['module_id'])
         user = self.request.user
+        # Verify enrollment
+        get_object_or_404(
+            Course,
+            Q(teacher=user) | Q(student=user),
+            id=linked_module.course_id,
+        )
         # Prefetch per-student progress to avoid an N+1 query in LessonSerializer.get_done()
         return Lesson.objects.filter(module=linked_module).prefetch_related(
             Prefetch(

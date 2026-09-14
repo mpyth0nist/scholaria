@@ -1,13 +1,8 @@
-version: '3.8'
-
 services:
   postgres:
-    image: postgres:14
+    image: pgvector/pgvector:pg16
     container_name: postgres
     environment:
-      POSTGRES_DB: scholaria
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
@@ -15,6 +10,11 @@ services:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER} -d ${DB_NAME}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   redis:
     image: redis:7
@@ -34,14 +34,10 @@ services:
       - /app/media
       - /app/static
     depends_on:
-      - postgres
-      - redis
-
-  redis:
-    image: redis:7
-    container_name: redis
-    ports:
-      - "6379:6379"
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
 
   frontend:
     build: ./frontend
