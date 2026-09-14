@@ -2,6 +2,7 @@
 
 from bs4 import BeautifulSoup
 
+
 def clean_text(text : str) -> str:
 
     raw_text = text

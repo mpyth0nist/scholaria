@@ -1,19 +1,22 @@
 import logging
 
-from django.shortcuts import get_object_or_404
 from django.db import transaction
 from django.db.models import Q
+from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import generics
 from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from courses.views import isTeacher, isStudent, isCourseTeacher
-from .models import Quiz, Question, Choice, UserAttempt, UserAnswer
+from courses.views import isStudent, isTeacher
+
+from .models import Question, Quiz, UserAnswer, UserAttempt
 from .serializers import (
-    QuizSerializer, UserQuizSerializer,
-    UserAttemptSerializer, UserAnswerSerializer,
+    QuizSerializer,
+    UserAnswerSerializer,
+    UserAttemptSerializer,
+    UserQuizSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -231,8 +234,10 @@ class SubmitQuiz(generics.UpdateAPIView):
 
 from .models import Assignment, Submission
 from .serializers import (
-    AssignmentSerializer, StudentAssignmentSerializer,
-    SubmissionSerializer, GradeSubmissionSerializer,
+    AssignmentSerializer,
+    GradeSubmissionSerializer,
+    StudentAssignmentSerializer,
+    SubmissionSerializer,
 )
 
 

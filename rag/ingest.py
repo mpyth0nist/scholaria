@@ -1,8 +1,9 @@
+from django.contrib.contenttypes.models import ContentType
+
 from core.mixins import RAGSearchableMixin
 from rag.models import DocumentChunk
 from utils.chunking import chunk_text
 from utils.embeddings import embed_data
-from django.contrib.contenttypes.models import ContentType
 
 CHUNK_THRESHOLD = 1000
 

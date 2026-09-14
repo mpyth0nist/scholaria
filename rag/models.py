@@ -1,7 +1,7 @@
-from django.db import models
-from pgvector.django import VectorField, HnswIndex
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
+from django.db import models
+from pgvector.django import HnswIndex, VectorField
 
 
 class DocumentChunk(models.Model):

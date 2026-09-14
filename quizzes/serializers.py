@@ -1,6 +1,15 @@
-from .models import Quiz, Question, Choice, UserAttempt, UserAnswer, Assignment, Submission
-
 from rest_framework import serializers
+
+from .models import (
+    Assignment,
+    Choice,
+    Question,
+    Quiz,
+    Submission,
+    UserAnswer,
+    UserAttempt,
+)
+
 
 class UserChoiceSerializer(serializers.ModelSerializer):
     class Meta:

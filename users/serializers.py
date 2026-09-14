@@ -1,7 +1,9 @@
-from rest_framework import serializers 
-from .models import CustomUser
+from rest_framework import serializers
+
 from courses.models import Course
-from courses.serializers import CourseSerializer
+
+from .models import CustomUser
+
 # Create your views here.
 
 

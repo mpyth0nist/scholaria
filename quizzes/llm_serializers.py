@@ -11,8 +11,8 @@ Design principles:
 """
 
 from rest_framework import serializers
-from .models import Quiz, Question, Choice, UserAttempt, Assignment, Submission
 
+from .models import Assignment, Choice, Question, Quiz, Submission, UserAttempt
 
 # ── Quiz serializers ──────────────────────────────────────────────────────────
 

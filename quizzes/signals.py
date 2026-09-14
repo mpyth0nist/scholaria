@@ -2,7 +2,8 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 
 from rag.tasks import ingest_searchable_object_task
-from .models import Quiz, Question, Assignment
+
+from .models import Assignment, Question, Quiz
 
 
 @receiver(post_save, sender=Quiz)

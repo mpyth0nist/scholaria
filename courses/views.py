@@ -1,17 +1,19 @@
 import logging
 
+from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, Prefetch
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.permissions import IsAuthenticated, BasePermission, SAFE_METHODS
+from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from users.models import CustomUser
-from .models import Course, Module, Lesson, StudentClass, UserLessonProgress
+from .models import Course, Lesson, Module, StudentClass, UserLessonProgress
 from .serializers import (
-    CourseSerializer, ModuleSerializer, LessonSerializer, StudentClassSerializer
+    CourseSerializer,
+    LessonSerializer,
+    ModuleSerializer,
+    StudentClassSerializer,
 )
 
 logger = logging.getLogger(__name__)

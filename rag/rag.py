@@ -1,14 +1,20 @@
 
-from openai import APITimeoutError
-from openai import OpenAI
+import os
+from logging import getLogger
+
+import tiktoken
+from openai import (
+    APIConnectionError,
+    APIStatusError,
+    APITimeoutError,
+    OpenAI,
+    RateLimitError,
+)
 from pgvector.django import CosineDistance
+
 from rag.models import DocumentChunk
 from utils.data_prepping import clean_text
-from utils.embeddings import embed_data, get_embedder
-from logging import getLogger
-import os
-import tiktoken
-from openai import APIConnectionError, RateLimitError, APITimeoutError, APIStatusError
+from utils.embeddings import get_embedder
 
 logger = getLogger(__name__)
 client = OpenAI(
@@ -19,7 +25,6 @@ client = OpenAI(
 class ServiceUnavailable(Exception):
     ''' Exception raised when an API call is timed out or rate limited'''
 
-    pass
 
 SYSTEM_PROMPT = '''
  You are Scholaria Assistant, an AI learning companion embedded in the Scholaria LMS platform.
@@ -132,8 +137,9 @@ def sanitize_user_input(query: str):
     return query
 
 def llm(query, courses_ids, model_name, user, conversation_id=None):
-    from llm.models import Conversation, ChatMessage, SemanticCache
     from pgvector.django import CosineDistance
+
+    from llm.models import ChatMessage, Conversation, SemanticCache
 
     query = sanitize_user_input(query)
 

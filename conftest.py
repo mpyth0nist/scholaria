@@ -4,9 +4,10 @@ BEFORE Django migrations run. This is necessary because some migrations
 reference the vector type.
 """
 import os
+
 import psycopg2
-from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 import pytest
+from psycopg2.extensions import ISOLATION_LEVEL_AUTOCOMMIT
 
 
 def _ensure_pgvector_on_test_db():

@@ -1,5 +1,6 @@
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
+
 def chunk_text(text: str, chunk_size: int=600, overlap: int=150) -> list[str]:
 
     if not text or not text.strip():
