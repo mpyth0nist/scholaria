@@ -362,7 +362,7 @@ class TestRAGAnswerViewStudent:
     @patch('llm.views.llm')
     def test_student_gets_answer(self, mock_llm, student, course):
         """Enrolled student gets a successful answer."""
-        mock_llm.return_value = 'Variables store data.'
+        mock_llm.return_value = (['Variables store data.'], 'mocked-conv-id')
 
         client = _auth_client(student)
         res = client.post(
@@ -371,12 +371,14 @@ class TestRAGAnswerViewStudent:
             format='json',
         )
         assert res.status_code == 200
-        assert res.data['answer'] == 'Variables store data.'
+        content = b''.join(res.streaming_content).decode('utf-8')
+        assert content == 'Variables store data.'
+        assert res['X-Conversation-Id'] == 'mocked-conv-id'
 
     @patch('llm.views.llm')
     def test_student_scoping_passes_enrolled_courses(self, mock_llm, student, course, course2):
         """Student's request only passes enrolled course IDs to llm()."""
-        mock_llm.return_value = 'answer'
+        mock_llm.return_value = (['answer'], 'conv-id')
 
         client = _auth_client(student)
         client.post(
@@ -405,7 +407,7 @@ class TestRAGAnswerViewStudent:
         )
         class_course.student_classes.add(student_class)
 
-        mock_llm.return_value = 'answer from class course'
+        mock_llm.return_value = (['answer from class course'], 'conv-id')
 
         client = _auth_client(student)
         client.post(
@@ -438,7 +440,7 @@ class TestRAGAnswerViewTeacher:
     @patch('llm.views.llm')
     def test_teacher_gets_answer(self, mock_llm, teacher, course):
         """Teacher gets a successful answer for their course."""
-        mock_llm.return_value = 'Teacher answer.'
+        mock_llm.return_value = (['Teacher answer.'], 'conv-id')
 
         client = _auth_client(teacher)
         res = client.post(
@@ -447,7 +449,8 @@ class TestRAGAnswerViewTeacher:
             format='json',
         )
         assert res.status_code == 200
-        assert res.data['answer'] == 'Teacher answer.'
+        content = b''.join(res.streaming_content).decode('utf-8')
+        assert content == 'Teacher answer.'
 
     @patch('llm.views.llm')
     def test_teacher_scoping_only_own_courses(self, mock_llm, teacher, course):
@@ -462,7 +465,7 @@ class TestRAGAnswerViewTeacher:
             course_name='Other Course', subject='Art', teacher=teacher2,
         )
 
-        mock_llm.return_value = 'answer'
+        mock_llm.return_value = (['answer'], 'conv-id')
 
         client = _auth_client(teacher)
         client.post(
