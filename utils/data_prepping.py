@@ -1,5 +1,5 @@
 
-
+import markdown
 from bs4 import BeautifulSoup
 
 
@@ -7,7 +7,9 @@ def clean_text(text : str) -> str:
 
     raw_text = text
 
-    soup = BeautifulSoup(raw_text, "html.parser")
+    html_content = markdown.markdown(raw_text)
+
+    soup = BeautifulSoup(html_content, "html.parser")
 
     clean_text = soup.get_text()
 
