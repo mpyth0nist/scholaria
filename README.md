@@ -8,7 +8,7 @@
 
 Scholaria is a modern, full-stack Learning Management System (LMS) built with a custom **Retrieval-Augmented Generation (RAG)** pipeline. It goes beyond standard course management by providing an AI learning companion that answers student questions based *strictly* on the course materials they are enrolled in.
 
-## 🚀 Core Features
+## Core Features
 
 ### Role-Based Access Control (RBAC)
 - **Teachers**: Can create and manage courses, modules, lessons, quizzes, and assignments. They have isolated AI access scoped only to the materials they teach.
@@ -21,7 +21,7 @@ Scholaria is a modern, full-stack Learning Management System (LMS) built with a 
 - **Context-Aware Responses**: Connects to the Groq API (LLaMA 3) to generate answers based *only* on the retrieved semantic context, preventing hallucinations.
 - **Role-Scoped Context**: The RAG search strictly filters vector results by the user's enrolled `course_id`s at the database level.
 
-## 🏗️ Architecture & Tech Stack
+## Architecture & Tech Stack
 
 **Backend (API Layer)**
 - **Framework**: Django & Django REST Framework
@@ -39,7 +39,7 @@ Scholaria is a modern, full-stack Learning Management System (LMS) built with a 
 
 ---
 
-## 🛠️ Local Setup & Installation
+## Local Setup & Installation
 
 ### Prerequisites
 - Docker and Docker Compose
