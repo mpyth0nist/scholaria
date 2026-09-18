@@ -10,6 +10,7 @@ from rest_framework.views import APIView
 from courses.models import Course
 from rag.rag import ServiceUnavailable, llm
 from scholaria.throttles import LLMRateThrottle
+from django.conf import settings
 
 logger = getLogger(__name__)
 
@@ -36,7 +37,7 @@ class RAGAnswerView(APIView):
             raise PermissionDenied('You are neither a teacher nor a student')
 
         try:
-            stream_gen, conv_id = llm(query, courses_ids, 'openai/gpt-oss-20b', user=user, conversation_id=conversation_id)
+            stream_gen, conv_id = llm(query, courses_ids, settings.DEFAULT_LLM_MODEL, user=user, conversation_id=conversation_id)
         except ValueError as e:
             logger.warning('No relevant context found for query')
             return Response({'answer': e.args[0]}, status=404)

@@ -120,28 +120,16 @@ Do not include any explanations, prefixes, or conversational text. Return ONLY t
     except Exception:
         return raw_query
 
-def sanitize_user_input(query: str):
-    import re
-    # Limit input length
-    query = query[:2000]
-    
-    # Strip markdown/HTML
-    query = re.sub(r'<[^>]*>', '', query)
-    
-    # Strip common injection patterns
-    injections = ['ignore previous instructions', 'system:', 'you are now', 'forget your instructions']
-    for inj in injections:
-        pattern = re.compile(re.escape(inj), re.IGNORECASE)
-        query = pattern.sub('', query)
-        
-    return query
-
 def llm(query, courses_ids, model_name, user, conversation_id=None):
     from pgvector.django import CosineDistance
 
     from llm.models import ChatMessage, Conversation, SemanticCache
 
-    query = sanitize_user_input(query)
+    # Limit query length
+    query = query[:2000]
+
+    # Strip markdown symbols or HTML tags from user query
+    query = clean_text(query)
 
     # 1. Get or create conversation
     if conversation_id:
