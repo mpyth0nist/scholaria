@@ -1,18 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import api from '../api'
+import { useDispatch } from 'react-redux'
+import { logoutUser } from '../features/users/userSlice'
 
 function LogoutButton({ className = '' }) {
 
     const [loading, setLoading] = useState(false)
     const navigate = useNavigate()
+    const dispatch = useDispatch()
 
     const handleLogout = async () => {
         setLoading(true)
-
         try {
-            // Blacklist the refresh token on the server and delete cookies
-            await api.post('api/users/logout/')
+            await dispatch(logoutUser()).unwrap()
         } catch (err) {
             // Proceed with client-side logout even if server call fails
             console.error('Logout request failed:', err)

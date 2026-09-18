@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { ACCESS_TOKEN } from '../../constants'
 import api from '../../api'
 
 

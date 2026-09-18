@@ -31,6 +31,10 @@ export const fetchUser = createAsyncThunk('fetchUser', async () => {
     return res.data
 })
 
+export const logoutUser = createAsyncThunk('logoutUser', async () => {
+    await api.post('api/users/logout/')
+})
+
 export const fetchTeacherDashboard = createAsyncThunk('fetchTeacherDashboard', async () => {
     const res = await api.get('api/users/dashboard/')
     return res.data
@@ -100,7 +104,12 @@ export const adminDeleteUser = createAsyncThunk('adminDeleteUser', async (id, { 
 const userSlice = createSlice({
     name: 'user',
     initialState,
-    reducers: {},
+    reducers: {
+        logout(state) {
+            state.isAuthenticated = false
+            state.user = {}
+        }
+    },
 
     extraReducers: (builder) => {
         builder.addCase(fetchUser.fulfilled, (state, action) => {
@@ -109,6 +118,11 @@ const userSlice = createSlice({
         })
         builder.addCase(fetchUser.pending, () => {})
         builder.addCase(fetchUser.rejected, () => {})
+
+        builder.addCase(logoutUser.fulfilled, (state) => {
+            state.isAuthenticated = false
+            state.user = {}
+        })
 
         builder.addCase(fetchStudents.pending, (state) => {
             state.studentsLoading = true
@@ -169,4 +183,5 @@ const userSlice = createSlice({
     }
 })
 
+export const { logout } = userSlice.actions
 export default userSlice.reducer
