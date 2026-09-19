@@ -1,5 +1,6 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
-import DOMPurify from 'dompurify';
+import DOMPurify from 'dompurify'
+import ReactMarkdown from 'react-markdown'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -430,23 +431,62 @@ const fixLessonColors = (html) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LESSON CONTENT RENDERER  (read-only)
+// Detects whether the stored content is Markdown or HTML and renders
+// accordingly. Markdown is identified by the presence of # headings,
+// **bold**, or --- separators at the start of the content.
 // ─────────────────────────────────────────────────────────────────────────────
 
-export const LessonContent = ({ html, className = '' }) => (
-    <div
-        className={`leading-relaxed
-            [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-4
-            [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
-            [&_p]:mb-3   [&_p]:leading-relaxed
-            [&_div]:mb-1 [&_div]:leading-relaxed
-            [&_strong]:font-bold [&_em]:italic [&_u]:underline
-            [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
-            [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
-            [&_span]:leading-[inherit]
-            ${className}`}
-        dangerouslySetInnerHTML={{ __html: fixLessonColors(html) }}
-        dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fixLessonColors(html)) }}
-    />
-)
+const isMarkdown = (content) => {
+    if (!content) return false
+    const trimmed = content.trim()
+    return (
+        /^#{1,6}\s/.test(trimmed) ||           // # Heading
+        /\*\*[^*]+\*\*/.test(trimmed) ||       // **bold**
+        /^---$/m.test(trimmed) ||              // --- divider
+        /^\s*[-*]\s/.test(trimmed)             // - list item
+    )
+}
+
+const MD_PROSE = `
+    leading-relaxed
+    [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-6
+    [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-5
+    [&_h3]:text-lg   sm:[&_h3]:text-xl   [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4
+    [&_p]:mb-3   [&_p]:leading-relaxed
+    [&_strong]:font-bold [&_em]:italic
+    [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
+    [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
+    [&_hr]:border-t [&_hr]:border-current [&_hr]:opacity-20 [&_hr]:my-6
+    [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:border-opacity-30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:opacity-80 [&_blockquote]:my-3
+    [&_code]:bg-black/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+`
+
+export const LessonContent = ({ html, className = '' }) => {
+    if (isMarkdown(html)) {
+        return (
+            <div className={`${MD_PROSE} ${className}`}>
+                <ReactMarkdown>
+                    {html}
+                </ReactMarkdown>
+            </div>
+        )
+    }
+
+    return (
+        <div
+            className={`leading-relaxed
+                [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-4
+                [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
+                [&_p]:mb-3   [&_p]:leading-relaxed
+                [&_div]:mb-1 [&_div]:leading-relaxed
+                [&_strong]:font-bold [&_em]:italic [&_u]:underline
+                [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
+                [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
+                [&_span]:leading-[inherit]
+                ${className}`}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fixLessonColors(html)) }}
+        />
+    )
+}
 
 export default RichTextEditor
