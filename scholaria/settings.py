@@ -198,7 +198,7 @@ if cors_origins:
 else:
     CORS_ALLOWED_ORIGINS = []
 
-CORS_ALLOW_ALL_CREDENTIALS = os.getenv("CORS_ALLOW_ALL_CREDENTIALS", "False").lower() in ("true", "1", "t")
+CORS_ALLOW_CREDENTIALS = True
 
 # CSRF configuration
 csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS")

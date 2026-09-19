@@ -8,8 +8,6 @@ import api from '../../api'
 
 export const fetchCourses = createAsyncThunk("fetchCourses", async () => {
     const res = await api.get('api/courses/list/')
-
-
     return res.data
 })
 
