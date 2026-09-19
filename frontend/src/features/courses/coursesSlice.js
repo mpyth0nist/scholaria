@@ -1,5 +1,4 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit'
-import { ACCESS_TOKEN } from '../../constants'
 import api from '../../api'
 
 
@@ -9,8 +8,6 @@ import api from '../../api'
 
 export const fetchCourses = createAsyncThunk("fetchCourses", async () => {
     const res = await api.get('api/courses/list/')
-
-
     return res.data
 })
 

@@ -10,7 +10,7 @@ from .models import CustomUser
 class CourseMinimalSerializer(serializers.ModelSerializer):
     class Meta:
         model = Course
-        fields = ['id', 'name']
+        fields = ['id', 'course_name']
 
 class UserSerializer(serializers.ModelSerializer):
 
