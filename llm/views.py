@@ -22,6 +22,7 @@ class RAGAnswerView(APIView):
     def post(self, request):
         query = request.data.get('query')
         conversation_id = request.data.get('conversation_id')
+        lesson_id = request.data.get('lesson_id')
 
         if not query:
             return Response({'error': 'query is required'}, status=400)
@@ -37,7 +38,7 @@ class RAGAnswerView(APIView):
             raise PermissionDenied('You are neither a teacher nor a student')
 
         try:
-            stream_gen, conv_id = llm(query, courses_ids, settings.DEFAULT_LLM_MODEL, user=user, conversation_id=conversation_id)
+            stream_gen, conv_id = llm(query, courses_ids, settings.DEFAULT_LLM_MODEL, user=user, conversation_id=conversation_id, lesson_id=lesson_id)
         except ValueError as e:
             logger.warning('No relevant context found for query')
             return Response({'answer': e.args[0]}, status=404)

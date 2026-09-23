@@ -140,7 +140,18 @@ class CookieTokenObtainPairView(TokenObtainPairView):
                 secure=getattr(settings, 'JWT_AUTH_SECURE', False)
             )
             del response.data['refresh']
-            
+
+        # Set the CSRF cookie so Axios can read it for subsequent mutating requests.
+        from django.middleware.csrf import get_token
+        csrf_token = get_token(request)
+        response.set_cookie(
+            'csrftoken',
+            csrf_token,
+            httponly=False,
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+            secure=getattr(settings, 'JWT_AUTH_SECURE', False)
+        )
+
         return response
 
 class CookieTokenRefreshView(TokenRefreshView):
@@ -161,11 +172,22 @@ class CookieTokenRefreshView(TokenRefreshView):
                 secure=getattr(settings, 'JWT_AUTH_SECURE', False)
             )
             del response.data['access']
+
+        from django.middleware.csrf import get_token
+        csrf_token = get_token(request)
+        response.set_cookie(
+            'csrftoken',
+            csrf_token,
+            httponly=False,
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+            secure=getattr(settings, 'JWT_AUTH_SECURE', False)
+        )
             
         return response
 
 class LogoutView(APIView):
-    permission_classes = [IsAuthenticated]
+    authentication_classes = []  # Skip CSRF check for logout
+    permission_classes = []  # Allow logout even with an expired access token
 
     def post(self, request):
         try:
@@ -177,8 +199,18 @@ class LogoutView(APIView):
             logger.exception("Error blacklisting refresh token during logout")
 
         response = Response(status=status.HTTP_205_RESET_CONTENT)
-        response.delete_cookie(getattr(settings, 'JWT_AUTH_COOKIE', 'access'))
-        response.delete_cookie(getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'))
+        response.delete_cookie(
+            getattr(settings, 'JWT_AUTH_COOKIE', 'access'),
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax')
+        )
+        response.delete_cookie(
+            getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'),
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax')
+        )
+        response.delete_cookie(
+            'csrftoken',
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax')
+        )
         return response
 
 
