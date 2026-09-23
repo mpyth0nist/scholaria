@@ -1,7 +1,21 @@
 import React, { useState, useEffect, useRef } from 'react';
+import ReactMarkdown from 'react-markdown';
 import api from '../api';
 
-const EdahAIAssistant = ({ isOpen, onClose }) => {
+const CHAT_PROSE = `
+    [&_p]:mb-2 [&_p]:last:mb-0
+    [&_strong]:font-bold [&_em]:italic
+    [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2
+    [&_ol]:list-decimal [&_ol]:pl-5 [&_ol]:mb-2
+    [&_li]:mb-0.5
+    [&_h3]:font-bold [&_h3]:mt-3 [&_h3]:mb-1
+    [&_h4]:font-bold [&_h4]:mt-2 [&_h4]:mb-1
+    [&_code]:bg-black/10 [&_code]:dark:bg-white/10 [&_code]:px-1 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-[13px]
+    [&_pre]:bg-black/5 [&_pre]:dark:bg-white/5 [&_pre]:p-2 [&_pre]:rounded [&_pre]:overflow-x-auto [&_pre]:mb-2
+    [&_a]:text-action [&_a]:underline
+`;
+
+const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
     const [messages, setMessages] = useState([
         { role: 'ai', content: 'Hello! I am Edah (إيضاح), your AI Tutor. How can I help you with this lesson?' }
     ]);
@@ -29,10 +43,9 @@ const EdahAIAssistant = ({ isOpen, onClose }) => {
         let aiBubbleCreated = false;
 
         try {
-            let baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/';
+            let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/';
             if (!baseURL.endsWith('/')) baseURL += '/';
 
-            // Helper to get CSRF token from cookies
             const getCookie = (name) => {
                 let cookieValue = null;
                 if (document.cookie && document.cookie !== '') {
@@ -48,20 +61,30 @@ const EdahAIAssistant = ({ isOpen, onClose }) => {
                 return cookieValue;
             };
 
-            const csrftoken = getCookie('csrftoken');
-            
-            const res = await fetch(`${baseURL}api/llm/answer/`, {
+            const makeFetch = () => fetch(`${baseURL}api/llm/answer/`, {
                 method: 'POST',
-                credentials: 'include', // This ensures httpOnly cookies (like access/refresh) are sent
+                credentials: 'include',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRFToken': csrftoken,
+                    'X-CSRFToken': getCookie('csrftoken'),
                 },
-                body: JSON.stringify({ 
+                body: JSON.stringify({
                     query: userMsg.content,
-                    conversation_id: conversationId 
-                })
+                    conversation_id: conversationId,
+                    lesson_id: lessonId,
+                }),
             });
+
+            let res = await makeFetch();
+
+            if (res.status === 401) {
+                try {
+                    await api.post('api/users/token/refresh/');
+                } catch (_) {
+                    throw new Error('Session expired. Please log in again.');
+                }
+                res = await makeFetch();
+            }
 
             if (!res.ok) {
                 let errorMsg = 'Sorry, I encountered an error. Please try again.';
@@ -160,12 +183,16 @@ const EdahAIAssistant = ({ isOpen, onClose }) => {
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`
-                                max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm whitespace-pre-wrap
+                                max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm
                                 ${msg.role === 'user' 
-                                    ? 'bg-action text-white rounded-br-sm' 
-                                    : 'bg-white dark:bg-[#2D332D] text-text border border-primary/10 rounded-bl-sm'}
+                                    ? 'bg-action text-white rounded-br-sm whitespace-pre-wrap' 
+                                    : `bg-white dark:bg-[#2D332D] text-text border border-primary/10 rounded-bl-sm ${CHAT_PROSE}`}
                             `}>
-                                {msg.content}
+                                {msg.role === 'ai' ? (
+                                    <ReactMarkdown>{msg.content}</ReactMarkdown>
+                                ) : (
+                                    msg.content
+                                )}
                             </div>
                         </div>
                     ))}

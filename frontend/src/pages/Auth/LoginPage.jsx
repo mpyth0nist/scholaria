@@ -1,7 +1,9 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import '../../style/style.css'
 import api from '../../api.js'
 import { useNavigate } from 'react-router-dom'
+import { useDispatch } from 'react-redux'
+import { logout } from '../../features/users/userSlice'
 
 function LoginPage() {
     const [username, setUsername] = useState("")
@@ -10,6 +12,12 @@ function LoginPage() {
     const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
+    const dispatch = useDispatch()
+
+    // Ensure Redux state is wiped clean when landing on the login page
+    useEffect(() => {
+        dispatch(logout())
+    }, [dispatch])
 
     const handleLogin = async (e) => {
         e.preventDefault()

@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-let baseURL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/'
+let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/'
 if (!baseURL.endsWith('/')) {
     baseURL += '/'
 }

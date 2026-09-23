@@ -25,6 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # DEFAULT LLM MODEL
 
 DEFAULT_LLM_MODEL = os.getenv('DEFAULT_MODEL_NAME', 'openai/gpt-oss-20b')
+
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
@@ -198,7 +199,7 @@ if cors_origins:
 else:
     CORS_ALLOWED_ORIGINS = []
 
-CORS_ALLOW_CREDENTIALS = True
+CORS_ALLOW_CREDENTIALS = True  # Required for httpOnly cookie auth
 
 # CSRF configuration
 csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS")

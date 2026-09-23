@@ -49,11 +49,17 @@ def embed_input(query : str):
 
     return vectorized_input
 
-def rag_search(query: str, courses_ids : list, top_k=5):
+def rag_search(query: str, courses_ids: list, top_k=5, lesson_id=None):
 
     query_embedding = embed_input(query)
 
-    raw_data = DocumentChunk.objects.filter(course_id__in=courses_ids).annotate(
+    qs = DocumentChunk.objects.filter(course_id__in=courses_ids)
+
+    # Narrow to the specific lesson when the frontend provides it
+    if lesson_id:
+        qs = qs.filter(content_type_name='lesson', object_id=lesson_id)
+
+    raw_data = qs.annotate(
             distance=CosineDistance(
                 'embedding',
                 query_embedding
@@ -71,9 +77,9 @@ def rag_search(query: str, courses_ids : list, top_k=5):
     
     return chunks
 
-def build_context(query, courses_ids, max_tokens=3000):
+def build_context(query, courses_ids, max_tokens=3000, lesson_id=None):
 
-    results = rag_search(query, courses_ids)
+    results = rag_search(query, courses_ids, lesson_id=lesson_id)
     if not results:
         return "No relevant course materials were found for this query."
 
@@ -120,7 +126,7 @@ Do not include any explanations, prefixes, or conversational text. Return ONLY t
     except Exception:
         return raw_query
 
-def llm(query, courses_ids, model_name, user, conversation_id=None):
+def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=None):
     from pgvector.django import CosineDistance
 
     from llm.models import ChatMessage, Conversation, SemanticCache
@@ -159,20 +165,20 @@ def llm(query, courses_ids, model_name, user, conversation_id=None):
 
     query_embedding = embed_input(search_query)
 
-    # 5. Semantic Cache check (using standalone search_query)
-    cached = SemanticCache.objects.annotate(
-        distance=CosineDistance('query_embedding', query_embedding)
-    ).filter(distance__lt=0.05, course_ids=sorted(courses_ids)).order_by("distance").first()
+    # 5. Semantic Cache check (skip when scoped to a specific lesson)
+    if not lesson_id:
+        cached = SemanticCache.objects.annotate(
+            distance=CosineDistance('query_embedding', query_embedding)
+        ).filter(distance__lt=0.05, course_ids=sorted(courses_ids)).order_by("distance").first()
 
-    if cached:
-        # Cache hit: save the assistant response to history and return
-        ChatMessage.objects.create(conversation=conversation, role='assistant', content=cached.response)
-        def cache_stream():
-            yield cached.response
-        return cache_stream(), conversation.id
+        if cached:
+            ChatMessage.objects.create(conversation=conversation, role='assistant', content=cached.response)
+            def cache_stream():
+                yield cached.response
+            return cache_stream(), conversation.id
 
     # 6. Build context and invoke LLM
-    context = build_context(search_query, courses_ids)
+    context = build_context(search_query, courses_ids, lesson_id=lesson_id)
 
     messages = [{"role": "system", "content": f'{SYSTEM_PROMPT}\n\nContext:\n{context}'}]
     messages.extend(history_msgs)
