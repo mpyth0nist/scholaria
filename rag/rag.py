@@ -128,7 +128,7 @@ NO: "What's the best movie?", "Tell me a joke", "Who won the football game?" """
         answer = response.choices[0].message.content.strip().upper()
         return answer.startswith("YES")
     except Exception:
-        return True  # Fail open — let the hardened system prompt handle it
+        return True  
 
 
 def rag_search(query: str, courses_ids: list, top_k=5, lesson_id=None):
@@ -225,7 +225,7 @@ def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=No
 
     # Fetch course names once — used by Layer 2 and Layer 3
     course_names = list(
-        Course.objects.filter(id__in=courses_ids).values_list('title', flat=True)
+        Course.objects.filter(id__in=courses_ids).values_list('course_name', flat=True)
     )
 
     # ── Layer 1: Deterministic keyword pre-filter (free, instant) ─────────
