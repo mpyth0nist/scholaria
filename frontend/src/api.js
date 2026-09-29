@@ -5,13 +5,40 @@ if (!baseURL.endsWith('/')) {
     baseURL += '/'
 }
 
+// Helper to read a cookie by name
+function getCookie(name) {
+    let cookieValue = null
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';')
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim()
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
+                break
+            }
+        }
+    }
+    return cookieValue
+}
+
 const api = axios.create({
     baseURL: baseURL,
     withCredentials: true,
-    xsrfCookieName: 'csrftoken',
-    xsrfHeaderName: 'X-CSRFToken',
 })
 
+// ── Request interceptor: inject CSRF token on every mutating request ─────────
+api.interceptors.request.use((config) => {
+    const method = config.method?.toLowerCase()
+    if (method && !['get', 'head', 'options'].includes(method)) {
+        const csrfToken = getCookie('csrftoken')
+        if (csrfToken) {
+            config.headers['X-CSRFToken'] = csrfToken
+        }
+    }
+    return config
+})
+
+// ── Response interceptor: auto-refresh expired access tokens ─────────────────
 api.interceptors.response.use(
     (response) => {
         return response
@@ -27,8 +54,7 @@ api.interceptors.response.use(
                 // The refresh cookie is sent automatically
                 const res = await axios.post(`${api.defaults.baseURL}api/users/refresh/`, {}, {
                     withCredentials: true,
-                    xsrfCookieName: 'csrftoken',
-                    xsrfHeaderName: 'X-CSRFToken'
+                    headers: { 'X-CSRFToken': getCookie('csrftoken') }
                 })
                 
                 if (res.status === 200) {

@@ -80,27 +80,7 @@ const LessonPage = () => {
         }
 
         try {
-            // Helper to get CSRF token from cookies
-            const getCookie = (name) => {
-                let cookieValue = null;
-                if (document.cookie && document.cookie !== '') {
-                    const cookies = document.cookie.split(';');
-                    for (let i = 0; i < cookies.length; i++) {
-                        const cookie = cookies[i].trim();
-                        if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                            break;
-                        }
-                    }
-                }
-                return cookieValue;
-            };
-
-            await api.patch(`api/courses/lessons/${lesson_id}/update-lesson/`, formData, {
-                headers: {
-                    'X-CSRFToken': getCookie('csrftoken')
-                }
-            })
+            await api.patch(`api/courses/lessons/${lesson_id}/update-lesson/`, formData)
             // Fetch lesson again to get the updated attachment URL
             await fetchLesson()
             setEditing(false)
