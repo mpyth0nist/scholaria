@@ -1,10 +1,15 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @theme {
   --color-primary: var(--primary);
   --color-action: var(--action);
   --color-background: var(--background);
   --color-text: var(--text);
+  --color-surface: var(--surface);
+  --color-border: var(--border);
+  --color-border-hover: var(--border-hover);
 
   --font-serif: "Lora", serif;
   --font-sans: "Inter", sans-serif;
@@ -20,6 +25,9 @@
   --action: #C05621;
   --background: #FFFDF5;
   --text: #132A13;
+  --surface: rgba(255, 255, 255, 0.6);
+  --border: rgba(74, 124, 89, 0.2);
+  --border-hover: rgba(74, 124, 89, 0.4);
 }
 
 html.dark {
@@ -27,6 +35,9 @@ html.dark {
   --action: #E06B35;
   --background: #0B140D;
   --text: #ECEFEA;
+  --surface: rgba(26, 30, 26, 0.8);
+  --border: rgba(118, 169, 132, 0.2);
+  --border-hover: rgba(118, 169, 132, 0.4);
 }
 
 /* ── Global resets ──────────────────────────────────────────────────────── */

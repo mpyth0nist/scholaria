@@ -211,7 +211,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         <div className="flex flex-col rounded-xl border border-primary/20 overflow-hidden focus-within:border-action transition">
 
             {/* ── toolbar ── */}
-            <div className="flex flex-wrap items-center gap-1 px-3 py-2 bg-white/60 border-b border-primary/20">
+            <div className="flex flex-wrap items-center gap-1 px-3 py-2 bg-surface border-b border-primary/20">
 
                 {/* Font family */}
                 <div className="relative">
@@ -226,7 +226,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                         <span className="text-xs opacity-60 ml-1">▾</span>
                     </button>
                     {showFonts && (
-                        <div className="absolute top-full left-0 mt-1 z-30 bg-white/60 border border-primary/20 rounded-xl py-1.5 shadow-2xl min-w-[190px]">
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-surface border border-primary/20 rounded-xl py-1.5 shadow-2xl min-w-[190px]">
                             <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 px-3 pt-1 pb-2">Font Family</p>
                             {FONTS.map(f => (
                                 <button
@@ -256,7 +256,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                         <span className="text-xs opacity-60">▾</span>
                     </button>
                     {showSizes && (
-                        <div className="absolute top-full left-0 mt-1 z-30 bg-white/60 border border-primary/20 rounded-xl py-1.5 shadow-2xl min-w-[90px]">
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-surface border border-primary/20 rounded-xl py-1.5 shadow-2xl min-w-[90px]">
                             <p className="text-xs font-semibold uppercase tracking-widest text-primary/70 px-3 pt-1 pb-2">Size</p>
                             {FONT_SIZES.map(px => (
                                 <button
@@ -331,7 +331,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                         <span className="text-xs opacity-60">▾</span>
                     </button>
                     {showColors && (
-                        <div className="absolute top-full left-0 mt-1 z-30 bg-white/60 border border-primary/20 rounded-xl p-3 shadow-2xl flex flex-col gap-2 min-w-max">
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-surface border border-primary/20 rounded-xl p-3 shadow-2xl flex flex-col gap-2 min-w-max">
                             <p className="text-xs font-semibold uppercase tracking-widest text-primary mb-1">Color</p>
                             <div className="grid grid-cols-4 gap-2">
                                 {COLORS.map(c => (
@@ -363,7 +363,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                 onMouseUp={syncState}
                 onBlur={closeAll}
                 data-placeholder={placeholder}
-                className="min-h-[200px] px-5 py-4 bg-white/60 text-text leading-relaxed outline-none
+                className="min-h-[200px] px-5 py-4 bg-surface text-text leading-relaxed outline-none
                     empty:before:content-[attr(data-placeholder)] empty:before:text-primary/70 empty:before:pointer-events-none
                     [&_h1]:text-3xl [&_h1]:font-bold   [&_h1]:text-text [&_h1]:mb-2  [&_h1]:mt-3
                     [&_h2]:text-xl  [&_h2]:font-semibold [&_h2]:text-text [&_h2]:mb-1.5 [&_h2]:mt-2.5
@@ -420,8 +420,14 @@ const fixLessonColors = (html) => {
         fixed = fixed.replaceAll(rgb, hex)
     })
 
-    // Replace hex representations (case-insensitive)
+    // STRIP inline default text colors so they inherit properly from the parent theme
+    // Both old 'white' and new 'dark green' are considered default text.
+    // If the style attribute ONLY contains color, we strip the whole style attribute.
+    fixed = fixed.replace(/style="[^"]*color:\s*(?:#f1f5f9|#132A13|#132a13)[^"]*"/gi, '')
+
+    // Replace hex representations (case-insensitive) for accent colors
     Object.entries(LIGHT_TO_DARK).forEach(([light, dark]) => {
+        if (light.toLowerCase() === '#f1f5f9') return; // Handled above by stripping
         const re = new RegExp(light.replace('#', '#'), 'gi')
         fixed = fixed.replace(re, dark)
     })

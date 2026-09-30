@@ -12,15 +12,15 @@ const Field = ({ label, children }) => (
 )
 
 const inputClass =
-    'bg-white/60 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text placeholder-slate-500 outline-none focus:border-action transition'
+    'bg-surface border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text placeholder-primary/40 outline-none focus:border-action transition'
 
 // ── step indicator ───────────────────────────────────────────────────────────
 const StepDot = ({ n, active, done }) => (
     <div className="flex flex-col items-center gap-1">
         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
             ${done ? 'bg-action border-action text-white'
-                : active ? 'bg-white/60 border-action text-action'
-                    : 'bg-white/60 border-primary/20 text-primary/70'}`}>
+                : active ? 'bg-surface border-action text-action'
+                    : 'bg-surface border-primary/20 text-primary/70'}`}>
             {done ? '✓' : n}
         </div>
     </div>
@@ -231,7 +231,7 @@ const CreateCourse = () => {
                 {/* Option B: finish later */}
                 <button
                     onClick={() => navigate('/all-courses')}
-                    className="flex flex-col items-start gap-3 p-5 bg-white/60 border border-primary/20 rounded-xl hover:bg-primary/5 hover:border-primary/20 active:scale-95 transition-all text-left group"
+                    className="flex flex-col items-start gap-3 p-5 bg-surface border border-primary/20 rounded-xl hover:bg-primary/5 hover:border-primary/20 active:scale-95 transition-all text-left group"
                 >
                     <span className="text-xs font-bold text-primary font-sans tracking-wider bg-primary/10 border border-primary/20 px-2 py-0.5 rounded">LIST</span>
                     <div>

@@ -24,7 +24,7 @@ const InputField = ({ label, type = "text", ...props }) => (
         <label className="text-xs font-semibold uppercase tracking-widest text-primary">{label}</label>
         <input 
             type={type} 
-            className="bg-white/60 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition" 
+            className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition" 
             {...props} 
         />
     </div>
@@ -33,7 +33,7 @@ const InputField = ({ label, type = "text", ...props }) => (
 const SelectField = ({ label, options, ...props }) => (
     <div className="flex flex-col gap-1.5 mb-4">
         <label className="text-xs font-semibold uppercase tracking-widest text-primary">{label}</label>
-        <select className="bg-white/60 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition appearance-none" {...props}>
+        <select className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition appearance-none" {...props}>
             {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
     </div>
@@ -175,7 +175,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Filters */}
-            <div className="bg-white/60 border border-primary/20 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center">
+            <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center">
                 <div className="flex-1 w-full relative">
                     <input 
                         type="text" 
@@ -218,7 +218,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-white/60 border border-primary/20 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
+            <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm whitespace-nowrap">
                         <thead>

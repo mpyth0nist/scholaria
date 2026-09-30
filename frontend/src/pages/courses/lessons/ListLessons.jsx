@@ -22,7 +22,7 @@ const ListLessons = ({ module_id }) => {
                 <button
                     key={lesson.id}
                     onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
-                    className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg bg-white/60 hover:bg-primary/5 border border-primary/20 hover:border-action/20 transition group"
+                    className="flex items-center gap-3 w-full text-left px-4 py-3 rounded-lg bg-surface dark:bg-[#1A1E1A]/80 hover:bg-primary/5 border border-primary/20 hover:border-action/20 transition group"
                 >
                     <div className="w-8 h-8 rounded bg-action/10 border border-action/20 flex items-center justify-center text-action shrink-0">
                         <svg className="w-4 h-4 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>

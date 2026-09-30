@@ -161,7 +161,7 @@ const TeacherModuleCard = ({ module, onDelete, onUpdate, navigate }) => {
                             <button
                                 key={lesson.id}
                                 onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
-                                className="flex items-center gap-4 w-full text-left px-4 py-4 rounded-lg bg-white/60 hover:bg-primary/5 border border-primary/20 hover:border-action/20 transition group"
+                                className="flex items-center gap-4 w-full text-left px-4 py-4 rounded-lg bg-surface dark:bg-[#1A1E1A]/80 hover:bg-primary/5 border border-primary/20 hover:border-action/20 transition group"
                             >
                                 <div className="w-8 h-8 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-action shrink-0">
                                     <svg className="w-4 h-4 text-action" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -263,7 +263,7 @@ const StudentModuleCard = ({ module, navigate }) => {
                                 onClick={() => navigate(`/course/module/lessons/${lesson.id}`)}
                                 className={`flex items-center gap-4 w-full text-left px-4 py-4 rounded-lg border transition group ${lesson.done
                                     ? 'bg-primary/10 border-primary/20'
-                                    : 'bg-white/60 border-primary/20 hover:bg-primary/5 hover:border-action/20'}`}
+                                    : 'bg-surface dark:bg-[#1A1E1A]/80 border-primary/20 hover:bg-primary/5 hover:border-action/20'}`}
                             >
                                     {lesson.done ? (
                                         <div className="w-8 h-8 rounded-full bg-primary/15 border border-primary/30 flex items-center justify-center text-primary shrink-0">

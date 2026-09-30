@@ -258,7 +258,7 @@ const StudentsPage = () => {
                             <button
                                 onClick={() => setPage(p => p - 1)}
                                 disabled={!studentsPrevious || loading}
-                                className="px-3.5 py-1.5 text-xs font-semibold text-text/80 bg-white/60 border border-primary/20 rounded-lg hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="px-3.5 py-1.5 text-xs font-semibold text-text/80 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 Previous
                             </button>

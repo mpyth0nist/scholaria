@@ -49,7 +49,7 @@ const SubmissionRow = ({ sub, onGrade }) => {
     const href = sub.file?.startsWith('http') ? sub.file : `${BASE}${sub.file}`
 
     return (
-        <div className="flex flex-col gap-3 bg-white/60 border border-primary/20 rounded-xl p-4">
+        <div className="flex flex-col gap-3 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-4">
             <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div>
                     <p className="text-sm font-semibold text-text">{sub.student_name ?? `Student #${sub.student}`}</p>
@@ -81,7 +81,7 @@ const SubmissionRow = ({ sub, onGrade }) => {
                         value={score}
                         onChange={e => setScore(e.target.value)}
                         placeholder="—"
-                        className="w-24 bg-white/60 border border-primary/20 rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-action transition"
+                        className="w-24 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-action transition"
                     />
                 </div>
                 <div className="flex flex-col gap-1 flex-1 min-w-[180px]">
@@ -91,7 +91,7 @@ const SubmissionRow = ({ sub, onGrade }) => {
                         value={feedback}
                         onChange={e => setFeedback(e.target.value)}
                         placeholder="Well done! / Please revise…"
-                        className="bg-white/60 border border-primary/20 rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-action transition w-full"
+                        className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-3 py-2 text-sm text-text outline-none focus:border-action transition w-full"
                     />
                 </div>
                 <button
@@ -184,14 +184,14 @@ const AssignmentPage = () => {
                 </div>
 
                 {/* Assignment document */}
-                <div className="bg-white/60 border border-primary/20 rounded-xl p-6 flex flex-col gap-3">
+                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-6 flex flex-col gap-3">
                     <p className="text-xs font-bold uppercase tracking-widest text-action">Assignment Document</p>
                     <p className="text-sm text-text/70">Download the assignment document, complete it, then upload your answer below.</p>
                     <FileLink url={assignment.document} label="Download Assignment PDF" />
                 </div>
 
                 {/* Submission section */}
-                <div className="bg-white/60 border border-primary/20 rounded-xl p-6 flex flex-col gap-4">
+                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-6 flex flex-col gap-4">
                     <p className="text-xs font-bold uppercase tracking-widest text-action">Your Submission</p>
 
                     {isGraded ? (
@@ -340,7 +340,7 @@ const AssignmentPage = () => {
             </div>
 
             {/* Document */}
-            <div className="bg-white/60 border border-primary/20 rounded-xl p-5">
+            <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-5">
                 <p className="text-xs font-bold uppercase tracking-widest text-action mb-3">Assignment Document</p>
                 <FileLink url={assignment.document} label="View / Download Assignment PDF" />
             </div>
@@ -351,7 +351,7 @@ const AssignmentPage = () => {
                     Student Submissions ({submissions.length})
                 </p>
                 {submissions.length === 0 ? (
-                    <div className="flex items-center justify-center py-16 bg-white/60 border border-primary/20 rounded-xl">
+                    <div className="flex items-center justify-center py-16 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl">
                         <p className="text-sm text-text/40 italic">No submissions yet.</p>
                     </div>
                 ) : (

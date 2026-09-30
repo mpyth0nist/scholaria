@@ -346,23 +346,30 @@ const LessonPage = () => {
             {/* view mode */}
             {!editing ? (
                 <>
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 max-w-prose w-full mx-auto">
-                        <h1 className="text-3xl font-bold text-text leading-snug">{lesson.title}</h1>
-                        <div className="flex items-center gap-2 sm:shrink-0 sm:ml-auto">
+                    {/* Teacher Toolbar */}
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 max-w-prose w-full mx-auto mb-4 border-b border-primary/10 pb-4">
+                        <div className="flex items-center gap-2">
+                             <span className="text-xs font-bold uppercase tracking-widest text-primary/50">Teacher Controls</span>
+                        </div>
+                        <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setEditing(true)}
-                                className="text-sm text-primary hover:text-action px-3 py-2 rounded-lg hover:bg-primary/5 transition btn-press"
+                                className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
                             >
-                                Edit
+                                Edit Lesson
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={deleting}
-                                className="text-sm text-red-400/70 hover:text-red-400 px-3 py-2 rounded-lg hover:bg-red-500/10 transition disabled:opacity-50 btn-press"
+                                className="bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white px-4 py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
                             >
-                                {deleting ? 'Deleting…' : 'Delete'}
+                                {deleting ? 'Deleting…' : 'Delete Lesson'}
                             </button>
                         </div>
+                    </div>
+
+                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 max-w-prose w-full mx-auto">
+                        <h1 className="text-3xl font-bold text-text leading-snug">{lesson.title}</h1>
                     </div>
 
                     <div className="flex justify-end max-w-prose w-full mx-auto mb-2 gap-2">

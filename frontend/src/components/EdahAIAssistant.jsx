@@ -186,7 +186,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                                 max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm
                                 ${msg.role === 'user' 
                                     ? 'bg-action text-white rounded-br-sm whitespace-pre-wrap' 
-                                    : `bg-white dark:bg-[#2D332D] text-text border border-primary/10 rounded-bl-sm ${CHAT_PROSE}`}
+                                    : `bg-white dark:bg-[#2D332D] text-text dark:text-white border border-primary/10 rounded-bl-sm ${CHAT_PROSE}`}
                             `}>
                                 {msg.role === 'ai' ? (
                                     <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -209,7 +209,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                 </div>
 
                 {/* Input */}
-                <div className="p-4 bg-white/40 dark:bg-black/40 border-t border-primary/10 backdrop-blur-md shrink-0">
+                <div className="p-4 bg-surface dark:bg-black/40 border-t border-primary/10 backdrop-blur-md shrink-0">
                     <form onSubmit={handleSubmit} className="relative">
                         <input
                             type="text"

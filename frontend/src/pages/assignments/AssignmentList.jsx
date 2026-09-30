@@ -24,7 +24,7 @@ const AssignmentList = () => {
             <div className="flex flex-col gap-6 p-6">
                 <div className="h-8 w-48 bg-primary/5 rounded-lg animate-pulse" />
                 {[1, 2, 3].map(i => (
-                    <div key={i} className="h-20 bg-white/60 rounded-xl animate-pulse border border-primary/20" />
+                    <div key={i} className="h-20 bg-surface dark:bg-[#1A1E1A]/80 rounded-xl animate-pulse border border-primary/20" />
                 ))}
             </div>
         )
@@ -73,7 +73,7 @@ const AssignmentList = () => {
                         return (
                             <div
                                 key={assignment.id}
-                                className="animate-item-enter btn-press group bg-white/60 border border-primary/20 rounded-xl px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-4"
+                                className="animate-item-enter btn-press group bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-4"
                                 style={{ animationDelay: `${i * 0.05}s` }}
                             >
                                 {/* Icon */}

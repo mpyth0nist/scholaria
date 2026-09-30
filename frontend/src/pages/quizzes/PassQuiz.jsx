@@ -142,7 +142,7 @@ const PassQuiz = () => {
             : 'Could not start the quiz. Please check your connection and try again.'
         return (
             <div className="flex items-center justify-center min-h-screen bg-background p-6">
-                <div className="bg-white/60 border border-red-700/40 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
+                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-red-700/40 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl">
                     <div className="text-3xl font-serif text-red-400 font-bold mb-4">Warning</div>
                     <h2 className="text-xl font-bold text-red-400 mb-2">Cannot Start Quiz</h2>
                     <p className="text-primary text-sm mb-8">{message}</p>
@@ -164,7 +164,7 @@ const PassQuiz = () => {
         const passed = score >= 50
         return (
             <div className="flex items-center justify-center min-h-screen bg-background p-6">
-                <div className="bg-white/60 border border-primary/20 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl backdrop-blur-md">
+                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-2xl p-10 w-full max-w-md text-center shadow-2xl backdrop-blur-md">
                     <div className={`text-6xl font-black mb-2 ${passed ? 'text-primary' : 'text-red-400'}`}>
                         {score.toFixed(0)}%
                     </div>
@@ -226,7 +226,7 @@ const PassQuiz = () => {
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full bg-white/60 rounded-full h-1.5 mb-8 overflow-hidden">
+                <div className="w-full bg-surface dark:bg-[#1A1E1A]/80 rounded-full h-1.5 mb-8 overflow-hidden">
                     <div
                         className="h-1.5 bg-action rounded-full transition-all duration-500"
                         style={{ width: `${progress}%` }}
@@ -234,7 +234,7 @@ const PassQuiz = () => {
                 </div>
 
                 {/* Question card */}
-                <div className="bg-white/60 border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-md">
+                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-md">
 
                     {/* Question text */}
                     <p className="text-xl font-semibold text-text leading-relaxed mb-8">
@@ -253,7 +253,7 @@ const PassQuiz = () => {
                                         w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-200 font-medium
                                         ${isSelected
                                             ? 'bg-action/10 border-action text-text shadow-lg shadow-sm'
-                                            : 'bg-white/60 border-primary/20 text-text/80 hover:border-action/20 hover:text-text hover:bg-primary/5'
+                                            : 'bg-surface dark:bg-[#1A1E1A]/80 border-primary/20 text-text/80 hover:border-action/20 hover:text-text hover:bg-primary/5'
                                         }
                                     `}
                                 >

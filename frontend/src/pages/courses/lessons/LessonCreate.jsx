@@ -43,7 +43,7 @@ const LessonCreate = ({ module_id, onCreated }) => {
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="Lesson title"
-                className="bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
+                className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
             />
 
             <RichTextEditor

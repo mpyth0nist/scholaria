@@ -57,7 +57,7 @@ const CreateQuiz = ({ quizData, coursesList, handleQuizFieldChange, toggleNext }
                                     className={`flex items-center gap-3 p-3 rounded-xl cursor-pointer border transition-all
                                         ${quizData.course === course.id
                                             ? 'bg-action/10 border-action'
-                                            : 'bg-white/60 border-primary/20 hover:border-action/20'}`}
+                                            : 'bg-surface dark:bg-[#1A1E1A]/80 border-primary/20 hover:border-action/20'}`}
                                 >
                                     <input
                                         type="radio"

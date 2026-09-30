@@ -243,7 +243,7 @@ function CourseUpdate() {
                                             className={`flex items-center gap-3 px-3.5 py-2.5 rounded-lg cursor-pointer transition-all duration-200 group
                                                 ${enrolled 
                                                     ? 'bg-primary/10 border border-primary/30 shadow-sm' 
-                                                    : 'bg-white/40 border border-primary/10 hover:bg-primary/5 hover:border-primary/25'}`}
+                                                    : 'bg-surface dark:bg-[#1A1E1A]/60 border border-primary/10 hover:bg-primary/5 hover:border-primary/25'}`}
                                         >
                                             <input
                                                 type="checkbox"

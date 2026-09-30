@@ -64,18 +64,18 @@ const CoursesList = ({ page }) => {
                         <div className="flex gap-2.5 pt-4 mt-auto border-t border-primary/10">
                             <button
                                 onClick={() => navigate(`/course/${course.id}/modules/`)}
-                                className="btn-press flex-1 bg-primary/10 hover:bg-primary text-primary hover:text-white border border-primary/20 text-xs font-bold tracking-[0.12em] uppercase py-2 px-3 rounded-lg transition-colors font-sans"
+                                className={`btn-press flex-1 border text-xs font-bold tracking-[0.12em] uppercase py-2 px-3 rounded-lg transition-colors font-sans ${isTeacher ? 'bg-primary text-white border-transparent hover:bg-opacity-90' : 'bg-primary/10 hover:bg-primary text-primary hover:text-white border-primary/20'}`}
                             >
-                                {isTeacher ? 'Manage' : 'View Course'}
+                                {isTeacher ? 'Curriculum' : 'View Course'}
                             </button>
 
                             {/* Teacher-only actions */}
                             {isTeacher && (
                                 <button
                                     onClick={() => navigate(`/update-course/${course.id}`)}
-                                    className="btn-press bg-background hover:bg-primary/5 border border-primary/20 text-text/60 hover:text-action text-xs font-bold tracking-[0.12em] uppercase py-2 px-3 rounded-lg transition-colors font-sans"
+                                    className="btn-press bg-transparent hover:bg-primary/10 border border-primary/20 text-primary hover:text-primary text-xs font-bold tracking-[0.12em] uppercase py-2 px-3 rounded-lg transition-colors font-sans"
                                 >
-                                    Edit
+                                    Settings
                                 </button>
                             )}
                         </div>

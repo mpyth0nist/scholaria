@@ -34,13 +34,9 @@ const TeacherCard = ({ className = "" }) => {
                     <span className="text-primary text-sm font-semibold">Email Address</span>
                     <span className="text-text text-sm truncate max-w-[150px]" title={teacher.email}>{teacher.email}</span>
                 </div>
-                <div className="flex justify-between items-center">
-                    <span className="text-primary text-sm font-semibold">Total Courses Built</span>
-                    <span className="text-text text-sm font-semibold">{teacher.courses_taught?.length || 0}</span>
-                </div>
                 <div className="flex justify-between items-center pt-1">
-                    <span className="text-primary text-sm font-semibold">System Status</span>
-                    <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-semibold uppercase tracking-wider border border-primary/20 shadow-sm">Online</span>
+                    <span className="text-primary text-sm font-semibold">Platform Access</span>
+                    <span className="px-2 py-1 bg-primary/10 text-primary rounded text-xs font-semibold uppercase tracking-wider border border-primary/20 shadow-sm">Active</span>
                 </div>
             </div>
         </div>

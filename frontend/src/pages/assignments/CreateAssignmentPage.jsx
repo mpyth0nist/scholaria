@@ -47,7 +47,7 @@ const CreateAssignmentPage = () => {
         }
     }
 
-    const inputClass = "bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-sm text-text placeholder-slate-400 outline-none focus:border-action transition w-full"
+    const inputClass = "bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-3 text-sm text-text placeholder-slate-400 outline-none focus:border-action transition w-full"
     const labelClass = "text-xs font-semibold uppercase tracking-widest text-action"
     const fieldClass = "flex flex-col gap-1.5"
 
@@ -65,7 +65,7 @@ const CreateAssignmentPage = () => {
                 <p className="text-text/50 text-sm mt-1">Upload a PDF document that students will complete and submit.</p>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 bg-white/60 border border-primary/20 rounded-xl p-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-6">
                 {/* Name */}
                 <div className={fieldClass}>
                     <label className={labelClass}>Title *</label>
