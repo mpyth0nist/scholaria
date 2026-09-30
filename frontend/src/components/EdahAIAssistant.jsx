@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import ReactMarkdown from 'react-markdown';
 import api from '../api';
 
-const CHAT_PROSE = `
+const CHAT_PROSE = ` [&_table]:w-full [&_table]:text-left [&_table]:border-collapse [&_th]:border-b [&_th]:border-border [&_th]:p-2 [&_th]:bg-primary/5 [&_td]:border-b [&_td]:border-border/50 [&_td]:p-2
     [&_p]:mb-2 [&_p]:last:mb-0
     [&_strong]:font-bold [&_em]:italic
     [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:mb-2
@@ -158,8 +158,8 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
             {/* Container */}
             <div className={`
                 fixed bottom-0 left-0 right-0 h-[85vh] z-50 rounded-t-3xl overflow-hidden
-                lg:static lg:h-[calc(100vh-8rem)] lg:w-[350px] xl:w-[400px] lg:rounded-2xl lg:shrink-0 lg:ml-6
-                bg-[#FAF6EE]/90 dark:bg-[#1A1E1A]/90 backdrop-blur-xl border border-primary/20 shadow-2xl
+                lg:static lg:h-[calc(100vh-8rem)] lg:w-[400px] xl:w-[450px] lg:rounded-2xl lg:shrink-0 lg:ml-6
+                bg-surface backdrop-blur-xl border border-border shadow-2xl
                 flex flex-col animate-page-enter
             `}>
                 {/* Header */}
@@ -183,10 +183,10 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                             <div className={`
-                                max-w-[85%] rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm
+                                rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm
                                 ${msg.role === 'user' 
-                                    ? 'bg-action text-white rounded-br-sm whitespace-pre-wrap' 
-                                    : `bg-white dark:bg-[#2D332D] text-text dark:text-white border border-primary/10 rounded-bl-sm ${CHAT_PROSE}`}
+                                    ? 'max-w-[85%] bg-action text-white rounded-br-sm whitespace-pre-wrap' 
+                                    : `max-w-full bg-surface text-text border border-border rounded-bl-sm overflow-x-auto ${CHAT_PROSE}`}
                             `}>
                                 {msg.role === 'ai' ? (
                                     <ReactMarkdown>{msg.content}</ReactMarkdown>
@@ -198,7 +198,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                     ))}
                     {isLoading && (
                         <div className="flex justify-start">
-                            <div className="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-4 bg-white dark:bg-[#2D332D] text-text border border-primary/10 flex items-center gap-1.5 shadow-sm">
+                            <div className="max-w-[85%] rounded-2xl rounded-bl-sm px-4 py-4 bg-surface text-text border border-border flex items-center gap-1.5 shadow-sm">
                                 <div className="w-1.5 h-1.5 bg-action rounded-full animate-bounce" />
                                 <div className="w-1.5 h-1.5 bg-action rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
                                 <div className="w-1.5 h-1.5 bg-action rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />

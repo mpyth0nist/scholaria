@@ -11,7 +11,7 @@ function NotFound() {
                 <p className="text-text/60 text-sm">
                     The page you are looking for doesn't exist or has been moved.
                 </p>
-                <Link to="/dashboard" className="mt-4 bg-action hover:bg-[#3a6347] text-white text-sm font-semibold px-6 py-3 rounded-lg transition-all btn-press inline-block">
+                <Link to="/dashboard" className="mt-4 bg-action hover:brightness-90 text-white text-sm font-semibold px-6 py-3 rounded-lg transition-all btn-press inline-block">
                     Return to Dashboard
                 </Link>
             </div>

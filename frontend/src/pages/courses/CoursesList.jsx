@@ -87,7 +87,7 @@ const CoursesList = ({ page }) => {
                 <div className="col-span-full mt-4 flex justify-end">
                     <button
                         onClick={() => navigate('/all-courses')}
-                        className="text-sm font-medium text-action hover:text-[#a04618] underline underline-offset-4 transition-colors"
+                        className="text-sm font-medium text-action hover:text-action/80 underline underline-offset-4 transition-colors"
                     >
                         View all courses →
                     </button>

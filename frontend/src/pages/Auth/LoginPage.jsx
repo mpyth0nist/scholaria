@@ -83,7 +83,7 @@ function LoginPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className="bg-action text-white rounded-full px-5 py-3 text-sm font-semibold mt-1 hover:bg-[#a04618] btn-press cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
+                        className="bg-action text-white rounded-full px-5 py-3 text-sm font-semibold mt-1 hover:brightness-90 btn-press cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed shadow-md"
                     >
                         {loading ? 'Signing in…' : 'Log In'}
                     </button>

@@ -18,7 +18,7 @@ const AddQuestions = ({
             <div className="w-full max-w-lg space-y-6">
 
                 {/* Header */}
-                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-2xl p-6 backdrop-blur-md">
+                <div className="bg-surface border border-primary/20 rounded-2xl p-6 backdrop-blur-md">
                     <h1 className="text-2xl font-bold text-text">Add Questions</h1>
                     <p className="text-primary text-sm mt-1">Step 2 of 2 — Build your questions</p>
 
@@ -34,7 +34,7 @@ const AddQuestions = ({
 
                 {/* Saved questions preview */}
                 {quizData?.questions?.length > 0 && (
-                    <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-4 space-y-2">
+                    <div className="bg-surface border border-primary/20 rounded-xl p-4 space-y-2">
                         <p className="text-primary text-xs uppercase tracking-wider font-semibold mb-2">Saved Questions</p>
                         {quizData.questions.map((q, i) => (
                             <div key={i} className="flex items-start gap-2 text-sm">
@@ -47,7 +47,7 @@ const AddQuestions = ({
                 )}
 
                 {/* Question form */}
-                <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-2xl p-6 backdrop-blur-md space-y-5">
+                <div className="bg-surface border border-primary/20 rounded-2xl p-6 backdrop-blur-md space-y-5">
                     <h2 className="text-text font-semibold">New Question</h2>
 
                     {/* Question text */}
@@ -55,7 +55,7 @@ const AddQuestions = ({
                         <label className="text-primary text-xs uppercase tracking-wider">Question Text *</label>
                         <textarea
                             rows={3}
-                            className="w-full p-3 rounded-xl bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none"
+                            className="w-full p-3 rounded-xl bg-surface border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none"
                             value={question.question_text}
                             placeholder="e.g. What is the capital of France?"
                             onChange={(e) => handleQuestionFieldChange('question_text', e.target.value)}
@@ -76,7 +76,7 @@ const AddQuestions = ({
                             <div key={i} className={`flex items-center gap-3 px-3 py-2 rounded-lg border text-sm
                                 ${c.is_correct
                                     ? 'bg-primary/10 border-primary/20 text-primary'
-                                    : 'bg-surface dark:bg-[#1A1E1A]/80 border-primary/20 text-text/80'}`}
+                                    : 'bg-surface border-primary/20 text-text/80'}`}
                             >
                                 {c.is_correct
                                     ? <span className="text-primary font-bold" title="Correct answer">◉</span>
@@ -90,7 +90,7 @@ const AddQuestions = ({
                         <div className="flex gap-2 mt-1">
                             <input
                                 type="text"
-                                className="flex-grow p-3 rounded-xl bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+                                className="flex-grow p-3 rounded-xl bg-surface border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
                                 value={choice.choice}
                                 placeholder="Choice text..."
                                 onChange={(e) => handleChoiceChange(e.target.value)}

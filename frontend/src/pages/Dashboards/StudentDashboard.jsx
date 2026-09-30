@@ -51,7 +51,7 @@ function Student() {
                     <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-primary font-sans">My Courses</h2>
                     <button
                         onClick={() => navigate('/all-courses')}
-                        className="text-xs text-action hover:text-[#a04618] font-semibold transition"
+                        className="text-xs text-action hover:text-action/80 font-semibold transition"
                     >
                         View all →
                     </button>
@@ -119,7 +119,7 @@ function Student() {
                     <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-primary font-sans">Available Quizzes</h2>
                     <button
                         onClick={() => navigate('/quizzes/list-quizzes/')}
-                        className="text-xs text-action hover:text-[#a04618] font-semibold transition"
+                        className="text-xs text-action hover:text-action/80 font-semibold transition"
                     >
                         View all →
                     </button>
@@ -162,7 +162,7 @@ function Student() {
                                         <span className="text-xs text-text/50 font-medium">Due: {new Date(quiz.due_date).toLocaleDateString()}</span>
                                     )}
                                 </div>
-                                <span className="ml-auto bg-action hover:bg-[#a04618] text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors shadow-sm">
+                                <span className="ml-auto bg-action hover:brightness-90 text-white text-xs font-semibold px-3 py-1.5 rounded-md transition-colors shadow-sm">
                                     Take Quiz
                                 </span>
                             </button>

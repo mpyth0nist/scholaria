@@ -25,7 +25,7 @@ const QuizList = () => {
                 <div className="h-8 w-48 bg-primary/5 rounded-lg animate-pulse" />
                 <div className="flex flex-col gap-3">
                     {[1, 2, 3].map(i => (
-                        <div key={i} className="h-20 bg-surface dark:bg-[#1A1E1A]/80 rounded-xl animate-pulse border border-primary/20" />
+                        <div key={i} className="h-20 bg-surface rounded-xl animate-pulse border border-primary/20" />
                     ))}
                 </div>
             </div>
@@ -46,7 +46,7 @@ const QuizList = () => {
                 {isTeacher && (
                     <button
                         onClick={() => navigate('/quizzes/create-quiz/')}
-                        className="flex items-center gap-2 bg-primary hover:bg-[#3E5C4A] active:scale-95 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all"
+                        className="flex items-center gap-2 bg-primary hover:brightness-90 active:scale-95 text-white text-sm font-semibold px-4 py-2.5 rounded-lg transition-all"
                     >
                         <span className="text-lg leading-none">+</span> New Quiz
                     </button>
@@ -71,7 +71,7 @@ const QuizList = () => {
                     {quizzes.map((quiz, i) => (
                         <div
                             key={quiz.id}
-                            className="animate-item-enter btn-press group bg-surface dark:bg-[#1A1E1A]/60 border border-primary/20 rounded-xl px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-4"
+                            className="animate-item-enter btn-press group bg-surface border border-primary/20 rounded-xl px-5 py-4 hover:border-primary/40 hover:shadow-sm transition-all flex items-center gap-4"
                             style={{ animationDelay: `${i * 0.05}s` }}
                         >
                             {/* icon */}

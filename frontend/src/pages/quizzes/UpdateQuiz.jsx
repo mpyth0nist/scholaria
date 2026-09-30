@@ -30,7 +30,7 @@ function ChoiceRow({ choice, choiceId, questionId, allChoiceIds, allChoices }) {
             className={`flex items-center gap-3 px-3 py-2 rounded-lg border text-sm group
                 ${isCorrect
                     ? 'bg-primary/10 border-primary/20'
-                    : 'bg-surface dark:bg-[#1A1E1A]/80 border-primary/20'}`}
+                    : 'bg-surface border-primary/20'}`}
             onClick={(e) => e.stopPropagation()}
         >
             {/* Correct toggle */}
@@ -91,7 +91,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
     }
 
     return (
-        <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl overflow-hidden">
+        <div className="bg-surface border border-primary/20 rounded-xl overflow-hidden">
             {/* Header */}
             <div
                 className="flex items-center gap-3 px-5 py-4 cursor-pointer hover:bg-primary/5 transition"
@@ -122,7 +122,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
                         value={question.question_text}
                         onChange={(e) => dispatch(updateQuestionText({ id: questionId, question_text: e.target.value }))}
                         onClick={(e) => e.stopPropagation()}
-                        className="w-full p-3 rounded-xl bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none text-sm"
+                        className="w-full p-3 rounded-xl bg-surface border border-primary/20 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition resize-none text-sm"
                     />
 
                     {/* Choices list */}
@@ -150,7 +150,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
 
                     {/* ── Inline add-choice form ── */}
                     {showAddForm ? (
-                        <div className="flex flex-col gap-2 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-3">
+                        <div className="flex flex-col gap-2 bg-surface border border-primary/20 rounded-xl p-3">
                             <p className="text-xs font-semibold uppercase tracking-widest text-action">New Choice</p>
 
                             <div className="flex gap-2">
@@ -160,7 +160,7 @@ function QuestionAccordion({ questionId, question, choicesData, expanded, onTogg
                                     value={draft.text}
                                     onChange={(e) => setDraft(d => ({ ...d, text: e.target.value }))}
                                     onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddChoice() } }}
-                                    className="flex-grow p-2.5 rounded-lg bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
+                                    className="flex-grow p-2.5 rounded-lg bg-surface border border-primary/20 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary transition text-sm"
                                     autoFocus
                                 />
                                 <button

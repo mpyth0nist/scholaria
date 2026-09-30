@@ -35,8 +35,7 @@ const LessonPage = () => {
     const [deleting, setDeleting] = useState(false)
 
     // Reader preferences (for relaxing phone reading)
-    const [readTheme, setReadTheme] = useState('cream') // cream, sepia, night
-    const [readSize, setReadSize] = useState('lg') // base, lg, xl
+        const [readSize, setReadSize] = useState('lg') // base, lg, xl
     const [readFont, setReadFont] = useState('serif') // serif, sans
     const [showPrefs, setShowPrefs] = useState(false)
     const [showAI, setShowAI] = useState(false)
@@ -129,25 +128,18 @@ const LessonPage = () => {
         xl: 'text-lg sm:text-xl [&_p]:text-lg sm:[&_p]:text-xl [&_p]:leading-[1.8] sm:[&_p]:leading-[1.9] [&_ul]:text-lg sm:[&_ul]:text-xl [&_ol]:text-lg sm:[&_ol]:text-xl'
     }[readSize]
 
-    // Map reader themes
-    const themeClasses = {
-        cream: 'bg-[#FAF6EE] text-[#2E251B] border-[#E5DDCF] shadow-xs',
-        sepia: 'bg-[#F4ECD8] text-[#5C4033] border-[#E4D5B7] shadow-xs',
-        night: 'bg-[#1A1E1A] text-[#E1DDD5] border-[#2D332D] shadow-xs'
-    }[readTheme]
 
     // Map reader fonts
     const fontClasses = readFont === 'serif' ? 'font-serif' : 'font-sans'
 
-    const readerCardClasses = `flex flex-col rounded-xl border p-5 sm:p-8 transition-all duration-300 max-w-prose w-full mx-auto ${themeClasses} ${fontClasses} ${sizeClasses}`
+    const readerCardClasses = `flex flex-col rounded-xl border p-5 sm:p-8 transition-all duration-300 max-w-prose w-full mx-auto bg-surface border-border text-text shadow-sm ${fontClasses} ${sizeClasses}`
 
     const preferencesPanel = showPrefs && (
-        <div className="animate-scale-in flex flex-col gap-4 bg-white/60 border border-primary/20 rounded-xl p-5 shadow-xs max-w-prose w-full mx-auto mb-2 text-text">
+        <div className="animate-scale-in flex flex-col gap-4 bg-surface border border-primary/20 rounded-xl p-5 shadow-xs max-w-prose w-full mx-auto mb-2 text-text">
             <div className="flex items-center justify-between border-b border-primary/10 pb-2">
                 <span className="text-xs font-bold uppercase tracking-widest text-primary">Reading Settings</span>
                 <button
                     onClick={() => {
-                        setReadTheme('cream')
                         setReadSize('lg')
                         setReadFont('serif')
                     }}
@@ -156,7 +148,7 @@ const LessonPage = () => {
                     Reset
                 </button>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Font selector */}
                 <div className="flex flex-col gap-1.5">
                     <label className="text-[10px] font-bold uppercase tracking-wider text-primary/70">Font Style</label>
@@ -164,14 +156,14 @@ const LessonPage = () => {
                         <button
                             type="button"
                             onClick={() => setReadFont('serif')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readFont === 'serif' ? 'bg-white text-action shadow-xs' : 'text-primary/70 hover:text-text'}`}
+                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readFont === 'serif' ? 'bg-primary text-white shadow-xs' : 'text-primary/70 hover:text-text'}`}
                         >
                             Serif
                         </button>
                         <button
                             type="button"
                             onClick={() => setReadFont('sans')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readFont === 'sans' ? 'bg-white text-action shadow-xs' : 'text-primary/70 hover:text-text'}`}
+                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readFont === 'sans' ? 'bg-primary text-white shadow-xs' : 'text-primary/70 hover:text-text'}`}
                         >
                             Sans
                         </button>
@@ -185,51 +177,23 @@ const LessonPage = () => {
                         <button
                             type="button"
                             onClick={() => setReadSize('base')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readSize === 'base' ? 'bg-white text-action shadow-xs' : 'text-primary/70 hover:text-text'}`}
+                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readSize === 'base' ? 'bg-primary text-white shadow-xs' : 'text-primary/70 hover:text-text'}`}
                         >
                             Small
                         </button>
                         <button
                             type="button"
                             onClick={() => setReadSize('lg')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readSize === 'lg' ? 'bg-white text-action shadow-xs' : 'text-primary/70 hover:text-text'}`}
+                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readSize === 'lg' ? 'bg-primary text-white shadow-xs' : 'text-primary/70 hover:text-text'}`}
                         >
                             Medium
                         </button>
                         <button
                             type="button"
                             onClick={() => setReadSize('xl')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readSize === 'xl' ? 'bg-white text-action shadow-xs' : 'text-primary/70 hover:text-text'}`}
+                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readSize === 'xl' ? 'bg-primary text-white shadow-xs' : 'text-primary/70 hover:text-text'}`}
                         >
                             Large
-                        </button>
-                    </div>
-                </div>
-
-                {/* Theme selector */}
-                <div className="flex flex-col gap-1.5">
-                    <label className="text-[10px] font-bold uppercase tracking-wider text-primary/70">Paper Tint</label>
-                    <div className="grid grid-cols-3 gap-1 bg-primary/5 p-1 rounded-lg">
-                        <button
-                            type="button"
-                            onClick={() => setReadTheme('cream')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readTheme === 'cream' ? 'bg-[#FAF6EE] text-[#2E251B] border border-[#E5DDCF] shadow-xs' : 'text-primary/70 hover:text-text'}`}
-                        >
-                            Cream
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setReadTheme('sepia')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readTheme === 'sepia' ? 'bg-[#F4ECD8] text-[#5C4033] border border-[#E4D5B7] shadow-xs' : 'text-primary/70 hover:text-text'}`}
-                        >
-                            Sepia
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => setReadTheme('night')}
-                            className={`py-1 text-xs font-semibold rounded-md transition-all ${readTheme === 'night' ? 'bg-[#1A1E1A] text-[#E1DDD5] border border-[#2D332D] shadow-xs' : 'text-primary/70 hover:text-text'}`}
-                        >
-                            Night
                         </button>
                     </div>
                 </div>
@@ -247,13 +211,13 @@ const LessonPage = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setShowAI(p => !p)}
-                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action text-white shadow-sm border-action/20' : 'bg-surface border-border text-action hover:bg-surface-hover'}`}
                             >
                                 ✨ Ask Edah
                             </button>
                             <button
                                 onClick={() => setShowPrefs(p => !p)}
-                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                             >
                                 Aa View
                             </button>
@@ -317,7 +281,7 @@ const LessonPage = () => {
                         <button
                             onClick={handleMarkRead}
                             disabled={marking}
-                            className="flex items-center gap-2 bg-primary hover:bg-[#3a6347] text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50 btn-press"
+                            className="flex items-center gap-2 bg-primary hover:brightness-90 text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50 btn-press"
                         >
                             {marking ? (
                                 <>Saving…</>
@@ -354,14 +318,14 @@ const LessonPage = () => {
                         <div className="flex items-center gap-2">
                             <button
                                 onClick={() => setEditing(true)}
-                                className="bg-primary/10 text-primary border border-primary/20 hover:bg-primary hover:text-white px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
+                                className="bg-surface text-text border border-border hover:bg-surface-hover px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
                             >
                                 Edit Lesson
                             </button>
                             <button
                                 onClick={handleDelete}
                                 disabled={deleting}
-                                className="bg-red-500/10 text-red-500 border border-red-500/20 hover:bg-red-500 hover:text-white px-4 py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
+                                className="bg-surface text-danger border border-danger/20 hover:bg-danger/10 px-4 py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
                             >
                                 {deleting ? 'Deleting…' : 'Delete Lesson'}
                             </button>
@@ -375,13 +339,13 @@ const LessonPage = () => {
                     <div className="flex justify-end max-w-prose w-full mx-auto mb-2 gap-2">
                         <button
                             onClick={() => setShowAI(p => !p)}
-                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action text-white shadow-sm border-action/20' : 'bg-surface border-border text-action hover:bg-surface-hover'}`}
                         >
                             ✨ Ask Edah
                         </button>
                         <button
                             onClick={() => setShowPrefs(p => !p)}
-                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-action/10 border-action text-action shadow-sm' : 'bg-white/60 border-primary/20 text-primary hover:text-action hover:border-action/50'}`}
+                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                         >
                             Aa View
                         </button>
@@ -430,7 +394,7 @@ const LessonPage = () => {
                         </button>
                     </div>
 
-                    <div className="flex flex-col gap-4 bg-white/60 border border-action/20 rounded-xl p-6">
+                    <div className="flex flex-col gap-4 bg-surface border border-action/20 rounded-xl p-6">
                         {/* title */}
                         <div className="flex flex-col gap-1.5">
                             <label className="text-xs font-semibold uppercase tracking-widest text-action">Title</label>
@@ -438,7 +402,7 @@ const LessonPage = () => {
                                 type="text"
                                 value={form.title}
                                 onChange={(e) => setForm(f => ({ ...f, title: e.target.value }))}
-                                className="bg-white/60 border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
+                                className="bg-surface border border-primary/20 rounded-lg px-4 py-3 text-base text-text placeholder-slate-500 outline-none focus:border-action transition"
                             />
                         </div>
 
@@ -461,7 +425,7 @@ const LessonPage = () => {
                                 </p>
                             )}
                             <label className="flex items-center gap-2 text-sm text-primary cursor-pointer">
-                                <span className="bg-white/60 border border-primary/20 rounded-lg px-4 py-2.5 hover:bg-white/60 transition text-text">
+                                <span className="bg-surface border border-primary/20 rounded-lg px-4 py-2.5 hover:bg-surface transition text-text">
                                     {form.attachments ? form.attachments.name : 'Choose file... (optional)'}
                                 </span>
                                 <input

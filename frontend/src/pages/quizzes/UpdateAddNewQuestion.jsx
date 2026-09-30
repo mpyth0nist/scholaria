@@ -104,7 +104,7 @@ function UpdateAddNewQuestion({ onDone }) {
                             className={`flex items-center gap-3 px-3 py-2 rounded-lg border text-sm
                                 ${c.is_correct
                                     ? 'bg-primary/10 border-primary/20 text-primary'
-                                    : 'bg-surface dark:bg-[#1A1E1A]/80 border-primary/20 text-text/80'}`}
+                                    : 'bg-surface border-primary/20 text-text/80'}`}
                         >
                             {c.is_correct
                                 ? <span className="text-primary font-bold" title="Correct">◉</span>

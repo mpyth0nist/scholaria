@@ -24,7 +24,7 @@ const InputField = ({ label, type = "text", ...props }) => (
         <label className="text-xs font-semibold uppercase tracking-widest text-primary">{label}</label>
         <input 
             type={type} 
-            className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition" 
+            className="bg-surface border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition" 
             {...props} 
         />
     </div>
@@ -33,7 +33,7 @@ const InputField = ({ label, type = "text", ...props }) => (
 const SelectField = ({ label, options, ...props }) => (
     <div className="flex flex-col gap-1.5 mb-4">
         <label className="text-xs font-semibold uppercase tracking-widest text-primary">{label}</label>
-        <select className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition appearance-none" {...props}>
+        <select className="bg-surface border border-primary/20 rounded-lg px-4 py-2.5 text-sm text-text focus:border-action outline-none transition appearance-none" {...props}>
             {options.map(opt => <option key={opt.value} value={opt.value}>{opt.label}</option>)}
         </select>
     </div>
@@ -95,7 +95,7 @@ const UserFormModal = ({ isOpen, onClose, user, onSubmit, isSubmitting }) => {
                 </div>
 
                 <div className="flex gap-3 mt-6 pt-4 border-t border-primary/10">
-                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-action hover:bg-[#a04618] text-white py-2.5 rounded-lg font-semibold transition disabled:opacity-50">
+                    <button type="submit" disabled={isSubmitting} className="flex-1 bg-action hover:brightness-90 text-white py-2.5 rounded-lg font-semibold transition disabled:opacity-50">
                         {isSubmitting ? 'Saving...' : 'Save User'}
                     </button>
                     <button type="button" onClick={onClose} className="px-6 bg-primary/10 hover:bg-primary/20 text-text py-2.5 rounded-lg font-semibold transition">Cancel</button>
@@ -169,13 +169,13 @@ const AdminDashboard = () => {
                     <h1 className="text-3xl font-serif font-bold text-text">Admin Dashboard</h1>
                     <p className="text-text/50 mt-1 text-sm">Manage users, roles, and platform access.</p>
                 </div>
-                <button onClick={openCreate} className="bg-action hover:bg-[#a04618] text-white px-5 py-2.5 rounded-lg font-semibold shadow-md transition transform active:scale-95 flex items-center gap-2">
+                <button onClick={openCreate} className="bg-action hover:brightness-90 text-white px-5 py-2.5 rounded-lg font-semibold shadow-md transition transform active:scale-95 flex items-center gap-2">
                     <span className="text-xl leading-none">+</span> New User
                 </button>
             </div>
 
             {/* Filters */}
-            <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center">
+            <div className="bg-surface border border-primary/20 p-4 rounded-xl flex flex-col md:flex-row gap-4 items-center">
                 <div className="flex-1 w-full relative">
                     <input 
                         type="text" 
@@ -218,7 +218,7 @@ const AdminDashboard = () => {
             </div>
 
             {/* Table */}
-            <div className="bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
+            <div className="bg-surface border border-primary/20 rounded-xl overflow-hidden shadow-sm flex-1 flex flex-col">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left text-sm whitespace-nowrap">
                         <thead>

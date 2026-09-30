@@ -56,7 +56,7 @@ const UpdateAssignmentPage = () => {
         }
     }
 
-    const inputClass = "bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-lg px-4 py-3 text-sm text-text placeholder-slate-400 outline-none focus:border-action transition w-full"
+    const inputClass = "bg-surface border border-primary/20 rounded-lg px-4 py-3 text-sm text-text placeholder-slate-400 outline-none focus:border-action transition w-full"
     const labelClass = "text-xs font-semibold uppercase tracking-widest text-action"
     const fieldClass = "flex flex-col gap-1.5"
 
@@ -80,7 +80,7 @@ const UpdateAssignmentPage = () => {
                 <h1 className="text-3xl font-serif font-bold">Edit Assignment</h1>
             </div>
 
-            <form onSubmit={handleSubmit} className="flex flex-col gap-5 bg-surface dark:bg-[#1A1E1A]/80 border border-primary/20 rounded-xl p-6">
+            <form onSubmit={handleSubmit} className="flex flex-col gap-5 bg-surface border border-primary/20 rounded-xl p-6">
                 <div className={fieldClass}>
                     <label className={labelClass}>Title *</label>
                     <input

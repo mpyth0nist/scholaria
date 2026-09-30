@@ -10,6 +10,7 @@
   --color-surface: var(--surface);
   --color-border: var(--border);
   --color-border-hover: var(--border-hover);
+  --color-danger: var(--danger);
 
   --font-serif: "Lora", serif;
   --font-sans: "Inter", sans-serif;
@@ -22,22 +23,24 @@
 
 :root {
   --primary: #4A7C59;
-  --action: #C05621;
+  --action: #3A6347;
   --background: #FFFDF5;
   --text: #132A13;
   --surface: rgba(255, 255, 255, 0.6);
   --border: rgba(74, 124, 89, 0.2);
   --border-hover: rgba(74, 124, 89, 0.4);
+  --danger: #ef4444;
 }
 
 html.dark {
   --primary: #76A984;
-  --action: #E06B35;
+  --action: #94C4A1;
   --background: #0B140D;
   --text: #ECEFEA;
   --surface: rgba(26, 30, 26, 0.8);
   --border: rgba(118, 169, 132, 0.2);
   --border-hover: rgba(118, 169, 132, 0.4);
+  --danger: #f87171;
 }
 
 /* ── Global resets ──────────────────────────────────────────────────────── */
@@ -175,7 +178,7 @@ html.dark {
   
   .premium-input:focus {
     border-color: var(--color-action);
-    box-shadow: 0 0 0 4px rgba(192, 86, 33, 0.12);
+    box-shadow: 0 0 0 4px rgba(74, 124, 89, 0.2);
     background-color: rgba(255, 255, 255, 0.95);
   }
 
@@ -191,7 +194,7 @@ html.dark {
 
   html.dark .premium-input:focus {
     border-color: var(--color-action);
-    box-shadow: 0 0 0 4px rgba(224, 107, 53, 0.18);
+    box-shadow: 0 0 0 4px rgba(118, 169, 132, 0.25);
     background-color: rgba(20, 36, 25, 0.95);
   }
 }
