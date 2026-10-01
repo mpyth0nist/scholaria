@@ -2,7 +2,7 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import RecentCourses from '../courses/RecentCourses'
 import TeacherCard from '../../components/TeacherInfoCard'
-import { fetchTeacherDashboard } from '../../features/users/userSlice'
+import { fetchTeacherDashboard, fetchUser } from '../../features/users/userSlice'
 import { fetchCourses } from '../../features/courses/coursesSlice'
 import '../../style/style.css'
 
@@ -63,12 +63,7 @@ function Teacher() {
 
                 <div className="animate-scale-in premium-card p-6 hover:-translate-y-1 transition duration-300" style={{ animationDelay: '0.15s' }}>
                     <div className="flex items-center justify-between mb-2">
-                        <p 
-                            className="text-primary text-xs font-bold uppercase tracking-[0.15em] font-sans cursor-help border-b border-dotted border-primary/50 pb-0.5"
-                            title="Average completion rate across all your lessons and quizzes"
-                        >
-                            Class Engagement
-                        </p>
+                        <p className="text-primary text-xs font-bold uppercase tracking-[0.15em] font-sans">Class Engagement</p>
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -91,47 +86,9 @@ function Teacher() {
             {/* Main Content Layout — two columns */}
             <div className="flex flex-col lg:flex-row gap-6 mt-4 items-stretch">
 
-                {/* Left Column: Teacher Card & Needs Attention */}
-                <div className="w-full lg:w-1/3 flex flex-col gap-6">
-                    <TeacherCard />
-                    
-                    {/* Needs Attention Panel */}
-                    <div className="premium-card p-6 flex-1 flex flex-col">
-                        <div className="flex items-center gap-2 mb-4 border-b border-primary/10 pb-3">
-                            <svg className="w-4 h-4 text-red-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                            </svg>
-                            <h2 className="text-red-500 text-sm font-bold uppercase tracking-[0.15em] font-sans">Needs Attention</h2>
-                        </div>
-                        
-                        {dashboardMetrics.needs_attention && dashboardMetrics.needs_attention.length > 0 ? (
-                            <div className="space-y-4">
-                                {dashboardMetrics.needs_attention.map(student => (
-                                    <div key={student.student_id} className="flex items-start gap-3 p-3 rounded-lg bg-red-500/5 border border-red-500/10 transition-all hover:bg-red-500/10">
-                                        <div className="h-8 w-8 rounded-full bg-red-500/20 flex items-center justify-center text-xs font-bold text-red-500 shrink-0">
-                                            {student.student_name.charAt(0)}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-text truncate">{student.student_name}</p>
-                                            <p className="text-xs text-red-400 mt-0.5">{student.issue}</p>
-                                        </div>
-                                        <div className="text-right">
-                                            <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-red-500/20 text-red-500">
-                                                {student.score}%
-                                            </span>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <div className="flex flex-col items-center justify-center py-8 text-primary/60">
-                                <svg className="w-8 h-8 mb-2 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M5 13l4 4L19 7" />
-                                </svg>
-                                <p className="text-sm font-medium">All caught up!</p>
-                            </div>
-                        )}
-                    </div>
+                {/* Left Column: Teacher Card */}
+                <div className="w-full lg:w-1/3 flex flex-col">
+                    <TeacherCard className="h-full flex-1" />
                 </div>
 
                 {/* Right Column: Recent Submissions */}

@@ -8,7 +8,6 @@ import {
     submitQuiz,
     cancelAttempt,
 } from "../../features/quizzes/quizSlice"
-import ReactMarkdown from 'react-markdown'
 
 const PassQuiz = () => {
     const { quiz_id } = useParams()
@@ -220,19 +219,16 @@ const PassQuiz = () => {
                     </div>
                     <button
                         onClick={handleCancel}
-                        className={isTeacher 
-                            ? "bg-red-500/10 text-red-500 hover:bg-red-500 hover:text-white border border-red-500/20 px-4 py-2 text-sm font-semibold rounded-lg transition-colors"
-                            : "text-primary/70 hover:text-red-400 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
-                        }
+                        className="text-primary/70 hover:text-red-400 text-sm font-medium transition-colors px-3 py-1.5 rounded-lg hover:bg-red-500/10 border border-transparent hover:border-red-500/20"
                     >
                         {isTeacher ? "Exit Preview" : "Cancel Quiz"}
                     </button>
                 </div>
 
                 {/* Progress bar */}
-                <div className="w-full bg-surface rounded-full h-2.5 mb-8 overflow-hidden">
+                <div className="w-full bg-surface rounded-full h-1.5 mb-8 overflow-hidden">
                     <div
-                        className="h-2.5 bg-action rounded-full transition-all duration-500"
+                        className="h-1.5 bg-action rounded-full transition-all duration-500"
                         style={{ width: `${progress}%` }}
                     />
                 </div>
@@ -241,45 +237,32 @@ const PassQuiz = () => {
                 <div className="bg-surface border border-primary/20 rounded-2xl p-8 shadow-2xl backdrop-blur-md">
 
                     {/* Question text */}
-                    <div className="text-xl font-semibold text-text leading-relaxed mb-8 prose prose-pre:bg-primary/10 prose-pre:text-text prose-code:text-action prose-p:my-0 max-w-none">
-                        <ReactMarkdown>{currentQuestion.question_text}</ReactMarkdown>
-                    </div>
+                    <p className="text-xl font-semibold text-text leading-relaxed mb-8">
+                        {currentQuestion.question_text}
+                    </p>
 
                     {/* Choices */}
                     <div className="space-y-3 mb-8">
                         {currentQuestion.choices.map(choice => {
                             const isSelected = selectedChoices[currentQuestion.id] === choice.id
-                            const isCorrectPreview = isTeacher && choice.is_correct
                             return (
                                 <button
                                     key={choice.id}
                                     onClick={() => handleSelectChoice(currentQuestion.id, choice.id)}
                                     className={`
-                                        w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-200 font-medium focus:outline-none focus:ring-2 focus:ring-action focus:border-transparent
+                                        w-full text-left px-5 py-4 rounded-xl border-2 transition-all duration-200 font-medium
                                         ${isSelected
                                             ? 'bg-action/10 border-action text-text shadow-lg shadow-sm'
-                                            : isCorrectPreview
-                                                ? 'bg-emerald-500/10 border-emerald-500/50 text-text'
-                                                : 'bg-surface border-primary/20 text-text/80 hover:border-action/20 hover:text-text hover:bg-primary/5'
+                                            : 'bg-surface border-primary/20 text-text/80 hover:border-action/20 hover:text-text hover:bg-primary/5'
                                         }
                                     `}
                                 >
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${isSelected 
-                                                ? 'border-violet-400 bg-action' 
-                                                : isCorrectPreview 
-                                                    ? 'border-emerald-500 bg-emerald-500/20' 
-                                                    : 'border-slate-500'
+                                        <div className={`w-5 h-5 rounded-full border-2 flex-shrink-0 flex items-center justify-center transition-colors ${isSelected ? 'border-violet-400 bg-action' : 'border-slate-500'
                                             }`}>
                                             {isSelected && <div className="w-2 h-2 bg-white rounded-full" />}
-                                            {!isSelected && isCorrectPreview && <div className="w-2 h-2 bg-emerald-500 rounded-full" />}
                                         </div>
-                                        <span className="flex-1">{choice.choice}</span>
-                                        {isCorrectPreview && (
-                                            <span className="text-xs font-bold uppercase tracking-wider text-emerald-600 bg-emerald-500/10 px-2 py-1 rounded">
-                                                Correct Answer
-                                            </span>
-                                        )}
+                                        {choice.choice}
                                     </div>
                                 </button>
                             )

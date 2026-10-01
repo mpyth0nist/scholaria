@@ -15,8 +15,6 @@ const initialState = {
     studentsNext: null,
     studentsPrevious: null,
     studentsLoading: false,
-    studentDetail: null,
-    studentDetailLoading: false,
     dashboardMetrics: null,
     dashboardLoading: false,
 
@@ -54,11 +52,6 @@ export const fetchStudents = createAsyncThunk('fetchStudents', async (params = {
         : 'api/users/students/'
 
     const res = await api.get(url)
-    return res.data
-})
-
-export const fetchStudentDetail = createAsyncThunk('fetchStudentDetail', async (studentId) => {
-    const res = await api.get(`api/users/students/${studentId}/`)
     return res.data
 })
 
@@ -143,17 +136,6 @@ const userSlice = createSlice({
         })
         builder.addCase(fetchStudents.rejected, (state) => {
             state.studentsLoading = false
-        })
-
-        builder.addCase(fetchStudentDetail.pending, (state) => {
-            state.studentDetailLoading = true
-        })
-        builder.addCase(fetchStudentDetail.fulfilled, (state, action) => {
-            state.studentDetail = action.payload
-            state.studentDetailLoading = false
-        })
-        builder.addCase(fetchStudentDetail.rejected, (state) => {
-            state.studentDetailLoading = false
         })
 
         builder.addCase(fetchTeacherDashboard.pending, (state) => {

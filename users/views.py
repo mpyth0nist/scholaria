@@ -297,88 +297,9 @@ class TeacherDashboardView(APIView):
             for attempt in recent_attempts
         ]
 
-        # ── Needs attention ───────────────────────────────────────────────────
-        # Students who recently failed a quiz (score < 50)
-        failed_attempts = (
-            UserAttempt.objects
-            .filter(quiz__teacher=user, score__lt=50, score__isnull=False)
-            .select_related('student', 'quiz')
-            .order_by('-submitted_at')[:5]
-        )
-
-        needs_attention = [
-            {
-                'student_id': attempt.student.id,
-                'student_name': f"{attempt.student.first_name} {attempt.student.last_name}",
-                'issue': f"Failed '{attempt.quiz.name}'",
-                'score': round(float(attempt.score), 1),
-                'date': attempt.submitted_at.isoformat() if attempt.submitted_at else None,
-            }
-            for attempt in failed_attempts
-        ]
-
         return Response({
             'total_courses': total_courses,
             'total_students': total_students,
             'engagement': engagement,
             'recent_submissions': recent_submissions,
-            'needs_attention': needs_attention,
-        })
-
-from django.shortcuts import get_object_or_404
-from courses.models import Lesson
-
-class StudentDetailView(APIView):
-    permission_classes = [IsAuthenticated, isTeacher]
-
-    def get(self, request, student_id):
-        user = request.user
-        
-        student = get_object_or_404(CustomUser, id=student_id, role='Student')
-        
-        teacher_courses = Course.objects.filter(teacher=user)
-        enrolled_courses = teacher_courses.filter(student=student)
-        
-        # Get progress in those courses
-        course_data = []
-        for course in enrolled_courses:
-            total_lessons = Lesson.objects.filter(module__course=course).count()
-            completed_lessons = UserLessonProgress.objects.filter(
-                user=student, lesson__module__course=course
-            ).count()
-            
-            progress = (completed_lessons / total_lessons * 100) if total_lessons > 0 else 0
-            
-            course_data.append({
-                'id': course.id,
-                'name': course.name,
-                'progress': round(progress),
-                'completed_lessons': completed_lessons,
-                'total_lessons': total_lessons
-            })
-            
-        # Get quiz scores for this student in the teacher's courses
-        quiz_attempts = UserAttempt.objects.filter(
-            student=student, quiz__teacher=user, score__isnull=False
-        ).select_related('quiz').order_by('-submitted_at')
-        
-        quizzes_data = []
-        for attempt in quiz_attempts:
-            quizzes_data.append({
-                'id': attempt.id,
-                'quiz_name': attempt.quiz.name,
-                'score': round(float(attempt.score), 1),
-                'submitted_at': attempt.submitted_at.isoformat()
-            })
-            
-        return Response({
-            'student': {
-                'id': student.id,
-                'name': f"{student.first_name} {student.last_name}",
-                'email': student.email,
-                'username': student.username,
-                'is_active': student.is_active,
-            },
-            'courses': course_data,
-            'quizzes': quizzes_data
         })

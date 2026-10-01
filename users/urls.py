@@ -13,7 +13,6 @@ from .views import (
     LogoutView,
     TeacherDashboardView,
     UpdateUserView,
-    StudentDetailView,
 )
 
 urlpatterns = [
@@ -22,7 +21,6 @@ urlpatterns = [
     path('refresh/', CookieTokenRefreshView.as_view(), name="refresh"),
     path('user/', LoggedUserView.as_view(), name="get_user_info"),
     path('students/', ListStudentsView.as_view(), name="get_students"),
-    path('students/<int:student_id>/', StudentDetailView.as_view(), name="get_student_detail"),
     path('logout/', LogoutView.as_view(), name="logout"),
     path('user/update/', UpdateUserView.as_view(), name="update_user"),
     path('dashboard/', TeacherDashboardView.as_view(), name="teacher_dashboard"),

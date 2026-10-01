@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { fetchStudents } from '../../features/users/userSlice'
-import StudentDetailPanel from '../../components/StudentDetailPanel'
 
 // ── helpers ──────────────────────────────────────────────────────────
 
@@ -46,7 +45,6 @@ const StudentsPage = () => {
     const [search, setSearch] = useState('')
     const [debouncedSearch, setDebouncedSearch] = useState('')
     const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' })
-    const [selectedStudentId, setSelectedStudentId] = useState(null)
 
     // Debounce search input
     useEffect(() => {
@@ -177,8 +175,7 @@ const StudentsPage = () => {
                                 {students.map((student, idx) => (
                                     <tr
                                         key={student.id}
-                                        onClick={() => setSelectedStudentId(student.id)}
-                                        className="hover:bg-primary/5 transition-colors duration-150 group cursor-pointer"
+                                        className="hover:bg-primary/5 transition-colors duration-150 group"
                                     >
                                         {/* Row number uses ID now, or we can use computed index */}
                                         <td className="hidden sm:table-cell px-5 py-4 text-primary/70 tabular-nums">{(page - 1) * 10 + idx + 1}</td>
@@ -253,29 +250,22 @@ const StudentsPage = () => {
                                 disabled={!studentsPrevious || loading}
                                 className="px-3.5 py-1.5 text-xs font-semibold text-text/80 bg-white/60 border border-primary/20 rounded-lg hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
-                                ← Prev
+                                Previous
                             </button>
-                            <span className="text-xs text-primary/80 px-3 py-1 font-medium bg-primary/10 rounded">
-                                {page}
+                            <span className="text-xs text-primary/80 px-2 font-medium">
+                                Page {page}
                             </span>
                             <button
                                 onClick={() => setPage(p => p + 1)}
                                 disabled={!studentsNext || loading}
                                 className="px-3.5 py-1.5 text-xs font-semibold text-white bg-action rounded-lg hover:bg-action active:scale-95 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                             >
-                                Next →
+                                Next
                             </button>
                         </div>
                     </div>
                 )}
             </div>
-
-            {selectedStudentId && (
-                <StudentDetailPanel 
-                    studentId={selectedStudentId} 
-                    onClose={() => setSelectedStudentId(null)} 
-                />
-            )}
         </div>
     )
 }
