@@ -18,13 +18,20 @@ function ProtectedRoutes(){
             } else {
                 setisAuthorized(false)
             }
-        } catch (error) {
+        } catch {
             setisAuthorized(false)
         }
     }
 
     if (isAuthorized === null){
-        return <div>...Loading</div>
+        return (
+            <div className="min-h-screen flex items-center justify-center bg-background">
+                <div className="flex flex-col items-center gap-3">
+                    <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    <p className="text-primary/60 text-sm font-medium tracking-wide">Loading…</p>
+                </div>
+            </div>
+        )
     }
 
     return isAuthorized ? <Outlet /> : <Navigate to='/login' />;

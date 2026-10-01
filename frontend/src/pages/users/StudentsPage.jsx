@@ -160,13 +160,12 @@ const StudentsPage = () => {
                                     >
                                         Email <SortIcon active={sortConfig.key === 'email'} direction={sortConfig.direction} />
                                     </th>
-                                    <th 
+                                    <th
                                         className="px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider cursor-pointer hover:bg-primary/15 transition-colors group select-none"
                                         onClick={() => handleSort('birth_date')}
                                     >
                                         Age <SortIcon active={sortConfig.key === 'birth_date'} direction={sortConfig.direction === 'asc' ? 'desc' : 'asc'} />
                                     </th>
-                                    <th className="hidden sm:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider">Date of Birth</th>
                                     <th className="hidden md:table-cell px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider">
                                         Courses
                                     </th>
@@ -214,15 +213,6 @@ const StudentsPage = () => {
                                             <span className="text-primary/70 ml-1">yrs</span>
                                         </td>
 
-                                        {/* Birth date */}
-                                        <td className="hidden sm:table-cell px-5 py-4 text-primary/80 tabular-nums">
-                                            {student.birth_date
-                                                ? new Date(student.birth_date).toLocaleDateString('en-GB', {
-                                                    day: '2-digit', month: 'short', year: 'numeric'
-                                                  })
-                                                : '—'}
-                                        </td>
-
                                         {/* Courses enrolled count */}
                                         <td className="hidden md:table-cell px-5 py-4">
                                             {student.student_courses && student.student_courses.length > 0 ? (
@@ -258,7 +248,7 @@ const StudentsPage = () => {
                             <button
                                 onClick={() => setPage(p => p - 1)}
                                 disabled={!studentsPrevious || loading}
-                                className="px-3.5 py-1.5 text-xs font-semibold text-text/80 bg-surface border border-primary/20 rounded-lg hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
+                                className="px-3.5 py-1.5 text-xs font-semibold text-text/80 bg-white/60 border border-primary/20 rounded-lg hover:bg-primary/10 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-95"
                             >
                                 Previous
                             </button>

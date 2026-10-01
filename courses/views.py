@@ -4,7 +4,7 @@ from django.db.models import Prefetch, Q
 from django.shortcuts import get_object_or_404
 from rest_framework import generics, status
 from rest_framework.exceptions import NotFound, PermissionDenied
-from rest_framework.permissions import SAFE_METHODS, BasePermission, IsAuthenticated
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -41,48 +41,18 @@ def get_nested_attrs(obj, attrs):
 
 
 # ── Permission classes ────────────────────────────────────────────────────────
+# Defined centrally in core/permissions.py; imported here to avoid duplication.
+# Lowercase aliases are preserved for backward compatibility with other modules
+# that import from courses.views (e.g. quizzes/views.py, users/views.py).
 
-class isCourseTeacher(BasePermission):
-
-    lookup_field = ['teacher']
-
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated
-
-    def has_object_permission(self, request, view, obj):
-        course_teacher = get_nested_attrs(obj, self.lookup_field)
-        if request.method in SAFE_METHODS:
-            return True
-        return course_teacher == request.user
-
-
-
-
-class isTeacher(BasePermission):
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role == 'Teacher'
-
-
-class isStudent(BasePermission):
-    def has_permission(self, request, view):
-        return request.user and request.user.is_authenticated and request.user.role == 'Student'
-
-
-class isAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user
-            and request.user.is_authenticated
-            and request.user.role == 'ADMIN'
-        )
-
-
-class isCourseStudent(BasePermission):
-    lookup_field = ['student']
-
-    def has_object_permission(self, request, view, obj):
-        course_students = get_nested_attrs(obj, self.lookup_field)
-        return request.user in course_students
+from core.permissions import (
+    IsCourseStudent as isCourseStudent,
+    IsCourseTeacher as isCourseTeacher,
+    IsAdmin as isAdmin,
+    IsStudent as isStudent,
+    IsTeacher as isTeacher,
+    IsTeacherOrAdmin,
+)
 
 
 # ── Student class views ───────────────────────────────────────────────────────
@@ -94,7 +64,8 @@ class StudentClassList(generics.ListAPIView):
 
 
 class StudentClassCreate(generics.CreateAPIView):
-    permission_classes = [IsAuthenticated, isTeacher]
+    """Only admins may create student classes (no per-teacher ownership model)."""
+    permission_classes = [IsAuthenticated, isAdmin]
     serializer_class = StudentClassSerializer
 
 
@@ -222,9 +193,10 @@ class ModuleList(generics.ListAPIView):
         user = self.request.user
         # Enforce enrollment: teacher must own the course OR student must be enrolled
         module_course = get_object_or_404(
-            Course,
-            Q(teacher=user) | Q(student=user),
-            id=self.kwargs['course_id'],
+            Course.objects.filter(
+                Q(teacher=user) | Q(student=user),
+                id=self.kwargs['course_id'],
+            ).distinct()
         )
         # Prefetch lessons and their progress in a single extra query each,
         # preventing N+1 inside ModuleSerializer.get_done()
@@ -289,9 +261,10 @@ class LessonList(generics.ListAPIView):
         user = self.request.user
         # Verify enrollment
         get_object_or_404(
-            Course,
-            Q(teacher=user) | Q(student=user),
-            id=linked_module.course_id,
+            Course.objects.filter(
+                Q(teacher=user) | Q(student=user),
+                id=linked_module.course_id,
+            ).distinct()
         )
         # Prefetch per-student progress to avoid an N+1 query in LessonSerializer.get_done()
         return Lesson.objects.filter(module=linked_module).prefetch_related(

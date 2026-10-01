@@ -1,6 +1,7 @@
 import { useRef, useState, useCallback, useEffect } from 'react'
 import DOMPurify from 'dompurify'
 import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -8,14 +9,14 @@ import ReactMarkdown from 'react-markdown'
 
 // Colors are chosen for legibility on a white/cream background (WCAG AA+).
 const COLORS = [
-    { label: 'Default',  value: '#132A13' },  // dark green — main text
-    { label: 'Slate',    value: '#334155' },  // dark slate
-    { label: 'Violet',   value: '#5b21b6' },  // deep violet
-    { label: 'Sky',      value: '#0369a1' },  // deep sky blue
-    { label: 'Emerald',  value: '#065f46' },  // deep emerald
-    { label: 'Amber',    value: '#92400e' },  // dark amber/brown
-    { label: 'Rose',     value: '#be123c' },  // deep rose
-    { label: 'Orange',   value: '#c2410c' },  // dark orange (action)
+    { label: 'Default',  value: 'inherit', hex: '#132A13', rgb: 'rgb(19, 42, 19)' },  // adaptive main text
+    { label: 'Slate',    value: 'var(--palette-slate)', hex: '#334155', rgb: 'rgb(51, 65, 85)' },
+    { label: 'Violet',   value: 'var(--palette-violet)', hex: '#5b21b6', rgb: 'rgb(91, 33, 182)' },
+    { label: 'Sky',      value: 'var(--palette-sky)', hex: '#0369a1', rgb: 'rgb(3, 105, 161)' },
+    { label: 'Emerald',  value: 'var(--palette-emerald)', hex: '#065f46', rgb: 'rgb(6, 95, 70)' },
+    { label: 'Amber',    value: 'var(--palette-amber)', hex: '#92400e', rgb: 'rgb(146, 64, 14)' },
+    { label: 'Rose',     value: 'var(--palette-rose)', hex: '#be123c', rgb: 'rgb(190, 18, 60)' },
+    { label: 'Orange',   value: 'var(--palette-orange)', hex: '#c2410c', rgb: 'rgb(194, 65, 12)' },
 ]
 
 const FONT_SIZES = [12, 14, 16, 18, 20, 24, 28, 32]
@@ -130,7 +131,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         onChange(editorRef.current?.innerHTML ?? '')
     }, [onChange, syncState])
 
-    const applyColor = (hex) => { setActiveColor(hex); setShowColors(false); exec('foreColor', hex) }
+    const applyColor = (c) => { setActiveColor(c.hex); setShowColors(false); exec('foreColor', c.hex) }
     const applyFont  = (val) => { setActiveFont(val); setShowFonts(false); exec('fontName', val) }
 
     // ── FIX 1: H1/H2 inline on selection, block on cursor-only ───────────────
@@ -336,14 +337,14 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                             <div className="grid grid-cols-4 gap-2">
                                 {COLORS.map(c => (
                                     <button
-                                        key={c.value}
+                                        key={c.label}
                                         type="button"
                                         title={c.label}
-                                        onMouseDown={(e) => { e.preventDefault(); applyColor(c.value) }}
+                                        onMouseDown={(e) => { e.preventDefault(); applyColor(c) }}
                                         className="w-8 h-8 rounded-lg border-2 transition hover:scale-110 active:scale-95"
                                         style={{
-                                            backgroundColor: c.value,
-                                            borderColor: activeColor === c.value ? '#a78bfa' : 'transparent',
+                                            backgroundColor: c.value === 'inherit' ? 'var(--text)' : c.value,
+                                            borderColor: activeColor === c.hex || activeColor === c.rgb ? 'var(--action)' : 'transparent',
                                         }}
                                     />
                                 ))}
@@ -378,58 +379,83 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// COLOR FIXER — maps old light-on-dark palette to dark-on-light equivalents.
-// This ensures content authored before the palette change renders correctly.
+// COLOR FIXER — maps hardcoded palette colors to dynamic CSS variables.
+// This ensures content renders correctly in both Light and Dark themes.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const LIGHT_TO_DARK = {
-    // hex values the old palette used (lowercase, no alpha)
-    '#f1f5f9': '#132A13',  // 'White'   → default text
-    '#94a3b8': '#334155',  // 'Silver'  → slate-700
-    '#a78bfa': '#5b21b6',  // 'Violet'  → violet-800
-    '#38bdf8': '#0369a1',  // 'Sky'     → sky-700
-    '#34d399': '#065f46',  // 'Emerald' → emerald-900
-    '#fbbf24': '#92400e',  // 'Amber'   → amber-900
-    '#fb7185': '#be123c',  // 'Rose'    → rose-700
-    '#fb923c': '#c2410c',  // 'Orange'  → orange-700
+const HEX_TO_VAR = {
+    // Default text colors (both old white and new dark green) -> inherit
+    '#f1f5f9': 'inherit',
+    '#132a13': 'inherit',
+
+    // Old light palette
+    '#94a3b8': 'var(--palette-slate)',
+    '#a78bfa': 'var(--palette-violet)',
+    '#38bdf8': 'var(--palette-sky)',
+    '#34d399': 'var(--palette-emerald)',
+    '#fbbf24': 'var(--palette-amber)',
+    '#fb7185': 'var(--palette-rose)',
+    '#fb923c': 'var(--palette-orange)',
+
+    // New dark palette
+    '#334155': 'var(--palette-slate)',
+    '#5b21b6': 'var(--palette-violet)',
+    '#0369a1': 'var(--palette-sky)',
+    '#065f46': 'var(--palette-emerald)',
+    '#92400e': 'var(--palette-amber)',
+    '#be123c': 'var(--palette-rose)',
+    '#c2410c': 'var(--palette-orange)',
 }
 
 /**
  * Walks all inline `color` style declarations in saved HTML and replaces
- * any known light-palette hex value with its dark counterpart.
- * rgb(r, g, b) values from execCommand are also normalised.
+ * hardcoded hex/rgb values with dynamic CSS variables.
  */
 const fixLessonColors = (html) => {
     if (!html) return ''
 
+    let fixed = html
+
+    // Convert legacy <font color="..."> to <span style="color: ...">
+    // The browser's execCommand('foreColor') uses <font>, but <font>
+    // does not support CSS variables or 'inherit'. If 'inherit' is passed
+    // to <font color>, legacy parsing evaluates it to bright green (#00e000)!
+    fixed = fixed.replace(/<font\s+color="([^"]+)">/gi, '<span style="color: $1">')
+    fixed = fixed.replace(/<\/font>/gi, '</span>')
+
     // Also handle rgb() format that browsers emit from execCommand
     const RGB_TO_HEX = {
         'rgb(241, 245, 249)': '#f1f5f9',
+        'rgb(19, 42, 19)': '#132a13',
+        
         'rgb(148, 163, 184)': '#94a3b8',
         'rgb(167, 139, 250)': '#a78bfa',
-        'rgb(56, 189, 248)':  '#38bdf8',
-        'rgb(52, 211, 153)':  '#34d399',
-        'rgb(251, 191, 36)':  '#fbbf24',
+        'rgb(56, 189, 248)': '#38bdf8',
+        'rgb(52, 211, 153)': '#34d399',
+        'rgb(251, 191, 36)': '#fbbf24',
         'rgb(251, 113, 133)': '#fb7185',
-        'rgb(251, 146, 60)':  '#fb923c',
+        'rgb(251, 146, 60)': '#fb923c',
+
+        'rgb(51, 65, 85)': '#334155',
+        'rgb(91, 33, 182)': '#5b21b6',
+        'rgb(3, 105, 161)': '#0369a1',
+        'rgb(6, 95, 70)': '#065f46',
+        'rgb(146, 64, 14)': '#92400e',
+        'rgb(190, 18, 60)': '#be123c',
+        'rgb(194, 65, 12)': '#c2410c',
     }
 
-    // Replace rgb() representations first so later hex replacement covers all cases
-    let fixed = html
+    // Replace rgb() representations first
     Object.entries(RGB_TO_HEX).forEach(([rgb, hex]) => {
-        fixed = fixed.replaceAll(rgb, hex)
+        // use regex to catch variable spacing in rgb()
+        const escapedRgb = rgb.replace(/\(/g, '\\(').replace(/\)/g, '\\)').replace(/,\s*/g, ',\\s*')
+        fixed = fixed.replace(new RegExp(escapedRgb, 'gi'), hex)
     })
 
-    // STRIP inline default text colors so they inherit properly from the parent theme
-    // Both old 'white' and new 'dark green' are considered default text.
-    // If the style attribute ONLY contains color, we strip the whole style attribute.
-    fixed = fixed.replace(/style="[^"]*color:\s*(?:#f1f5f9|#132A13|#132a13)[^"]*"/gi, '')
-
-    // Replace hex representations (case-insensitive) for accent colors
-    Object.entries(LIGHT_TO_DARK).forEach(([light, dark]) => {
-        if (light.toLowerCase() === '#f1f5f9') return; // Handled above by stripping
-        const re = new RegExp(light.replace('#', '#'), 'gi')
-        fixed = fixed.replace(re, dark)
+    // Replace hex representations
+    Object.entries(HEX_TO_VAR).forEach(([hex, cssVar]) => {
+        const re = new RegExp(hex, 'gi')
+        fixed = fixed.replace(re, cssVar)
     })
 
     return fixed
@@ -465,13 +491,18 @@ const MD_PROSE = `
     [&_hr]:border-t [&_hr]:border-current [&_hr]:opacity-20 [&_hr]:my-6
     [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:border-opacity-30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:opacity-80 [&_blockquote]:my-3
     [&_code]:bg-black/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+    [&_pre]:bg-black/10 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:mb-4 [&_pre]:overflow-x-auto
+    [&_pre_code]:bg-transparent [&_pre_code]:px-0 [&_pre_code]:py-0 [&_pre_code]:text-sm [&_pre_code]:leading-relaxed
+    [&_table]:w-full [&_table]:mb-4 [&_table]:border-collapse [&_table]:text-sm
+    [&_th]:text-left [&_th]:font-semibold [&_th]:px-4 [&_th]:py-2 [&_th]:border-b-2 [&_th]:border-current/20 [&_th]:bg-black/5
+    [&_td]:px-4 [&_td]:py-2 [&_td]:border-b [&_td]:border-current/10
 `
 
 export const LessonContent = ({ html, className = '' }) => {
     if (isMarkdown(html)) {
         return (
             <div className={`${MD_PROSE} ${className}`}>
-                <ReactMarkdown>
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
                     {html}
                 </ReactMarkdown>
             </div>

@@ -19,6 +19,7 @@ import PassQuiz from './pages/quizzes/PassQuiz.jsx'
 import UpdateQuiz from './pages/quizzes/UpdateQuiz.jsx'
 import StudentsPage from './pages/users/StudentsPage.jsx'
 import AdminDashboard from './pages/Dashboards/AdminDashboard.jsx'
+import AdminClassesPage from './pages/Dashboards/AdminClassesPage.jsx'
 import AssignmentList from './pages/assignments/AssignmentList.jsx'
 import AssignmentPage from './pages/assignments/AssignmentPage.jsx'
 import CreateAssignmentPage from './pages/assignments/CreateAssignmentPage.jsx'
@@ -71,6 +72,7 @@ function App() {
           {/* ── admin-only routes ─────────────────────────────────── */}
           <Route element={<RoleProtectedRoute allowedRoles={['ADMIN']} />}>
             <Route path='/admin/dashboard' element={<Dashboard><AdminDashboard /></Dashboard>} />
+            <Route path='/admin/classes' element={<Dashboard><AdminClassesPage /></Dashboard>} />
           </Route>
 
         </Route>

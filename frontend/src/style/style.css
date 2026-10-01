@@ -217,3 +217,22 @@ html.dark {
     font-size: 19px;
   }
 }
+:root {
+  --palette-slate: #334155;
+  --palette-violet: #5b21b6;
+  --palette-sky: #0369a1;
+  --palette-emerald: #065f46;
+  --palette-amber: #92400e;
+  --palette-rose: #be123c;
+  --palette-orange: #c2410c;
+}
+
+html.dark {
+  --palette-slate: #94a3b8;
+  --palette-violet: #a78bfa;
+  --palette-sky: #38bdf8;
+  --palette-emerald: #34d399;
+  --palette-amber: #fbbf24;
+  --palette-rose: #fb7185;
+  --palette-orange: #fb923c;
+}

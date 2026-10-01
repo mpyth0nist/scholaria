@@ -1,9 +1,9 @@
 import { useParams, useNavigate } from 'react-router-dom'
-import { useSelector } from 'react-redux'
 import api from '../../../api'
 import { useState, useEffect } from 'react'
 import RichTextEditor, { LessonContent } from '../../../components/RichTextEditor'
 import EdahAIAssistant from '../../../components/EdahAIAssistant'
+import usePermissions from '../../../hooks/usePermissions'
 
 // Prepend the backend origin to relative media paths (/media/...)
 // so attachments resolve to Django (8000) not the Vite dev server (5173).
@@ -22,8 +22,7 @@ const resolveMedia = (url) => {
 const LessonPage = () => {
     const { lesson_id } = useParams()
     const navigate = useNavigate()
-    const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     const [lesson, setLesson] = useState(null)
     const [marking, setMarking] = useState(false)
@@ -33,6 +32,7 @@ const LessonPage = () => {
     const [form, setForm] = useState({ title: '', content: '', attachments: null })
     const [saving, setSaving] = useState(false)
     const [deleting, setDeleting] = useState(false)
+    const [deleteConfirm, setDeleteConfirm] = useState(false)
 
     // Reader preferences (for relaxing phone reading)
         const [readSize, setReadSize] = useState('lg') // base, lg, xl
@@ -92,7 +92,7 @@ const LessonPage = () => {
 
     // ── teacher: delete lesson ────────────────────────────────────────────────
     const handleDelete = async () => {
-        if (!window.confirm('Delete this lesson? This cannot be undone.')) return
+        setDeleteConfirm(false)
         setDeleting(true)
         try {
             await api.delete(`api/courses/lessons/${lesson_id}/delete-lesson/`)
@@ -117,8 +117,36 @@ const LessonPage = () => {
             onClick={() => navigate(-1)}
             className="flex items-center gap-1.5 text-sm text-primary hover:text-action transition w-fit"
         >
-            ← Back to modules
+            ← Back
         </button>
+    )
+
+    // ── teacher: delete confirmation modal ────────────────────────────────────
+    const DeleteModal = deleteConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-scale-in">
+            <div className="bg-surface border border-danger/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl flex flex-col gap-4">
+                <h2 className="text-lg font-bold text-text">Delete this lesson?</h2>
+                <p className="text-sm text-text/70">
+                    This will permanently delete <span className="font-semibold text-text">"{lesson.title}"</span> and remove all
+                    associated student progress. This action cannot be undone.
+                </p>
+                <div className="flex justify-end gap-3 pt-2">
+                    <button
+                        onClick={() => setDeleteConfirm(false)}
+                        className="px-4 py-2 text-sm font-semibold rounded-lg bg-surface border border-border text-text hover:bg-surface-hover transition"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        disabled={deleting}
+                        className="px-4 py-2 text-sm font-semibold rounded-lg bg-danger text-white hover:opacity-90 transition disabled:opacity-50"
+                    >
+                        {deleting ? 'Deleting…' : 'Yes, Delete'}
+                    </button>
+                </div>
+            </div>
+        </div>
     )
 
     // Map reader sizes to be responsive (smaller defaults on phone screens)
@@ -217,9 +245,10 @@ const LessonPage = () => {
                             </button>
                             <button
                                 onClick={() => setShowPrefs(p => !p)}
+                                title="Adjust font size and style for easier reading"
                                 className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                             >
-                                Aa View
+                                Reading Settings
                             </button>
                         </div>
                     </div>
@@ -323,7 +352,7 @@ const LessonPage = () => {
                                 Edit Lesson
                             </button>
                             <button
-                                onClick={handleDelete}
+                                onClick={() => setDeleteConfirm(true)}
                                 disabled={deleting}
                                 className="bg-surface text-danger border border-danger/20 hover:bg-danger/10 px-4 py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
                             >
@@ -332,9 +361,9 @@ const LessonPage = () => {
                         </div>
                     </div>
 
-                    <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 max-w-prose w-full mx-auto">
-                        <h1 className="text-3xl font-bold text-text leading-snug">{lesson.title}</h1>
-                    </div>
+                    <h1 className="text-3xl font-bold text-text leading-snug max-w-prose w-full mx-auto">
+                        {lesson.title}
+                    </h1>
 
                     <div className="flex justify-end max-w-prose w-full mx-auto mb-2 gap-2">
                         <button
@@ -345,9 +374,10 @@ const LessonPage = () => {
                         </button>
                         <button
                             onClick={() => setShowPrefs(p => !p)}
+                            title="Adjust font size and style for easier reading"
                             className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                         >
-                            Aa View
+                            Reading Settings
                         </button>
                     </div>
 
@@ -448,6 +478,7 @@ const LessonPage = () => {
             )}
             </div>
             <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} lessonId={lesson_id} />
+            {DeleteModal}
         </div>
     )
 }

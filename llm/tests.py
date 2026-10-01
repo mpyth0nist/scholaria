@@ -479,6 +479,7 @@ class TestRAGAnswerViewTeacher:
             data={'query': 'test'},
             format='json',
         )
+        res.close()  # Close the streaming response
         list(res.streaming_content)  # Fully consume stream to avoid dangling cursors
         res.close()
 

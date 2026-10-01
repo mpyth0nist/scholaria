@@ -80,6 +80,33 @@ export const updateCourse = createAsyncThunk("updateCourse", async (updatedCours
 
 
 
+export const createClass = createAsyncThunk("createClass", async (classData, { rejectWithValue }) => {
+    try {
+        const res = await api.post('api/courses/classes/create/', classData)
+        return res.data
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
+})
+
+export const updateClass = createAsyncThunk("updateClass", async ({ id, data }, { rejectWithValue }) => {
+    try {
+        const res = await api.put(`api/courses/classes/update/${id}/`, data)
+        return res.data
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
+})
+
+export const deleteClass = createAsyncThunk("deleteClass", async (id, { rejectWithValue }) => {
+    try {
+        await api.delete(`api/courses/classes/delete/${id}/`)
+        return id
+    } catch (err) {
+        return rejectWithValue(err.response?.data)
+    }
+})
+
 const coursesSlice = createSlice({
     name: "courses",
     initialState: { courses: [], selectedCourse: {}, classes: [], error: false, loading: false },
@@ -141,6 +168,18 @@ const coursesSlice = createSlice({
 
         builder.addCase(fetchClasses.fulfilled, (state, action) => {
             state.classes = action.payload
+        })
+
+        builder.addCase(createClass.fulfilled, (state, action) => {
+            state.classes.push(action.payload)
+        })
+
+        builder.addCase(updateClass.fulfilled, (state, action) => {
+            state.classes = state.classes.map(c => c.id === action.payload.id ? action.payload : c)
+        })
+
+        builder.addCase(deleteClass.fulfilled, (state, action) => {
+            state.classes = state.classes.filter(c => c.id !== action.payload)
         })
     }
 

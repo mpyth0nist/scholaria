@@ -3,28 +3,19 @@ import logging
 from django.db.models import Count, Sum
 from rest_framework import filters, generics, status
 from rest_framework.pagination import PageNumberPagination
-from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from core.permissions import IsAdmin as isAdmin, IsTeacher as isTeacher
 from courses.models import Course, UserLessonProgress
-from courses.views import isTeacher
 from quizzes.models import Quiz, UserAttempt
 
 from .models import CustomUser
 from .serializers import AdminUserSerializer, UserSerializer
 
 logger = logging.getLogger(__name__)
-
-
-class isAdmin(BasePermission):
-    def has_permission(self, request, view):
-        return (
-            request.user
-            and request.user.is_authenticated
-            and request.user.role == 'ADMIN'
-        )
 
 
 class StandardResultsSetPagination(PageNumberPagination):
@@ -201,15 +192,18 @@ class LogoutView(APIView):
         response = Response(status=status.HTTP_205_RESET_CONTENT)
         response.delete_cookie(
             getattr(settings, 'JWT_AUTH_COOKIE', 'access'),
-            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax')
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+            secure=getattr(settings, 'JWT_AUTH_SECURE', False)
         )
         response.delete_cookie(
             getattr(settings, 'JWT_AUTH_REFRESH_COOKIE', 'refresh'),
-            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax')
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+            secure=getattr(settings, 'JWT_AUTH_SECURE', False)
         )
         response.delete_cookie(
             'csrftoken',
-            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax')
+            samesite=getattr(settings, 'JWT_AUTH_SAMESITE', 'Lax'),
+            secure=getattr(settings, 'JWT_AUTH_SECURE', False)
         )
         return response
 

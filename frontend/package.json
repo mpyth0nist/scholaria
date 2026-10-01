@@ -21,6 +21,7 @@
     "react-markdown": "^10.1.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.10.1",
+    "remark-gfm": "^4.0.1",
     "tailwindcss": "^4.1.11",
     "uuid": "^13.0.0"
   },

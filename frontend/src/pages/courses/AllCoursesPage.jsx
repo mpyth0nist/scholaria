@@ -1,10 +1,9 @@
 
-import { useSelector } from 'react-redux'
+import usePermissions from '../../hooks/usePermissions'
 import CoursesList from "./CoursesList"
 
 const CoursesDetail = () => {
-    const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     return (
         <div className="flex flex-col gap-6 p-6">
@@ -13,7 +12,7 @@ const CoursesDetail = () => {
                     {isTeacher ? 'My Courses' : 'Available Courses'}
                 </h1>
                 <p className="text-text/50 font-medium text-sm mt-1.5">
-                    {isTeacher ? 'Manage and organise your course library.' : 'Browse and access your enrolled courses.'}
+                    {isTeacher ? 'Manage and organize your course library.' : 'Browse and access your enrolled courses.'}
                 </p>
             </div>
             <CoursesList page='Courses' />

@@ -18,17 +18,41 @@ from courses.models import Course, Module, Lesson
 from quizzes.models import Quiz, Question, Choice
 from users.models import CustomUser
 
-teacher = CustomUser.objects.get(username='youssef_kaddioui')
+teacher, _ = CustomUser.objects.get_or_create(
+    username='youssef_kaddioui',
+    defaults={
+        'email': 'kaddioui123@scholaria.com',
+        'first_name': 'Youssef',
+        'last_name': 'Kaddioui',
+        'role': 'Teacher',
+        'password': 'password123'
+    }
+)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # COURSE 1 — Introduction to Islamic Art & Architecture  (id=1)
 # Already has: Module 1 (Arabic Calligraphy Foundations) → Lesson (Naskh Script)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-course1 = Course.objects.get(id=1)
+course1, _ = Course.objects.get_or_create(
+    course_name='Introduction to Islamic Art & Architecture',
+    defaults={
+        'subject': 'Art',
+        'teacher': teacher,
+        'published': True,
+        'is_published': True
+    }
+)
 
 # ── Module 1: fill remaining lessons ──────────────────────────────────────────
-mod1_1 = Module.objects.get(id=1)  # Already exists
+mod1_1, _ = Module.objects.get_or_create(
+    title='Module 1: Arabic Calligraphy Foundations',
+    course=course1,
+    defaults={
+        'order': 1,
+        'is_published': True
+    }
+)
 
 if not Lesson.objects.filter(module=mod1_1, title__icontains='Thuluth').exists():
     Lesson.objects.create(
@@ -346,10 +370,25 @@ Write a short essay (300 words) proposing how one traditional Islamic art form (
 # Already has: Module 1 (The Ancient Mediterranean) → Lesson (Roman Republic)
 # ═══════════════════════════════════════════════════════════════════════════════
 
-course2 = Course.objects.get(id=2)
+course2, _ = Course.objects.get_or_create(
+    course_name='World History: Ancient Civilizations',
+    defaults={
+        'subject': 'History',
+        'teacher': teacher,
+        'published': True,
+        'is_published': True
+    }
+)
 
 # ── Module 1: fill remaining lessons ──────────────────────────────────────────
-mod2_1 = Module.objects.get(id=2)
+mod2_1, _ = Module.objects.get_or_create(
+    title='Module 1: The Ancient Mediterranean',
+    course=course2,
+    defaults={
+        'order': 1,
+        'is_published': True
+    }
+)
 
 if not Lesson.objects.filter(module=mod2_1, title__icontains='Greek').exists():
     Lesson.objects.create(
@@ -1810,7 +1849,7 @@ else:
 # ═══════════════════════════════════════════════════════════════════════════════
 
 print("\n=== Ingesting lessons into Vector DB ===")
-from courses.services.process_lessons import store_lesson
+from rag.ingest import ingest_searchable_object
 from rag.models import DocumentChunk
 
 for lesson in Lesson.objects.all():
@@ -1819,7 +1858,7 @@ for lesson in Lesson.objects.all():
     ).count()
     if chunk_count == 0:
         try:
-            store_lesson(lesson)
+            ingest_searchable_object(lesson)
             print(f"  ✓ Ingested: {lesson.title}")
         except Exception as e:
             print(f"  ✗ Failed to ingest {lesson.title}: {e}")
