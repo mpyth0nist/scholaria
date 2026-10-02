@@ -82,6 +82,7 @@ const LessonPage = () => {
     const [readFont, setReadFont] = useState('serif') // serif, sans
     const [showPrefs, setShowPrefs] = useState(false)
     const [showAI, setShowAI] = useState(false)
+    const [chatWidth, setChatWidth] = useState('400px')
 
     // ── Inline explain ────────────────────────────────────────────────────────
     // cards: { id, action, selectedText, surroundingText, anchorEl, annotationId, initialText, isPinned }
@@ -296,8 +297,14 @@ const LessonPage = () => {
     // ─────────────────────────────────────────────────────────────────────────
     if (!isTeacher) {
         return (
-            <div className={`flex flex-col lg:flex-row items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 ${showAI ? 'max-w-6xl mx-auto' : 'max-w-3xl mx-auto'}`}>
-                <div className="flex flex-col gap-6 w-full text-text">
+            <>
+            <div 
+                className="flex flex-col items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 mx-auto max-w-3xl lg:max-w-none"
+                style={{
+                    paddingRight: (showAI && typeof window !== 'undefined' && window.innerWidth >= 1024) ? `calc(${chatWidth} + 1.5rem)` : undefined
+                }}
+            >
+                <div className="flex flex-col gap-6 w-full text-text max-w-3xl mx-auto">
                     <div className="flex items-center justify-between w-full max-w-prose mx-auto gap-4">
                         {BackButton}
                         <div className="flex items-center gap-2">
@@ -396,8 +403,9 @@ const LessonPage = () => {
                     )}
                 </div>
             </div>
-            <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} lessonId={lesson_id} />
-        </div>
+            </div>
+            <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} lessonId={lesson_id} onWidthChange={setChatWidth} />
+        </>
         )
     }
 
