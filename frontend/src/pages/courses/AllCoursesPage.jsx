@@ -1,8 +1,10 @@
 
-import usePermissions from '../../hooks/usePermissions'
+import { useSelector } from 'react-redux'
 import CoursesList from "./CoursesList"
+import { usePermissions } from '../../hooks/usePermissions.js';
 
 const CoursesDetail = () => {
+    const role = useSelector(state => state.users.user?.role)
     const { isTeacher } = usePermissions()
 
     return (

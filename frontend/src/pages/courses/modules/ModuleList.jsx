@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import api from '../../../api'
 import { useEffect, useState } from 'react'
 import RichTextEditor from '../../../components/RichTextEditor'
+import { usePermissions } from '../../../hooks/usePermissions.js';
 
 // ─────────────────────────────────────────────────────────────────────────────
 // TEACHER SUB-COMPONENTS
@@ -301,7 +302,7 @@ const ModulesList = () => {
     const { course_id } = useParams()
     const navigate = useNavigate()
     const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     const [modules, setModules] = useState([])
     const [newTitle, setNewTitle] = useState('')

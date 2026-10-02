@@ -2,13 +2,14 @@ import { useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchCourses } from '../../features/courses/coursesSlice'
+import { usePermissions } from '../../hooks/usePermissions.js';
 
 const CoursesList = ({ page }) => {
     const navigate = useNavigate()
     const dispatch = useDispatch()
     const courses = useSelector(state => state.courses.courses)
     const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     useEffect(() => {
         dispatch(fetchCourses())

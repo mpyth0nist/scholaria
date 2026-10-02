@@ -9,7 +9,8 @@ from rest_framework.exceptions import PermissionDenied, ValidationError
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
-from courses.views import isStudent, isTeacher
+from core.permissions import IsStudent as isStudent
+from core.permissions import IsTeacher as isTeacher
 
 from .models import Question, Quiz, UserAnswer, UserAttempt
 from .serializers import (
@@ -33,7 +34,7 @@ class QuizList(generics.ListAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'Teacher':
+        if user.is_teacher:
             return Quiz.objects.filter(teacher=user)
         # Students: quizzes belonging to enrolled courses
         from django.db.models import Prefetch
@@ -56,7 +57,7 @@ class QuizDetailedView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         user = self.request.user
-        if user.role == 'Teacher':
+        if user.is_teacher:
             return Quiz.objects.filter(teacher=user)
         return Quiz.objects.filter(
             Q(course__student=user) | Q(course__student_classes__students=user)
@@ -64,7 +65,7 @@ class QuizDetailedView(generics.RetrieveAPIView):
 
     def get_serializer_class(self):
         user = self.request.user
-        if user.role == 'Teacher':
+        if user.is_teacher:
             return QuizSerializer
         return UserQuizSerializer
 
@@ -246,14 +247,14 @@ class AssignmentList(generics.ListAPIView):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_class(self):
-        if self.request.user.role == 'Teacher':
+        if self.request.user.is_teacher:
             return AssignmentSerializer
         return StudentAssignmentSerializer
 
     def get_queryset(self):
         from django.db.models import Q
         user = self.request.user
-        if user.role == 'Teacher':
+        if user.is_teacher:
             return Assignment.objects.filter(teacher=user).prefetch_related('submissions')
         # Students see assignments for courses they are enrolled in
         return Assignment.objects.filter(
@@ -276,14 +277,14 @@ class AssignmentDetail(generics.RetrieveAPIView):
     lookup_field = 'id'
 
     def get_serializer_class(self):
-        if self.request.user.role == 'Teacher':
+        if self.request.user.is_teacher:
             return AssignmentSerializer
         return StudentAssignmentSerializer
 
     def get_queryset(self):
         from django.db.models import Q
         user = self.request.user
-        if user.role == 'Teacher':
+        if user.is_teacher:
             return Assignment.objects.filter(teacher=user).prefetch_related('submissions')
         return Assignment.objects.filter(
             Q(course__student=user) | Q(course__student_classes__students=user)

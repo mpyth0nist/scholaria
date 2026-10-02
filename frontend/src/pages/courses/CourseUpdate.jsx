@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { fetchSelectedCourse, updateCourse, deleteCourse, fetchClasses } from "../../features/courses/coursesSlice"
 import { fetchUser } from "../../features/users/userSlice"
 import NotFound from '../NotFound'
+import { usePermissions } from '../../hooks/usePermissions.js';
 
 // ── reusable field wrapper ────────────────────────────────────────────────────
 const Field = ({ label, children }) => (
@@ -113,7 +114,8 @@ function CourseUpdate() {
         navigate('/all-courses')
     }
 
-    if (role !== 'Teacher') return <NotFound />
+    const { isTeacher } = usePermissions();
+    if (!isTeacher) return <NotFound />
 
     return (
         <>

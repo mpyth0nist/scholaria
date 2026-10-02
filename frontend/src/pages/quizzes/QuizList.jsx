@@ -3,6 +3,7 @@ import { fetchQuizzes, deleteQuiz } from "../../features/quizzes/quizSlice"
 import { fetchUser } from "../../features/users/userSlice"
 import { useEffect } from "react"
 import { useNavigate } from "react-router-dom"
+import { usePermissions } from '../../hooks/usePermissions.js';
 
 const QuizList = () => {
     const quizzes = useSelector(state => state.quizzes.quizzes)
@@ -16,7 +17,7 @@ const QuizList = () => {
         dispatch(fetchUser())
     }, [])
 
-    const isTeacher = userData?.role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     // ── loading skeleton ──────────────────────────────────────────────────────
     if (loading) {

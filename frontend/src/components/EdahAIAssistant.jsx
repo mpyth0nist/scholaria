@@ -85,7 +85,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
             if (res.status === 401) {
                 try {
                     await api.post('api/users/token/refresh/');
-                } catch {
+                } catch (_) {
                     throw new Error('Session expired. Please log in again.');
                 }
                 res = await makeFetch();
@@ -96,7 +96,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                 try {
                     const errorData = await res.json();
                     if (errorData.error) errorMsg = errorData.error;
-                } catch { /* ignore JSON parse errors */ }
+                } catch (e) {}
                 throw new Error(errorMsg);
             }
 
@@ -188,8 +188,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                     className="flex-1 overflow-y-auto p-4 flex flex-col gap-4 font-sans relative"
                     role="log"
                     aria-live="polite"
-                    aria-label="Edah AI conversation"
-                    aria-relevant="additions"
+                    aria-label="Chat with Edah AI"
                 >
                     {messages.map((msg, idx) => (
                         <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
@@ -228,7 +227,7 @@ const EdahAIAssistant = ({ isOpen, onClose, lessonId = null }) => {
                             onChange={(e) => setInput(e.target.value)}
                             placeholder="Ask Edah a question..."
                             disabled={isLoading}
-                            aria-label="Message Edah AI"
+                            aria-label="Ask Edah a question"
                             className="w-full bg-white dark:bg-[#1A1E1A] border border-primary/20 focus:border-action outline-none rounded-full pl-5 pr-12 py-3.5 text-sm text-text placeholder-primary/40 shadow-sm transition-all disabled:opacity-50 font-sans"
                         />
                         <button

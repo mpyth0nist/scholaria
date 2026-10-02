@@ -16,7 +16,11 @@ const RoleProtectedRoute = ({ allowedRoles }) => {
     // While the user hasn't loaded yet (role is undefined), wait — don't redirect prematurely
     if (role === undefined) return null
 
-    return allowedRoles.includes(role)
+    // Normalize both sides for robust comparison
+    const normalizedRole = role?.toUpperCase()
+    const normalizedAllowed = allowedRoles.map(r => r.toUpperCase())
+
+    return normalizedAllowed.includes(normalizedRole)
         ? <Outlet />
         : <Navigate to="/dashboard" replace />
 }

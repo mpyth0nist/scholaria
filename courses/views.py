@@ -8,6 +8,12 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from core.permissions import IsAdmin as isAdmin
+from core.permissions import IsCourseTeacher as isCourseTeacher
+from core.permissions import IsStudent as isStudent
+from core.permissions import IsTeacher as isTeacher
+from core.permissions import IsTeacherOrAdmin
+
 from .models import Course, Lesson, Module, StudentClass, UserLessonProgress
 from .serializers import (
     CourseSerializer,
@@ -41,18 +47,7 @@ def get_nested_attrs(obj, attrs):
 
 
 # ── Permission classes ────────────────────────────────────────────────────────
-# Defined centrally in core/permissions.py; imported here to avoid duplication.
-# Lowercase aliases are preserved for backward compatibility with other modules
-# that import from courses.views (e.g. quizzes/views.py, users/views.py).
-
-from core.permissions import (
-    IsCourseStudent as isCourseStudent,
-    IsCourseTeacher as isCourseTeacher,
-    IsAdmin as isAdmin,
-    IsStudent as isStudent,
-    IsTeacher as isTeacher,
-    IsTeacherOrAdmin,
-)
+# All permission classes are imported from core.permissions at the top of this file.
 
 
 # ── Student class views ───────────────────────────────────────────────────────

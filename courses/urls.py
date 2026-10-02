@@ -1,5 +1,11 @@
 from django.urls import path
 
+from .annotation_views import (
+    AnnotationDeleteView,
+    AnnotationPinView,
+    InlineExplainView,
+    LessonAnnotationListView,
+)
 from .views import (
     CourseCreate,
     CourseDelete,
@@ -42,4 +48,9 @@ urlpatterns = [
     path('lessons/<int:lesson_id>/update-lesson/', LessonUpdate.as_view(), name="update-lesson"),
     path('lessons/<int:lesson_id>/delete-lesson/', LessonDelete.as_view(), name="delete-lesson"),
     path('lessons/<int:lesson_id>/mark-read/', LessonMarkRead.as_view(), name="mark-lesson-read"),
+    # ── Inline Explain ──────────────────────────────────────────────────────
+    path('lessons/<int:lesson_id>/explain/', InlineExplainView.as_view(), name='lesson-explain'),
+    path('lessons/<int:lesson_id>/annotations/', LessonAnnotationListView.as_view(), name='lesson-annotations'),
+    path('annotations/<int:pk>/pin/', AnnotationPinView.as_view(), name='annotation-pin'),
+    path('annotations/<int:pk>/', AnnotationDeleteView.as_view(), name='annotation-delete'),
 ]

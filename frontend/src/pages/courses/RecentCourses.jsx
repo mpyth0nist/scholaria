@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
+import { usePermissions } from '../../hooks/usePermissions.js';
 
 const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000'
 
@@ -108,7 +109,7 @@ const CourseBubble = ({ course, index, onClick }) => (
 const RecentCourses = () => {
     const courses = useSelector(state => state.courses.courses)
     const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
     const [selectedCourseId, setSelectedCourseId] = useState(null)
 
     const displayCourses = courses.slice(0, 3)

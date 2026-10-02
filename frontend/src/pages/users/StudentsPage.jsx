@@ -160,7 +160,7 @@ const StudentsPage = () => {
                                     >
                                         Email <SortIcon active={sortConfig.key === 'email'} direction={sortConfig.direction} />
                                     </th>
-                                    <th
+                                    <th 
                                         className="px-5 py-3 text-xs font-semibold text-text uppercase tracking-wider cursor-pointer hover:bg-primary/15 transition-colors group select-none"
                                         onClick={() => handleSort('birth_date')}
                                     >

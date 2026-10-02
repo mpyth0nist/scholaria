@@ -36,9 +36,9 @@ class LLMUserSerializer(serializers.ModelSerializer):
         return list(obj.student_courses.values_list('course_name', flat=True))
 
     def get_course_count(self, obj):
-        if obj.role == 'Teacher':
+        if obj.is_teacher:
             return obj.courses_taught.count()
-        if obj.role == 'Student':
+        if obj.is_student:
             return obj.student_courses.count()
         return None
 

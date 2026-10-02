@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { fetchUser } from '../features/users/userSlice'
 
@@ -16,15 +16,11 @@ const TeacherCard = ({ className = "" }) => {
     }
 
     const handleCopyEmail = () => {
-        if (!teacher.email) return
         navigator.clipboard.writeText(teacher.email).then(() => {
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         })
     }
-
-    // Read is_active from the user object; fall back to true only if field is absent
-    const isActive = teacher.is_active !== undefined ? teacher.is_active : true
 
     return (
         <div className={`premium-card p-6 relative overflow-hidden group flex flex-col ${className}`}>
@@ -42,19 +38,14 @@ const TeacherCard = ({ className = "" }) => {
             </div>
 
             <div className="space-y-3 relative z-10 pt-4 border-t border-primary/10 mt-auto">
-                <div className="flex justify-between items-center gap-2">
+                <div className="flex justify-between items-start gap-3">
                     <span className="text-primary text-sm font-semibold shrink-0">Email Address</span>
                     <div className="flex items-center gap-1.5 min-w-0">
-                        <span
-                            className="text-text text-sm truncate max-w-[130px]"
-                            title={teacher.email}
-                        >
-                            {teacher.email}
-                        </span>
+                        <span className="text-text text-sm break-all text-right">{teacher.email}</span>
                         <button
                             onClick={handleCopyEmail}
-                            title={copied ? 'Copied!' : 'Copy email address'}
-                            className="shrink-0 p-1 rounded hover:bg-primary/10 text-primary/60 hover:text-action transition-colors"
+                            title={copied ? 'Copied!' : 'Copy email'}
+                            className="shrink-0 text-primary/50 hover:text-action transition-colors"
                             aria-label="Copy email address"
                         >
                             {copied ? (
@@ -72,11 +63,11 @@ const TeacherCard = ({ className = "" }) => {
                 <div className="flex justify-between items-center pt-1">
                     <span className="text-primary text-sm font-semibold">Platform Access</span>
                     <span className={`px-2 py-1 rounded text-xs font-semibold uppercase tracking-wider border shadow-sm ${
-                        isActive
+                        teacher.is_active !== false
                             ? 'bg-primary/10 text-primary border-primary/20'
                             : 'bg-danger/10 text-danger border-danger/20'
                     }`}>
-                        {isActive ? 'Active' : 'Inactive'}
+                        {teacher.is_active !== false ? 'Active' : 'Inactive'}
                     </span>
                 </div>
             </div>

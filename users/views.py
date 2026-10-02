@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 
-from core.permissions import IsAdmin as isAdmin, IsTeacher as isTeacher
+from core.permissions import IsAdmin as isAdmin
+from core.permissions import IsTeacher as isTeacher
 from courses.models import Course, UserLessonProgress
 from quizzes.models import Quiz, UserAttempt
 

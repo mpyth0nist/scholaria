@@ -63,7 +63,23 @@ function Teacher() {
 
                 <div className="animate-scale-in premium-card p-6 hover:-translate-y-1 transition duration-300" style={{ animationDelay: '0.15s' }}>
                     <div className="flex items-center justify-between mb-2">
-                        <p className="text-primary text-xs font-bold uppercase tracking-[0.15em] font-sans">Class Engagement</p>
+                        <div className="flex items-center gap-1.5">
+                            <p className="text-primary text-xs font-bold uppercase tracking-[0.15em] font-sans">Class Engagement</p>
+                            {/* Tooltip explaining the metric */}
+                            <div className="relative group">
+                                <button
+                                    aria-label="What is Class Engagement?"
+                                    className="w-4 h-4 rounded-full bg-primary/20 text-primary text-[10px] font-bold flex items-center justify-center hover:bg-primary/30 transition-colors cursor-help"
+                                >
+                                    ?
+                                </button>
+                                <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-56 bg-surface border border-border rounded-xl p-3 shadow-xl text-xs text-text/80 leading-relaxed opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity z-10">
+                                    <p className="font-semibold text-text mb-1">How it's calculated</p>
+                                    <p>Percentage of enrolled students who have submitted at least one quiz. 50%+ is healthy; below 20% may signal low activity.</p>
+                                    <div className="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-border" />
+                                </div>
+                            </div>
+                        </div>
                         <div className="h-8 w-8 rounded-lg bg-primary/10 flex items-center justify-center">
                             <svg className="w-4 h-4 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -72,7 +88,12 @@ function Teacher() {
                     </div>
                     <div className="flex items-baseline gap-2">
                         {dashboardMetrics.engagement != null ? (
-                            <h3 className="text-4xl font-serif font-bold text-text">{dashboardMetrics.engagement}%</h3>
+                            <>
+                                <h3 className="text-4xl font-serif font-bold text-text">{dashboardMetrics.engagement}%</h3>
+                                <span className={`text-xs font-semibold ${dashboardMetrics.engagement >= 50 ? 'text-primary' : dashboardMetrics.engagement >= 20 ? 'text-action' : 'text-red-400'}`}>
+                                    {dashboardMetrics.engagement >= 50 ? '↑ Good' : dashboardMetrics.engagement >= 20 ? '~ Fair' : '↓ Low'}
+                                </span>
+                            </>
                         ) : (
                             <>
                                 <h3 className="text-4xl font-serif font-bold text-primary/50">N/A</h3>

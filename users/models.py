@@ -15,6 +15,18 @@ class CustomUser(AbstractUser):
     birth_date = models.DateField(null=False, blank=False)
     REQUIRED_FIELDS = ["role", "birth_date"]
 
+    @property
+    def is_teacher(self):
+        return self.role == 'Teacher'
+
+    @property
+    def is_student(self):
+        return self.role == 'Student'
+
+    @property
+    def is_admin(self):
+        return self.role == 'ADMIN'
+
 
 
 

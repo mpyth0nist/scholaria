@@ -2,13 +2,14 @@ import { useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { useNavigate } from 'react-router-dom'
 import { fetchAssignments, deleteAssignment } from '../../features/assignments/assignmentSlice'
+import { usePermissions } from '../../hooks/usePermissions.js';
 
 const AssignmentList = () => {
     const dispatch = useDispatch()
     const navigate = useNavigate()
     const { assignments, loading } = useSelector(state => state.assignments)
     const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     useEffect(() => { dispatch(fetchAssignments()) }, [])
 

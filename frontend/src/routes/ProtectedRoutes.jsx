@@ -18,17 +18,17 @@ function ProtectedRoutes(){
             } else {
                 setisAuthorized(false)
             }
-        } catch {
+        } catch (error) {
             setisAuthorized(false)
         }
     }
 
     if (isAuthorized === null){
         return (
-            <div className="min-h-screen flex items-center justify-center bg-background">
+            <div className="flex items-center justify-center min-h-screen bg-surface">
                 <div className="flex flex-col items-center gap-3">
-                    <div className="w-8 h-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
-                    <p className="text-primary/60 text-sm font-medium tracking-wide">Loading…</p>
+                    <div className="w-9 h-9 rounded-full border-2 border-action border-t-transparent animate-spin" />
+                    <p className="text-primary text-sm font-medium">Loading…</p>
                 </div>
             </div>
         )

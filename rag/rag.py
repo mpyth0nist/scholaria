@@ -188,10 +188,7 @@ def build_context(query, courses_ids, max_tokens=3000, lesson_id=None):
 
 
 def rewrite_query(raw_query, history_msgs):
-    prompt = """Given the conversation history, rewrite the user's latest query to be a standalone, highly descriptive search query that contains all necessary context. 
-If the query is already standalone, just return the query as is. 
-HOWEVER, if the query is explicitly casual or completely unrelated to education, academics, or course materials (e.g., movies, sports), return EXACTLY the string 'OFF_TOPIC'.
-Do not include any explanations, prefixes, or conversational text. Return ONLY the rewritten query or 'OFF_TOPIC'."""
+    # Single prompt (removed the stale first version that was being overwritten)
     prompt = """Given the conversation history, rewrite the user's latest query to be a standalone, highly descriptive search query that contains all necessary context.
 If the query is already standalone, return it as-is.
 Do not include any explanations, prefixes, or conversational text. Return ONLY the rewritten query."""
@@ -317,7 +314,14 @@ def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=No
         
         final_text = "".join(full_response)
         ChatMessage.objects.create(conversation=conversation, role='assistant', content=final_text)
-        SemanticCache.objects.create(query_text=search_query, query_embedding=query_embedding, response=final_text, course_ids=sorted(courses_ids))
+        # Only cache generic (non-lesson-scoped) queries
+        if not lesson_id:
+            SemanticCache.objects.create(
+                query_text=search_query,
+                query_embedding=query_embedding,
+                response=final_text,
+                course_ids=sorted(courses_ids),
+            )
 
     return generate(), conversation.id
 
@@ -329,9 +333,101 @@ def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=No
 
 
 
+# ── Inline Explain ────────────────────────────────────────────────────────────
 
-    
+INLINE_ACTIONS = ('explain', 'simplify', 'example')
 
+# Rule 8 for the wider inline surface: tables OK, ~200 words, no <br>
+_INLINE_RULE_8 = (
+    "8. FORMATTING RULE: Use Markdown (bold, lists, tables, code blocks). "
+    "Tables may be wider than the chat panel here. "
+    "Keep the response under ~200 words. Do NOT use <br> tags."
+)
+_INLINE_SYSTEM_PROMPT = SYSTEM_PROMPT_TEMPLATE.replace(
+    "8. FORMATTING RULE: Use Markdown formatting (bold, lists, tables, code blocks)."
+    " Keep tables compact (2\u20133 columns max) since the chat window is narrow."
+    " Do not use <br> tags.",
+    _INLINE_RULE_8,
+)
+
+_ACTION_INSTRUCTIONS = {
+    'explain':  "Explain the selected text clearly and concisely.",
+    'simplify': "Rewrite the selected text in simpler language so it is easier to understand.",
+    'example':  "Give a concrete example that illustrates the selected text.",
+}
+
+
+
+def explain_selection(
+    selected_text: str,
+    surrounding_text: str,
+    action: str,
+    courses_ids: list,
+    model_name: str,
+    lesson_id: int,
+    extra_question: str = None,
+):
+    """Return a Groq streaming response for an inline explain action on a lesson text selection."""
+    if action not in INLINE_ACTIONS:
+        raise ValueError(f"Invalid action '{action}'. Must be one of {INLINE_ACTIONS}.")
+
+    import tiktoken
+    from courses.models import Course
+
+    # Truncate inputs
+    selected_text = selected_text[:1500]
+    surrounding_text = surrounding_text[:3000]
+
+    # Build course scope
+    course_names = list(
+        Course.objects.filter(id__in=courses_ids).values_list('course_name', flat=True)
+    )
+    course_scope = (
+        "The student is enrolled in: " + ", ".join(course_names) + "."
+        if course_names else "No course enrollment information is available."
+    )
+    system_prompt = _INLINE_SYSTEM_PROMPT.format(course_scope=course_scope)
+
+    # RAG: lesson-scoped chunks, skip any that already contain the selection
+    raw_chunks = rag_search(selected_text[:500], courses_ids, top_k=4, lesson_id=lesson_id)
+    encoder = tiktoken.get_encoding("cl100k_base")
+    context_parts, token_count = [], 0
+    for chunk in raw_chunks:
+        if selected_text.strip()[:100] in chunk["content"]:
+            continue
+        tokens = len(encoder.encode(chunk["content"]))
+        if token_count + tokens > 2000:
+            break
+        context_parts.append(chunk["content"])
+        token_count += tokens
+    context = "\n\n---\n\n".join(context_parts) if context_parts else "No additional lesson material found."
+
+    system_msg = f"{system_prompt}\n\nRelated lesson material:\n{context}"
+
+    # User message: selection + surrounding + action instruction
+    user_msg = (
+        f"Selected text:\n{selected_text}\n\n"
+        f"Surrounding context:\n{surrounding_text}\n\n"
+        f"Task: {_ACTION_INSTRUCTIONS[action]}"
+    )
+    # Topic filter only applied to extra_question, not to the selection itself
+    if extra_question:
+        user_msg += f"\n\nFollow-up question: {clean_text(extra_question[:500])}"
+
+    messages = [
+        {"role": "system", "content": system_msg},
+        {"role": "user",   "content": user_msg},
+    ]
+
+    try:
+        return client.chat.completions.create(
+            model=model_name,
+            messages=messages,
+            stream=True,
+        )
+    except (APITimeoutError, RateLimitError, APIConnectionError, APIStatusError) as error:
+        logger.exception('GROQ API Error (inline explain)')
+        raise ServiceUnavailable('LLM provider is down') from error
 
 
 

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import LogoutButton from "../LogoutButton";
+import { usePermissions } from "../../hooks/usePermissions.js";
 
 const NavButton = ({ label, icon, isActive, onClick, children }) => (
     <div className="flex flex-col">
@@ -116,9 +117,7 @@ const ThemeToggle = () => {
 
 const Sidebar = (props) => {
     const user = useSelector(state => state.users.user)
-    const role = user?.role ?? props.role ?? ''
-    const isTeacher = (role.toUpperCase() === 'TEACHER')
-    const isAdmin = (role.toUpperCase() === 'ADMIN')
+    const { isTeacher, isAdmin, role } = usePermissions()
     const [activeMenu, setActiveMenu] = useState(null)
     const navigate = useNavigate()
     const location = useLocation()

@@ -1,3 +1,4 @@
+import { usePermissions } from "../../hooks/usePermissions.js";
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { useDispatch, useSelector } from 'react-redux'
@@ -114,7 +115,7 @@ const AssignmentPage = () => {
 
     const { currentAssignment: assignment, loading, error, submitSuccess } = useSelector(state => state.assignments)
     const role = useSelector(state => state.users.user?.role)
-    const isTeacher = role === 'Teacher'
+    const { isTeacher } = usePermissions()
 
     const [file, setFile] = useState(null)
     const [submitting, setSubmitting] = useState(false)

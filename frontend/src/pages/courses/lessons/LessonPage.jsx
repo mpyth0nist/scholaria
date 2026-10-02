@@ -1,9 +1,15 @@
 import { useParams, useNavigate } from 'react-router-dom'
+import { useSelector } from 'react-redux'
 import api from '../../../api'
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
 import RichTextEditor, { LessonContent } from '../../../components/RichTextEditor'
 import EdahAIAssistant from '../../../components/EdahAIAssistant'
-import usePermissions from '../../../hooks/usePermissions'
+import SelectionToolbar from '../../../components/SelectionToolbar'
+import InlineExplainCard from '../../../components/InlineExplainCard'
+import { usePermissions } from '../../../hooks/usePermissions.js'
+import { ENDPOINTS } from '../../../constants'
+
 
 // Prepend the backend origin to relative media paths (/media/...)
 // so attachments resolve to Django (8000) not the Vite dev server (5173).
@@ -15,6 +21,41 @@ const resolveMedia = (url) => {
 
 
 // ─────────────────────────────────────────────────────────────────────────────
+// PORTAL CARD HELPER
+// ─────────────────────────────────────────────────────────────────────────────
+const PortalCard = ({ card, lessonId, onDismiss, onPinChange }) => {
+    // Create the container once
+    const [container] = useState(() => document.createElement('div'))
+
+    useEffect(() => {
+        if (card.anchorEl) {
+            card.anchorEl.after(container)
+            return () => { container.remove() }
+        }
+    }, [card.anchorEl, container])
+
+    const cardEl = (
+        <InlineExplainCard
+            lessonId={lessonId}
+            action={card.action}
+            selectedText={card.selectedText}
+            surroundingText={card.surroundingText}
+            annotationId={card.annotationId}
+            initialText={card.initialText}
+            isPinned={card.isPinned}
+            onDismiss={() => onDismiss(card.id)}
+            onPinChange={(pinned) => onPinChange(card.id, pinned)}
+        />
+    )
+
+    if (card.anchorEl) {
+        return createPortal(cardEl, container)
+    }
+    return cardEl
+}
+
+
+// ─────────────────────────────────────────────────────────────────────────────
 // MAIN PAGE
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -22,6 +63,7 @@ const resolveMedia = (url) => {
 const LessonPage = () => {
     const { lesson_id } = useParams()
     const navigate = useNavigate()
+    const role = useSelector(state => state.users.user?.role)
     const { isTeacher } = usePermissions()
 
     const [lesson, setLesson] = useState(null)
@@ -32,13 +74,36 @@ const LessonPage = () => {
     const [form, setForm] = useState({ title: '', content: '', attachments: null })
     const [saving, setSaving] = useState(false)
     const [deleting, setDeleting] = useState(false)
-    const [deleteConfirm, setDeleteConfirm] = useState(false)
+    const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false)
+    const [showMoreMenu, setShowMoreMenu] = useState(false)
 
     // Reader preferences (for relaxing phone reading)
         const [readSize, setReadSize] = useState('lg') // base, lg, xl
     const [readFont, setReadFont] = useState('serif') // serif, sans
     const [showPrefs, setShowPrefs] = useState(false)
     const [showAI, setShowAI] = useState(false)
+
+    // ── Inline explain ────────────────────────────────────────────────────────
+    // cards: { id, action, selectedText, surroundingText, anchorEl, annotationId, initialText, isPinned }
+    const [cards, setCards] = useState([])
+    const contentRef = useRef(null)
+
+    const dismissCard = useCallback((cardId) => {
+        setCards(prev => prev.filter(c => c.id !== cardId))
+    }, [])
+
+    const handlePinChange = useCallback((cardId, pinned) => {
+        setCards(prev => prev.map(c => c.id === cardId ? { ...c, isPinned: pinned } : c))
+    }, [])
+
+    const handleAction = useCallback((action, selectedText, surroundingText, anchorEl) => {
+        const cardId = `${Date.now()}-${action}`
+        setCards(prev => {
+            // One card per (anchor, action) — replace if already exists
+            const filtered = prev.filter(c => !(c.anchorEl === anchorEl && c.action === action))
+            return [...filtered, { id: cardId, action, selectedText, surroundingText, anchorEl, annotationId: null, initialText: null, isPinned: false }]
+        })
+    }, [])
 
     const fetchLesson = async () => {
         try {
@@ -52,6 +117,33 @@ const LessonPage = () => {
     }
 
     useEffect(() => { fetchLesson() }, [lesson_id])
+
+    // Load saved annotations
+    useEffect(() => {
+        if (!lesson_id || !isTeacher === false) return
+        api.get(ENDPOINTS.lessonAnnotations(lesson_id))
+            .then(res => {
+                const annotations = res.data
+                if (!annotations.length) return
+                setCards(prev => {
+                    const existing = new Set(prev.map(c => c.annotationId))
+                    const fromServer = annotations
+                        .filter(a => !existing.has(a.id))
+                        .map(a => ({
+                            id: `saved-${a.id}`,
+                            action: a.action,
+                            selectedText: a.selected_text,
+                            surroundingText: '',
+                            anchorEl: null, // no live DOM ref; rendered at bottom of content
+                            annotationId: a.id,
+                            initialText: a.response,
+                            isPinned: a.pinned,
+                        }))
+                    return [...prev, ...fromServer]
+                })
+            })
+            .catch(() => {})
+    }, [lesson_id, isTeacher])
 
     // ── student: mark lesson as read ──────────────────────────────────────────
     const handleMarkRead = async () => {
@@ -92,11 +184,11 @@ const LessonPage = () => {
 
     // ── teacher: delete lesson ────────────────────────────────────────────────
     const handleDelete = async () => {
-        setDeleteConfirm(false)
+        setDeleteConfirmOpen(false)
         setDeleting(true)
         try {
             await api.delete(`api/courses/lessons/${lesson_id}/delete-lesson/`)
-            navigate(-1)
+            navigate('..', { relative: 'path' })
         } catch (err) {
             console.error(err)
             setDeleting(false)
@@ -114,39 +206,11 @@ const LessonPage = () => {
     // ── shared: back button ───────────────────────────────────────────────────
     const BackButton = (
         <button
-            onClick={() => navigate(-1)}
+            onClick={() => navigate('..', { relative: 'path' })}
             className="flex items-center gap-1.5 text-sm text-primary hover:text-action transition w-fit"
         >
-            ← Back
+            ← Back to lessons
         </button>
-    )
-
-    // ── teacher: delete confirmation modal ────────────────────────────────────
-    const DeleteModal = deleteConfirm && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-scale-in">
-            <div className="bg-surface border border-danger/20 rounded-2xl p-6 max-w-sm w-full shadow-2xl flex flex-col gap-4">
-                <h2 className="text-lg font-bold text-text">Delete this lesson?</h2>
-                <p className="text-sm text-text/70">
-                    This will permanently delete <span className="font-semibold text-text">"{lesson.title}"</span> and remove all
-                    associated student progress. This action cannot be undone.
-                </p>
-                <div className="flex justify-end gap-3 pt-2">
-                    <button
-                        onClick={() => setDeleteConfirm(false)}
-                        className="px-4 py-2 text-sm font-semibold rounded-lg bg-surface border border-border text-text hover:bg-surface-hover transition"
-                    >
-                        Cancel
-                    </button>
-                    <button
-                        onClick={handleDelete}
-                        disabled={deleting}
-                        className="px-4 py-2 text-sm font-semibold rounded-lg bg-danger text-white hover:opacity-90 transition disabled:opacity-50"
-                    >
-                        {deleting ? 'Deleting…' : 'Yes, Delete'}
-                    </button>
-                </div>
-            </div>
-        </div>
     )
 
     // Map reader sizes to be responsive (smaller defaults on phone screens)
@@ -245,10 +309,9 @@ const LessonPage = () => {
                             </button>
                             <button
                                 onClick={() => setShowPrefs(p => !p)}
-                                title="Adjust font size and style for easier reading"
                                 className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                             >
-                                Reading Settings
+                                Aa Reading
                             </button>
                         </div>
                     </div>
@@ -275,8 +338,20 @@ const LessonPage = () => {
                             </span>
                         </div>
                     )}
-                    <div>
+                    <div ref={contentRef} className="relative">
                         <LessonContent html={lesson.content} />
+
+                        <SelectionToolbar containerRef={contentRef} onAction={handleAction} />
+
+                        {cards.map(c => (
+                            <PortalCard
+                                key={c.id}
+                                card={c}
+                                lessonId={lesson.id}
+                                onDismiss={dismissCard}
+                                onPinChange={handlePinChange}
+                            />
+                        ))}
                     </div>
                 </div>
 
@@ -329,7 +404,44 @@ const LessonPage = () => {
     // ─────────────────────────────────────────────────────────────────────────
     // TEACHER VIEW
     // ─────────────────────────────────────────────────────────────────────────
+
+    // Delete confirmation modal (replaces window.confirm)
+    const DeleteModal = deleteConfirmOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-scale-in">
+            <div className="bg-surface border border-border rounded-2xl shadow-2xl max-w-sm w-full p-6 flex flex-col gap-4">
+                <div className="flex items-start gap-3">
+                    <span className="flex-shrink-0 w-10 h-10 rounded-full bg-danger/10 border border-danger/20 flex items-center justify-center text-danger">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" />
+                        </svg>
+                    </span>
+                    <div>
+                        <h2 className="text-base font-bold text-text">Delete this lesson?</h2>
+                        <p className="text-sm text-text/60 mt-1">This will permanently remove the lesson and all associated student progress. This action cannot be undone.</p>
+                    </div>
+                </div>
+                <div className="flex justify-end gap-2 pt-2">
+                    <button
+                        onClick={() => setDeleteConfirmOpen(false)}
+                        className="px-4 py-2 text-sm font-semibold text-text bg-surface border border-border rounded-lg hover:bg-surface-hover transition-colors"
+                    >
+                        Cancel
+                    </button>
+                    <button
+                        onClick={handleDelete}
+                        className="px-4 py-2 text-sm font-semibold text-white bg-danger rounded-lg hover:bg-danger/80 transition-colors"
+                    >
+                        Delete Lesson
+                    </button>
+                </div>
+            </div>
+        </div>
+    )
+
     return (
+
+        <>
+        {DeleteModal}
         <div className={`flex flex-col lg:flex-row items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 ${showAI ? 'max-w-6xl mx-auto' : 'max-w-3xl mx-auto'}`}>
             <div className="flex flex-col gap-6 w-full text-text">
                 <div className="max-w-prose w-full mx-auto">
@@ -351,19 +463,41 @@ const LessonPage = () => {
                             >
                                 Edit Lesson
                             </button>
-                            <button
-                                onClick={() => setDeleteConfirm(true)}
-                                disabled={deleting}
-                                className="bg-surface text-danger border border-danger/20 hover:bg-danger/10 px-4 py-2 text-sm font-semibold rounded-lg transition-colors disabled:opacity-50"
-                            >
-                                {deleting ? 'Deleting…' : 'Delete Lesson'}
-                            </button>
+                            {/* Overflow menu — keeps destructive action out of the primary flow */}
+                            <div className="relative">
+                                <button
+                                    onClick={() => setShowMoreMenu(p => !p)}
+                                    aria-label="More actions"
+                                    aria-expanded={showMoreMenu}
+                                    className="bg-surface text-text/60 border border-border hover:bg-surface-hover px-3 py-2 text-sm font-bold rounded-lg transition-colors"
+                                >
+                                    ⋯
+                                </button>
+                                {showMoreMenu && (
+                                    <>
+                                        {/* Click-away backdrop */}
+                                        <div
+                                            className="fixed inset-0 z-10"
+                                            onClick={() => setShowMoreMenu(false)}
+                                        />
+                                        <div className="absolute right-0 mt-1 w-44 bg-surface border border-border rounded-xl shadow-lg z-20 overflow-hidden animate-scale-in">
+                                            <button
+                                                onClick={() => { setShowMoreMenu(false); setDeleteConfirmOpen(true) }}
+                                                disabled={deleting}
+                                                className="w-full flex items-center gap-2 px-4 py-3 text-sm font-semibold text-danger hover:bg-danger/5 transition-colors disabled:opacity-50"
+                                            >
+                                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                {deleting ? 'Deleting…' : 'Delete Lesson'}
+                                            </button>
+                                        </div>
+                                    </>
+                                )}
+                            </div>
                         </div>
                     </div>
 
-                    <h1 className="text-3xl font-bold text-text leading-snug max-w-prose w-full mx-auto">
-                        {lesson.title}
-                    </h1>
 
                     <div className="flex justify-end max-w-prose w-full mx-auto mb-2 gap-2">
                         <button
@@ -374,10 +508,9 @@ const LessonPage = () => {
                         </button>
                         <button
                             onClick={() => setShowPrefs(p => !p)}
-                            title="Adjust font size and style for easier reading"
                             className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                         >
-                            Reading Settings
+                                Aa Reading
                         </button>
                     </div>
 
@@ -478,8 +611,8 @@ const LessonPage = () => {
             )}
             </div>
             <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} lessonId={lesson_id} />
-            {DeleteModal}
         </div>
+        </>
     )
 }
 

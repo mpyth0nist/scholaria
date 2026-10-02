@@ -88,3 +88,21 @@ class UserLessonProgress(models.Model):
 
     def __str__(self):
         return f"{self.student.username} completed {self.lesson.title}"
+
+
+class LessonAnnotation(models.Model):
+    user          = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='annotations')
+    lesson        = models.ForeignKey(Lesson, on_delete=models.CASCADE, related_name='annotations')
+    selected_text = models.TextField()
+    action        = models.CharField(max_length=30)
+    language      = models.CharField(max_length=10, default='en')
+    response      = models.TextField()
+    pinned        = models.BooleanField(default=False)
+    created_at    = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [models.Index(fields=['user', 'lesson'])]
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.user.username} – {self.action} on lesson {self.lesson_id}"

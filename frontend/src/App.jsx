@@ -26,12 +26,14 @@ import CreateAssignmentPage from './pages/assignments/CreateAssignmentPage.jsx'
 import UpdateAssignmentPage from './pages/assignments/UpdateAssignmentPage.jsx'
 import NotFound from './pages/NotFound.jsx'
 
+import { usePermissions } from './hooks/usePermissions.js'
+
 // Role-aware dashboard: renders Admin, Teacher or Student view based on Redux role
 const DashboardPage = () => {
-  const role = useSelector(state => state.users.user?.role)
+  const { isAdmin, isTeacher, role } = usePermissions()
   if (!role) return null
-  if (role === 'ADMIN') return <AdminDashboard />
-  return role === 'Teacher' ? <Teacher /> : <Student />
+  if (isAdmin) return <AdminDashboard />
+  return isTeacher ? <Teacher /> : <Student />
 }
 
 function App() {

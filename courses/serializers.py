@@ -28,7 +28,7 @@ class LessonSerializer(serializers.ModelSerializer):
         request = self.context.get('request')
         if not request or not request.user.is_authenticated:
             return False
-        if request.user.role == 'Teacher':
+        if request.user.is_teacher:
             return False
 
         # Fast path: prefetch_related already loaded progress into this attr
