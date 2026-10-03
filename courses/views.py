@@ -12,7 +12,6 @@ from core.permissions import IsAdmin as isAdmin
 from core.permissions import IsCourseTeacher as isCourseTeacher
 from core.permissions import IsStudent as isStudent
 from core.permissions import IsTeacher as isTeacher
-from core.permissions import IsTeacherOrAdmin
 
 from .models import Course, Lesson, Module, StudentClass, UserLessonProgress
 from .serializers import (

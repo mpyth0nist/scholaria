@@ -1,5 +1,6 @@
 from logging import getLogger
 
+from django.conf import settings
 from django.db.models import Q
 from django.http import StreamingHttpResponse
 from rest_framework.exceptions import PermissionDenied
@@ -10,7 +11,6 @@ from rest_framework.views import APIView
 from courses.models import Course
 from rag.rag import ServiceUnavailable, llm
 from scholaria.throttles import LLMRateThrottle
-from django.conf import settings
 
 logger = getLogger(__name__)
 

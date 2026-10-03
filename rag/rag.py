@@ -92,7 +92,7 @@ def is_off_topic_keyword(query: str) -> bool:
 
 # ── Layer 2: LLM binary classifier (cheap, course-scoped) ────────────────────
 
-def is_on_topic(query: str, course_names: list[str] = None) -> bool:
+def is_on_topic(query: str, course_names: list[str] | None = None) -> bool:
     """Uses a small LLM to check if the query is relevant to the student's
     enrolled courses. Falls back to a broad academic check if no course names
     are provided. Fails open (returns True) on API errors."""
@@ -212,8 +212,8 @@ Do not include any explanations, prefixes, or conversational text. Return ONLY t
 def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=None):
     from pgvector.django import CosineDistance
 
-    from llm.models import ChatMessage, Conversation, SemanticCache
     from courses.models import Course
+    from llm.models import ChatMessage, Conversation, SemanticCache
 
     # Limit query length
     query = query[:2000]
@@ -370,6 +370,7 @@ def explain_selection(
         raise ValueError(f"Invalid action '{action}'. Must be one of {INLINE_ACTIONS}.")
 
     import tiktoken
+
     from courses.models import Course
 
     # Truncate inputs
