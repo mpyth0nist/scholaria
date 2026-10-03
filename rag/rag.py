@@ -363,7 +363,7 @@ def explain_selection(
     courses_ids: list,
     model_name: str,
     lesson_id: int,
-    extra_question: str = None,
+    extra_question: str | None = None,
 ):
     """Return a Groq streaming response for an inline explain action on a lesson text selection."""
     if action not in INLINE_ACTIONS:
