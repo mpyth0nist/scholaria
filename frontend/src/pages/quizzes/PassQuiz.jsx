@@ -24,6 +24,7 @@ const PassQuiz = () => {
     const choices = useSelector(state => state.quizzes.currentQuizChoices)
     const loading = useSelector(state => state.quizzes.loading)
     const activeAttempt = useSelector(state => state.quizzes.activeAttempt)
+    const savedAnswerIds = useSelector(state => state.quizzes.savedAnswerIds)
     const attemptLoading = useSelector(state => state.quizzes.attemptLoading)
     const attemptError = useSelector(state => state.quizzes.attemptError)
     const submitResult = useSelector(state => state.quizzes.submitResult)
@@ -46,6 +47,18 @@ const PassQuiz = () => {
         dispatch(fetchQuiz(quiz_id))
         if (!isTeacher) dispatch(startAttempt(quiz_id))
     }, [quiz_id, isTeacher])
+
+    useEffect(() => {
+        if (activeAttempt?.answers) {
+            const initialChoices = {}
+            activeAttempt.answers.forEach(ans => {
+                if (ans.chosen_choices && ans.chosen_choices.length > 0) {
+                    initialChoices[ans.question] = ans.chosen_choices[0]
+                }
+            })
+            setSelectedChoices(prev => ({ ...initialChoices, ...prev }))
+        }
+    }, [activeAttempt?.answers])
 
     const handleSelectChoice = (questionId, choiceId) => {
         setSelectedChoices(prev => ({ ...prev, [questionId]: choiceId }))
@@ -70,14 +83,28 @@ const PassQuiz = () => {
         }
     }
 
+    const saveCurrentAnswer = async (q) => {
+        if (!isTeacher) {
+            const r = await dispatch(submitAnswer({
+                attemptId: activeAttempt.id,
+                questionId: q.id,
+                chosenChoices: [selectedChoices[q.id]],
+                savedAnswerId: savedAnswerIds[q.id] ?? null,
+            }))
+            if (submitAnswer.rejected.match(r)) {
+                setError("Failed to save your answer. Please check your connection and try again.")
+                return false
+            }
+        }
+        return true
+    }
+
     const handleNext = async () => {
         const q = questionList[questionIndex]
         if (!selectedChoices[q.id]) { setError("Please select an answer before continuing."); return }
         setError(null)
-        if (!isTeacher) {
-            const r = await dispatch(submitAnswer({ attemptId: activeAttempt.id, questionId: q.id, chosenChoices: [selectedChoices[q.id]] }))
-            if (submitAnswer.rejected.match(r)) { setError("Failed to save your answer. Please check your connection and try again."); return }
-        }
+        const ok = await saveCurrentAnswer(q)
+        if (!ok) return
         setQuestionIndex(prev => prev + 1)
     }
 
@@ -87,8 +114,8 @@ const PassQuiz = () => {
         setError(null)
         setSubmitting(true)
         if (!isTeacher) {
-            const r = await dispatch(submitAnswer({ attemptId: activeAttempt.id, questionId: q.id, chosenChoices: [selectedChoices[q.id]] }))
-            if (submitAnswer.rejected.match(r)) { setError("Failed to save your answer. Please check your connection and try again."); setSubmitting(false); return }
+            const ok = await saveCurrentAnswer(q)
+            if (!ok) { setSubmitting(false); return }
             await dispatch(submitQuiz(activeAttempt.id))
         } else {
             navigate('/quizzes/list-quizzes/')

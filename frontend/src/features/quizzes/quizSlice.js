@@ -67,13 +67,29 @@ export const startAttempt = createAsyncThunk("startAttempt", async (quizId, { re
     }
 })
 
-export const submitAnswer = createAsyncThunk("submitAnswer", async ({ attemptId, questionId, chosenChoices }) => {
-    const res = await api.post(
-        `api/quizzes/attempts/${attemptId}/questions/${questionId}/answer/`,
-        { chosen_choices: chosenChoices }
-    )
-    return res.data
-})
+// savedAnswerId: if set, this question was already answered → PATCH; otherwise → POST
+export const submitAnswer = createAsyncThunk(
+    "submitAnswer",
+    async ({ attemptId, questionId, chosenChoices, savedAnswerId }, { rejectWithValue }) => {
+        try {
+            let res
+            if (savedAnswerId) {
+                res = await api.patch(
+                    `api/quizzes/answers/${savedAnswerId}/update/`,
+                    { chosen_choices: chosenChoices }
+                )
+            } else {
+                res = await api.post(
+                    `api/quizzes/attempts/${attemptId}/questions/${questionId}/answer/`,
+                    { chosen_choices: chosenChoices }
+                )
+            }
+            return { ...res.data, questionId }
+        } catch (err) {
+            return rejectWithValue(err.response?.data ?? err.message)
+        }
+    }
+)
 
 export const submitQuiz = createAsyncThunk("submitQuiz", async (attemptId) => {
     const res = await api.patch(`api/quizzes/attempts/${attemptId}/submit/`, {})
@@ -113,6 +129,7 @@ const initialState = {
     error: false,
     // ── active attempt (while student is taking a quiz) ────────────
     activeAttempt: null,   // { id, quiz, student, score, answers }
+    savedAnswerIds: {},    // { [questionId]: answerId } — tracks which questions have been answered
     attemptLoading: false,
     attemptError: null,    // error message when startAttempt fails
     submitResult: null,    // the graded attempt returned after submitQuiz
@@ -352,14 +369,29 @@ const quizSlice = createSlice({
         builder.addCase(startAttempt.pending, (state) => {
             state.attemptLoading = true
             state.attemptError = null
+            state.savedAnswerIds = {}
         })
         builder.addCase(startAttempt.fulfilled, (state, action) => {
             state.activeAttempt = action.payload
             state.attemptLoading = false
+            if (action.payload.answers) {
+                action.payload.answers.forEach(ans => {
+                    state.savedAnswerIds[ans.question] = ans.id
+                })
+            }
         })
         builder.addCase(startAttempt.rejected, (state, action) => {
             state.attemptLoading = false
             state.attemptError = action.payload ?? action.error?.message ?? 'Failed to start quiz.'
+        })
+
+        // ── submitAnswer ──
+        builder.addCase(submitAnswer.fulfilled, (state, action) => {
+            // Record the answerId for this question so the next save is a PATCH
+            const { id, questionId } = action.payload
+            if (questionId != null && id != null) {
+                state.savedAnswerIds[questionId] = id
+            }
         })
 
         // ── submitQuiz ──
@@ -367,6 +399,7 @@ const quizSlice = createSlice({
         builder.addCase(submitQuiz.fulfilled, (state, action) => {
             state.submitResult = action.payload
             state.activeAttempt = null
+            state.savedAnswerIds = {}
             state.attemptLoading = false
         })
         builder.addCase(submitQuiz.rejected, (state) => { state.attemptLoading = false })
@@ -374,6 +407,7 @@ const quizSlice = createSlice({
         // ── cancelAttempt ──
         builder.addCase(cancelAttempt.fulfilled, (state) => {
             state.activeAttempt = null
+            state.savedAnswerIds = {}
         })
     }
 })
