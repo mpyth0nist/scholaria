@@ -1,0 +1,9 @@
+Design Plan:
+1. Add new tokens in style.css: `--color-muted`, `--radius-ui: 1rem`, `--shadow-ui`.
+2. Update `.premium-card`, `.premium-input`, and button classes to use `--radius-ui` (rounded-ui in TW4) for consistency.
+3. In LoginPage, add a glowing background blob using a radial gradient.
+4. Add an SVG logo (e.g., a simple academic cap or geometric shape) and a tagline under the heading.
+5. Wrap inputs in a `flex flex-col gap-1.5` with visible `<label>` tags.
+6. Add "Forgot password?" link (to `#`) and a show/hide password toggle (eye icon).
+7. Handle `loading` state gracefully on the button (spinner SVG + text).
+8. Use logical properties (`px-` replaced by `pis-`/`pie-` if needed? Actually TW `px` maps to `padding-inline` natively in modern TW, but I will use `ps-`, `pe-`, `ms-`, `me-` which map to `padding-inline-start`, etc.).

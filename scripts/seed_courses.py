@@ -14,8 +14,9 @@ What it does:
 """
 
 import datetime
-from courses.models import Course, Module, Lesson
-from quizzes.models import Quiz, Question, Choice
+
+from courses.models import Course, Lesson, Module
+from quizzes.models import Choice, Question, Quiz
 from users.models import CustomUser
 
 teacher, _ = CustomUser.objects.get_or_create(

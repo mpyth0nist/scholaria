@@ -1,12 +1,12 @@
 """Tests for inline explain views (courses/annotation_views.py)."""
+from unittest.mock import MagicMock, patch
+
 import pytest
 from django.core.cache import cache
 from django.urls import reverse
 from rest_framework.test import APIClient
-from unittest.mock import MagicMock, patch
 
 from courses.models import LessonAnnotation
-
 
 # ── Fixtures ──────────────────────────────────────────────────────────────────
 
@@ -39,7 +39,7 @@ def course(db, teacher):
 
 @pytest.fixture
 def lesson(db, course):
-    from courses.models import Module, Lesson
+    from courses.models import Lesson, Module
     module = Module.objects.create(title='Mod', course=course)
     return Lesson.objects.create(title='Lesson 1', content='Some content.', module=module, is_published=True)
 
