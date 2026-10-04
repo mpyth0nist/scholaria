@@ -294,14 +294,15 @@ class TestLLMFunction:
         result = ''.join(list(stream))
 
         assert result == 'Variables store data values.'
-        mock_client.chat.completions.create.assert_called_once()
+        assert mock_client.chat.completions.create.call_count == 3
 
     @patch('rag.rag.client')
     @patch('rag.rag.build_context')
     def test_raises_service_unavailable_on_api_error(self, mock_context, mock_client, student):
         """llm() raises ServiceUnavailable when Groq API errors."""
         from openai import APITimeoutError
-        from rag.rag import llm, ServiceUnavailable
+
+        from rag.rag import ServiceUnavailable, llm
 
         mock_context.return_value = 'Some context.'
         mock_client.chat.completions.create.side_effect = APITimeoutError(request=MagicMock())

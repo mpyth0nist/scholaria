@@ -280,6 +280,7 @@ JWT_AUTH_SECURE = not DEBUG
 CSRF_COOKIE_HTTPONLY = False  # Allows frontend Axios to read it
 CSRF_USE_SESSIONS = False
 import sys
+
 if "pytest" in sys.modules:
     REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
     REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {"anon": "10000/sec", "user": "10000/sec", "llm": "10000/sec"}
