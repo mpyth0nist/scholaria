@@ -25,6 +25,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # DEFAULT LLM MODEL
 
 DEFAULT_LLM_MODEL = os.getenv('DEFAULT_MODEL_NAME', 'openai/gpt-oss-20b')
+RAG_EMBEDDING_MODEL = os.getenv('RAG_EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
+RAG_WARMUP = os.getenv('RAG_WARMUP', '1').lower() not in ('0', 'false', 'no')
+HF_HUB_OFFLINE = os.getenv('HF_HUB_OFFLINE', 'False').lower() in ('true', '1', 't')
+if HF_HUB_OFFLINE:
+    os.environ['HF_HUB_OFFLINE'] = '1'
+RAG_WARMUP = os.getenv('RAG_WARMUP', '1').lower() not in ('0', 'false', 'no')
+HF_HUB_OFFLINE = os.getenv('HF_HUB_OFFLINE', 'False').lower() in ('true', '1', 't')
+if HF_HUB_OFFLINE:
+    os.environ['HF_HUB_OFFLINE'] = '1'
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/

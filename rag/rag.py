@@ -1,6 +1,7 @@
 
 import os
 import re
+from functools import lru_cache
 from logging import getLogger
 
 import tiktoken
@@ -22,6 +23,12 @@ client = OpenAI(
     api_key=os.environ.get('GROQ_API_KEY'),
     base_url='https://api.groq.com/openai/v1'
 )
+
+
+@lru_cache(maxsize=1)
+def get_encoder():
+    return tiktoken.get_encoding("cl100k_base")
+
 
 class ServiceUnavailable(Exception):
     ''' Exception raised when an API call is timed out or rate limited'''
@@ -166,7 +173,7 @@ def build_context(query, courses_ids, max_tokens=3000, lesson_id=None):
     if not results:
         return "No relevant course materials were found for this query."
 
-    encoder = tiktoken.get_encoding("cl100k_base")
+    encoder = get_encoder()
     valid_chunks = []
     current_tokens = 0
     for r in results:
@@ -369,8 +376,6 @@ def explain_selection(
     if action not in INLINE_ACTIONS:
         raise ValueError(f"Invalid action '{action}'. Must be one of {INLINE_ACTIONS}.")
 
-    import tiktoken
-
     from courses.models import Course
 
     # Truncate inputs
@@ -389,7 +394,7 @@ def explain_selection(
 
     # RAG: lesson-scoped chunks, skip any that already contain the selection
     raw_chunks = rag_search(selected_text[:500], courses_ids, top_k=4, lesson_id=lesson_id)
-    encoder = tiktoken.get_encoding("cl100k_base")
+    encoder = get_encoder()
     context_parts, token_count = [], 0
     for chunk in raw_chunks:
         if selected_text.strip()[:100] in chunk["content"]:
