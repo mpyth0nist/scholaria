@@ -40,7 +40,7 @@ jobs:
         
     - name: Run linting
       run: |
-        uvx ruff check .
+        uv run ruff check .
         
     - name: Run tests
       env:
