@@ -21,8 +21,6 @@ function Dashboard({ children }) {
         setSidebarOpen(false)
     }, [location])
 
-    const firstName = user?.first_name ?? ''
-    const lastName = user?.last_name ?? ''
     const role = user?.role ?? ''
 
     return (
@@ -30,7 +28,7 @@ function Dashboard({ children }) {
             <div className="h-full border border-primary/20 rounded-lg overflow-hidden flex flex-col shadow-sm">
 
                 {/* ── Main Content ── */}
-                <div className="flex-1 flex flex-col md:grid md:grid-cols-[240px_1fr] relative overflow-hidden">
+                <div className="flex-1 flex flex-col md:grid md:grid-cols-[260px_1fr] relative overflow-hidden">
                     {/* Floating Hamburger Toggle Button on Mobile */}
                     <button
                         onClick={() => setSidebarOpen(prev => !prev)}
@@ -42,7 +40,7 @@ function Dashboard({ children }) {
 
                     {/* Sidebar wrapper */}
                     <div className={`
-                        fixed inset-y-0 left-0 z-50 w-[240px] bg-background transform transition-transform duration-300 ease-in-out
+                        fixed inset-y-0 left-0 z-50 w-[260px] bg-background transform transition-transform duration-300 ease-in-out
                         md:static md:translate-x-0 md:h-full md:w-auto
                         ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
                     `}>
@@ -58,7 +56,7 @@ function Dashboard({ children }) {
                     )}
 
                     <main className="bg-background p-4 pt-16 md:pt-6 md:p-6 overflow-y-auto flex-1 h-full">
-                        <div className="max-w-7xl mx-auto pb-8">
+                        <div className="max-w-7xl mx-auto pb-8 px-2 sm:px-4 md:px-6">
                             {/* key forces re-mount on route change, triggering the CSS animation */}
                             <div key={location.pathname} className="animate-page-enter">
                                 {children}
