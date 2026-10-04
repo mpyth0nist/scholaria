@@ -285,3 +285,10 @@ if "pytest" in sys.modules:
     REST_FRAMEWORK["DEFAULT_THROTTLE_CLASSES"] = []
     REST_FRAMEWORK["DEFAULT_THROTTLE_RATES"] = {"anon": "10000/sec", "user": "10000/sec", "llm": "10000/sec"}
 
+    # Run Celery tasks synchronously in-process — no broker needed in CI
+    CELERY_TASK_ALWAYS_EAGER = True
+    CELERY_TASK_EAGER_PROPAGATES = True
+
+    # Prevent the OpenAI client in rag/rag.py from raising at import time
+    import os as _os
+    _os.environ.setdefault("GROQ_API_KEY", "test-dummy-key")
