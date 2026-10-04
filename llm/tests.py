@@ -254,8 +254,8 @@ class TestBuildContext:
         mock_search.return_value = []
 
         from rag.rag import build_context
-        with pytest.raises(ValueError):
-            build_context('test query', [1, 2, 3])
+        res = build_context('test query', [1, 2, 3])
+        assert res == "No relevant course materials were found for this query."
 
     @patch('rag.rag.rag_search')
     def test_returns_concatenated_context(self, mock_search):
@@ -280,45 +280,36 @@ class TestLLMFunction:
 
     @patch('rag.rag.client')
     @patch('rag.rag.build_context')
-    def test_returns_llm_answer(self, mock_context, mock_client):
+    def test_returns_llm_answer(self, mock_context, mock_client, student):
         """llm() returns the LLM's response string."""
         mock_context.return_value = 'Some context about variables.'
 
-        # Mock the Groq response structure
-        mock_choice = MagicMock()
-        mock_choice.message.content = 'Variables store data values.'
-        mock_response = MagicMock()
-        mock_response.choices = [mock_choice]
-        mock_client.chat.completions.create.return_value = mock_response
+        # Mock the Groq response structure for a stream
+        mock_chunk = MagicMock()
+        mock_chunk.choices[0].delta.content = 'Variables store data values.'
+        mock_client.chat.completions.create.return_value = [mock_chunk]
 
         from rag.rag import llm
-        result = llm('What are variables?', [1], 'llama-3.1-8b-instant')
+        stream, _ = llm('What are variables?', [1], 'llama-3.1-8b-instant', user=student)
+        result = ''.join(list(stream))
 
         assert result == 'Variables store data values.'
         mock_client.chat.completions.create.assert_called_once()
 
     @patch('rag.rag.client')
     @patch('rag.rag.build_context')
-    def test_raises_service_unavailable_on_api_error(self, mock_context, mock_client):
+    def test_raises_service_unavailable_on_api_error(self, mock_context, mock_client, student):
         """llm() raises ServiceUnavailable when Groq API errors."""
         from openai import APITimeoutError
-
-        from rag.rag import llm
+        from rag.rag import llm, ServiceUnavailable
 
         mock_context.return_value = 'Some context.'
         mock_client.chat.completions.create.side_effect = APITimeoutError(request=MagicMock())
 
-        with pytest.raises(APITimeoutError):
-            llm('test query', [1], 'llama-3.1-8b-instant')
+        with pytest.raises(ServiceUnavailable):
+            llm('test query', [1], 'llama-3.1-8b-instant', user=student)
 
-    @patch('rag.rag.build_context')
-    def test_propagates_value_error_when_no_context(self, mock_context):
-        """llm() propagates ValueError from build_context."""
-        mock_context.side_effect = ValueError('no relevant info')
 
-        from rag.rag import llm
-        with pytest.raises(ValueError):
-            llm('test query', [1], 'llama-3.1-8b-instant')
 
 
 # ══════════════════════════════════════════════════════════════════════════════
