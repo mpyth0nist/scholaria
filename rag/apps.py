@@ -48,8 +48,8 @@ class RagConfig(AppConfig):
 
         try:
             logger.info("Warming up RAG pipeline (embeddings & tokenizer)...")
-            from utils.embeddings import get_embedder
             from rag.rag import get_encoder
+            from utils.embeddings import get_embedder
 
             get_embedder()
             get_encoder()

@@ -17,11 +17,10 @@
  *   onPinChange(pinned)
  */
 import { useEffect, useRef } from 'react'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 import api from '../api'
 import { useExplainStream } from '../hooks/useExplainStream'
 import { ENDPOINTS } from '../constants'
+import MarkdownRenderer from './edah/MarkdownRenderer'
 
 const ACTION_LABELS = {
     explain:  '💡 Explain',
@@ -185,13 +184,8 @@ export default function InlineExplainCard({
                 )}
 
                 {(displayStatus === 'streaming' || displayStatus === 'done') && displayText && (
-                    <div className={CARD_PROSE}>
-                        <ReactMarkdown
-                            remarkPlugins={[remarkGfm]}
-                            components={MarkdownComponents()}
-                        >
-                            {displayText}
-                        </ReactMarkdown>
+                    <div className="relative">
+                        <MarkdownRenderer>{displayText}</MarkdownRenderer>
                         {displayStatus === 'streaming' && (
                             <span className="inline-block w-1.5 h-3.5 bg-action/60 rounded-sm animate-pulse ml-0.5 align-middle" />
                         )}

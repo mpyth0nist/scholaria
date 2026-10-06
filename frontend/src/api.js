@@ -1,28 +1,8 @@
 import axios from 'axios'
-
-let baseURL = import.meta.env.VITE_API_URL || 'http://localhost:8000/'
-if (!baseURL.endsWith('/')) {
-    baseURL += '/'
-}
-
-// Helper to read a cookie by name
-function getCookie(name) {
-    let cookieValue = null
-    if (document.cookie && document.cookie !== '') {
-        const cookies = document.cookie.split(';')
-        for (let i = 0; i < cookies.length; i++) {
-            const cookie = cookies[i].trim()
-            if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                cookieValue = decodeURIComponent(cookie.substring(name.length + 1))
-                break
-            }
-        }
-    }
-    return cookieValue
-}
+import { BASE_URL, getCookie } from './utils/http'
 
 const api = axios.create({
-    baseURL: baseURL,
+    baseURL: BASE_URL,
     withCredentials: true,
 })
 

@@ -51,3 +51,32 @@ class RAGAnswerView(APIView):
         response['Access-Control-Expose-Headers'] = 'X-Conversation-Id'
         return response
 
+
+class ConversationMessagesView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        from llm.models import Conversation
+
+        try:
+            conversation = Conversation.objects.get(pk=pk, user=request.user)
+        except Conversation.DoesNotExist:
+            return Response({'error': 'Conversation not found'}, status=404)
+
+        messages = conversation.messages.order_by('created_at')
+        serialized = [
+            {
+                'id': msg.id,
+                'role': 'ai' if msg.role == 'assistant' else msg.role,
+                'content': msg.content,
+                'created_at': msg.created_at.isoformat(),
+            }
+            for msg in messages
+        ]
+
+        return Response({
+            'conversation_id': conversation.id,
+            'title': conversation.title,
+            'messages': serialized,
+        })
+

@@ -1,20 +1,6 @@
 import { useRef, useState, useCallback } from 'react'
 import { ENDPOINTS } from '../constants'
-
-const BASE_URL = (() => {
-    let u = import.meta.env.VITE_API_URL || 'http://localhost:8000/'
-    return u.endsWith('/') ? u : u + '/'
-})()
-
-function getCookie(name) {
-    if (!document.cookie) return null
-    for (const c of document.cookie.split(';')) {
-        const t = c.trim()
-        if (t.startsWith(name + '='))
-            return decodeURIComponent(t.slice(name.length + 1))
-    }
-    return null
-}
+import { BASE_URL, getCookie } from '../utils/http'
 
 /**
  * useExplainStream — stream an inline-explain answer from the backend.
