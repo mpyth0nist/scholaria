@@ -91,10 +91,17 @@ class ConversationListView(APIView):
 
         student = request.user
 
-        conversations = dict(Conversation.objects.filter(user=student).order_by('created_at').values_list('id', 'title'))
-
-        
-        return Response(conversations)
+        conversations = Conversation.objects.filter(user=student).prefetch_related('messages').order_by('-created_at')
+        serialized = []
+        for conversation in conversations:
+            first_user_message = next((message for message in conversation.messages.all() if message.role == 'user'), None)
+            title = conversation.title or (first_user_message.content[:72].strip() if first_user_message else '')
+            serialized.append({
+                'id': conversation.id,
+                'title': title,
+                'created_at': conversation.created_at.isoformat(),
+            })
+        return Response(serialized)
 
 
 class ConversationDeleteView(generics.DestroyAPIView):
@@ -112,5 +119,3 @@ class ConversationDeleteView(generics.DestroyAPIView):
 
 
         
-
-
