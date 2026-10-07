@@ -318,7 +318,7 @@ const LessonPage = () => {
                                 onClick={() => setShowPrefs(p => !p)}
                                 className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
                             >
-                                Aa Reading
+                                Display Options
                             </button>
                         </div>
                     </div>
@@ -450,8 +450,13 @@ const LessonPage = () => {
 
         <>
         {DeleteModal}
-        <div className={`flex flex-col lg:flex-row items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 ${showAI ? 'max-w-6xl mx-auto' : 'max-w-3xl mx-auto'}`}>
-            <div className="flex flex-col gap-6 w-full text-text">
+        <div 
+            className="flex flex-col items-start justify-center gap-6 p-4 sm:p-6 w-full animate-page-enter transition-all duration-300 mx-auto max-w-3xl lg:max-w-none"
+            style={{
+                paddingRight: (showAI && typeof window !== 'undefined' && window.innerWidth >= 1024) ? `calc(${chatWidth} + 1.5rem)` : undefined
+            }}
+        >
+            <div className="flex flex-col gap-6 w-full text-text max-w-3xl mx-auto">
                 <div className="max-w-prose w-full mx-auto">
                     {BackButton}
                 </div>
@@ -618,7 +623,7 @@ const LessonPage = () => {
                 </form>
             )}
             </div>
-            <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} lessonId={lesson_id} />
+            <EdahAIAssistant isOpen={showAI} onClose={() => setShowAI(false)} lessonId={lesson_id} onWidthChange={setChatWidth} />
         </div>
         </>
     )
