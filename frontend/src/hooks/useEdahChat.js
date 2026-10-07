@@ -12,6 +12,8 @@ export function useEdahChat({ lessonId = null } = {}) {
     const [conversationId, setConversationId] = useState(() => {
         return localStorage.getItem(storageKey) || null
     })
+    const initialConversationId = useRef(conversationId)
+    const historyRequestRef = useRef(0)
 
     const [messages, setMessages] = useState([INITIAL_MESSAGE])
     const [status, setStatus] = useState('idle') // idle | loading | streaming | error
@@ -26,15 +28,16 @@ export function useEdahChat({ lessonId = null } = {}) {
         }
     }, [conversationId, storageKey])
 
-    // Load existing messages if conversationId is found in localStorage
+    // Restore the last active conversation once. New IDs returned during streaming
+    // must not trigger a fetch that can race with the streamed answer.
     useEffect(() => {
-        if (!conversationId) return
-
-        let isCancelled = false
-
-        async function fetchHistory() {
+        const id = initialConversationId.current
+        if (!id) return
+        const requestId = ++historyRequestRef.current
+        setStatus('loading')
+        async function fetchInitialHistory() {
             try {
-                const res = await fetch(`${BASE_URL}api/llm/conversations/${conversationId}/messages/`, {
+                const res = await fetch(`${BASE_URL}api/llm/conversations/${id}/messages/`, {
                     credentials: 'include',
                     headers: {
                         'X-CSRFToken': getCookie('csrftoken') || '',
@@ -42,23 +45,24 @@ export function useEdahChat({ lessonId = null } = {}) {
                 })
                 if (res.ok) {
                     const data = await res.json()
-                    if (!isCancelled && data.messages && data.messages.length > 0) {
-                        setMessages(data.messages)
+                    if (historyRequestRef.current === requestId) {
+                        setMessages(data.messages?.length ? data.messages : [INITIAL_MESSAGE])
+                        setStatus('idle')
                     }
                 } else if (res.status === 404) {
-                    if (!isCancelled) {
+                    if (historyRequestRef.current === requestId) {
                         setConversationId(null)
+                        setMessages([INITIAL_MESSAGE])
+                        setStatus('idle')
                     }
                 }
-            } catch (_) {}
+            } catch (_) {
+                if (historyRequestRef.current === requestId) setStatus('error')
+            }
         }
-
-        fetchHistory()
-
-        return () => {
-            isCancelled = true
-        }
-    }, [conversationId])
+        fetchInitialHistory()
+        return () => { historyRequestRef.current += 1 }
+    }, [])
 
     const stopGeneration = useCallback(() => {
         if (abortRef.current) {
@@ -69,10 +73,36 @@ export function useEdahChat({ lessonId = null } = {}) {
     }, [])
 
     const clearChat = useCallback(() => {
+        historyRequestRef.current += 1
         stopGeneration()
         setConversationId(null)
         setMessages([INITIAL_MESSAGE])
         setStatus('idle')
+    }, [stopGeneration])
+
+    const selectConversation = useCallback(async (id) => {
+        const requestId = ++historyRequestRef.current
+        stopGeneration()
+        setMessages([])
+        setStatus('loading')
+        setConversationId(String(id))
+        try {
+            const res = await fetch(`${BASE_URL}api/llm/conversations/${id}/messages/`, {
+                credentials: 'include',
+                headers: { 'X-CSRFToken': getCookie('csrftoken') || '' },
+            })
+            if (!res.ok) throw new Error('Could not load this conversation')
+            const data = await res.json()
+            if (historyRequestRef.current === requestId) {
+                setMessages(data.messages?.length ? data.messages : [INITIAL_MESSAGE])
+                setStatus('idle')
+            }
+        } catch (_) {
+            if (historyRequestRef.current === requestId) {
+                setMessages([{ role: 'ai', content: 'Could not load this conversation. Please try again.' }])
+                setStatus('error')
+            }
+        }
     }, [stopGeneration])
 
     const sendMessage = useCallback(async (userText) => {
@@ -125,7 +155,7 @@ export function useEdahChat({ lessonId = null } = {}) {
                 let errorMsg = 'Sorry, I encountered an error. Please try again.'
                 try {
                     const errorData = await res.json()
-                    if (errorData.error) errorMsg = errorData.error
+                    if (errorData.error || errorData.answer) errorMsg = errorData.error || errorData.answer
                 } catch (_) {}
                 throw new Error(errorMsg)
             }
@@ -228,7 +258,7 @@ export function useEdahChat({ lessonId = null } = {}) {
         sendMessage,
         stopGeneration,
         clearChat,
+        selectConversation,
         retryLast
     }
 }
-
