@@ -28,7 +28,7 @@ export default function EdahMessageList({
     return (
         <div
             ref={listRef}
-            className="flex-1 min-h-0 overflow-y-auto overscroll-contain p-4 flex flex-col gap-4 font-sans relative"
+            className="flex-1 min-h-0 min-w-0 overflow-y-auto overscroll-contain p-4 flex flex-col gap-4 font-sans relative"
             role="log"
             aria-live="polite"
             aria-label="Chat with Edah AI"
@@ -60,4 +60,3 @@ export default function EdahMessageList({
         </div>
     )
 }
-

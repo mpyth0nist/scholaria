@@ -3,20 +3,21 @@ import MarkdownRenderer from './MarkdownRenderer'
 
 export default function EdahMessageBubble({ message, isLatest, isStreaming, isExpandedWidth, onRetry }) {
     const [copied, setCopied] = useState(false)
-    const isUser = message.role === 'user'
+    const isUser = message?.role === 'user'
+    const contentStr = typeof message?.content === 'string' ? message.content : String(message?.content || '')
 
     const handleCopy = async () => {
         try {
-            await navigator.clipboard.writeText(message.content)
+            await navigator.clipboard.writeText(contentStr)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
         } catch (_) {}
     }
 
     const isError = !isUser && (
-        message.content.includes('[Error:') ||
-        message.content.startsWith('Sorry, I encountered an error') ||
-        message.content === 'AI service is temporarily unavailable.'
+        contentStr.includes('[Error:') ||
+        contentStr.startsWith('Sorry, I encountered an error') ||
+        contentStr === 'AI service is temporarily unavailable.'
     )
 
     if (isError) {
@@ -31,7 +32,7 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
                 >
                     <div className="flex items-center gap-2 min-w-0">
                         <span className="shrink-0 text-base">⚠️</span>
-                        <span className="truncate">{message.content.replace('\n\n[Error: Stream interrupted]', '')}</span>
+                        <span className="truncate">{contentStr.replace('\n\n[Error: Stream interrupted]', '')}</span>
                     </div>
                     {onRetry && (
                         <button
@@ -47,10 +48,10 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
     }
 
     return (
-        <div className={`group flex ${isUser ? 'justify-end' : 'justify-start'} relative`}>
+        <div className={`group flex min-w-0 ${isUser ? 'justify-end' : 'justify-start'} relative`}>
             <div
                 className={`
-                    ${isExpandedWidth ? 'max-w-[96%]' : 'max-w-[85%]'} rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm relative transition-all
+                    ${isExpandedWidth ? 'max-w-[96%]' : 'max-w-[85%]'} min-w-0 rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm relative transition-all
                     ${isUser
                         ? 'bg-action text-white rounded-br-sm whitespace-pre-wrap'
                         : 'bg-white dark:bg-[#2D332D] text-text border border-primary/10 rounded-bl-sm'}
@@ -92,4 +93,3 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
         </div>
     )
 }
-

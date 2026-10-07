@@ -7,22 +7,22 @@ import 'katex/dist/katex.min.css'
 
 const DEFAULT_COMPONENTS = {
     table: ({ children }) => (
-        <div className="overflow-x-auto mb-2">
-            <table className="w-max min-w-full border-collapse text-[13px]">{children}</table>
+        <div className="max-w-full overflow-x-auto overscroll-x-contain mb-2 rounded-lg">
+            <table className="w-full table-fixed border-collapse text-[13px]">{children}</table>
         </div>
     ),
     th: ({ children }) => (
-        <th className="text-left font-semibold px-3 py-1.5 border-b-2 border-current/20 bg-black/5 dark:bg-white/10 min-w-[100px] align-top" dir="auto">
+        <th className="text-left font-semibold px-2.5 py-2 border-b-2 border-current/20 bg-black/5 dark:bg-white/10 align-top [overflow-wrap:anywhere]" dir="auto">
             {children}
         </th>
     ),
     td: ({ children }) => (
-        <td className="px-3 py-1.5 border-b border-current/10 min-w-[100px] align-top" dir="auto">
+        <td className="px-2.5 py-2 border-b border-current/10 align-top [overflow-wrap:anywhere]" dir="auto">
             {children}
         </td>
     ),
     pre: ({ children }) => (
-        <div className="overflow-x-auto mb-2">
+        <div className="max-w-full overflow-x-auto overscroll-x-contain mb-2">
             <pre className="bg-black/5 dark:bg-white/5 p-2.5 rounded-lg text-xs md:text-sm leading-relaxed" dir="ltr" style={{ unicodeBidi: 'isolate' }}>
                 {children}
             </pre>
@@ -64,4 +64,3 @@ export default function MarkdownRenderer({ children, className = '' }) {
         </div>
     )
 }
-
