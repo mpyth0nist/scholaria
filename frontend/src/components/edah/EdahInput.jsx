@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { Send, Square } from 'lucide-react'
 
 export default function EdahInput({ onSend, onStop, status, isOpen }) {
     const [input, setInput] = useState('')
@@ -49,7 +50,7 @@ export default function EdahInput({ onSend, onStop, status, isOpen }) {
 
     return (
         <div className="p-3 sm:p-4 bg-white/40 dark:bg-black/40 border-t border-primary/10 backdrop-blur-md shrink-0">
-            <form onSubmit={handleSubmit} className="flex items-end gap-2 bg-white dark:bg-[#1A1E1A] border border-primary/30 focus-within:border-action focus-within:ring-2 focus-within:ring-action/40 rounded-2xl p-1.5 shadow-sm transition-all">
+            <form onSubmit={handleSubmit} className="flex items-end gap-2 bg-[var(--chat-composer-surface)] border border-[var(--chat-composer-border)] focus-within:border-action focus-within:ring-2 focus-within:ring-action/40 rounded-2xl p-1.5 shadow-sm transition-all">
                 <textarea
                     ref={textareaRef}
                     rows={1}
@@ -71,8 +72,7 @@ export default function EdahInput({ onSend, onStop, status, isOpen }) {
                             title="Stop generating"
                             className="w-9 h-9 bg-danger/80 hover:bg-danger text-white rounded-xl flex items-center justify-center transition-all shadow-sm btn-press"
                         >
-                            {/* Stop Icon (Square) */}
-                            <div className="w-3 h-3 bg-white rounded-sm" />
+                            <Square size={14} fill="currentColor" aria-hidden="true" />
                         </button>
                     ) : (
                         <button
@@ -80,11 +80,9 @@ export default function EdahInput({ onSend, onStop, status, isOpen }) {
                             disabled={!input.trim()}
                             aria-label="Send message"
                             title="Send message"
-                            className="w-9 h-9 bg-action hover:bg-[#2d4d38] text-white rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:hover:bg-action shadow-sm btn-press"
+                            className="w-9 h-9 bg-[var(--chat-control-surface)] hover:opacity-90 text-[var(--chat-control-text)] rounded-xl flex items-center justify-center transition-all disabled:opacity-40 shadow-sm btn-press"
                         >
-                            <svg className="w-4 h-4 translate-x-px translate-y-[-1px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                            </svg>
+                            <Send size={16} strokeWidth={1.8} aria-hidden="true" />
                         </button>
                     )}
                 </div>

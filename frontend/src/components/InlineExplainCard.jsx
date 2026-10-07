@@ -17,16 +17,18 @@
  *   onPinChange(pinned)
  */
 import { useEffect, useRef } from 'react'
+import { FlaskConical, Lightbulb, Pin, Pencil, RotateCcw, Square, X } from 'lucide-react'
 import api from '../api'
 import { useExplainStream } from '../hooks/useExplainStream'
 import { ENDPOINTS } from '../constants'
 import MarkdownRenderer from './edah/MarkdownRenderer'
 
 const ACTION_LABELS = {
-    explain:  '💡 Explain',
-    simplify: '✏️ Simplify',
-    example:  '🔬 Example',
+    explain: 'Explain',
+    simplify: 'Simplify',
+    example: 'Example',
 }
+const ACTION_ICONS = { explain: Lightbulb, simplify: Pencil, example: FlaskConical }
 
 // Matches CHAT_PROSE from EdahAIAssistant but with overflow-x:auto on tables/pre
 const CARD_PROSE = `
@@ -120,6 +122,7 @@ export default function InlineExplainCard({
 
     const displayText = initialText || text
     const displayStatus = initialText ? 'done' : status
+    const ActionIcon = ACTION_ICONS[action]
 
     const truncatedQuote = selectedText.length > 80
         ? selectedText.slice(0, 80) + '…'
@@ -130,6 +133,7 @@ export default function InlineExplainCard({
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-2.5 bg-action/10 border-b border-action/15">
                 <div className="flex items-center gap-2 min-w-0">
+                    {ActionIcon && <ActionIcon size={15} strokeWidth={1.8} className="text-action shrink-0" aria-hidden="true" />}
                     <span className="text-xs font-bold uppercase tracking-widest text-action shrink-0">
                         {ACTION_LABELS[action] ?? action}
                     </span>
@@ -141,9 +145,10 @@ export default function InlineExplainCard({
                         <button
                             onClick={abort}
                             title="Stop"
+                            aria-label="Stop generating explanation"
                             className="text-xs px-2 py-1 rounded-lg text-text/60 hover:bg-primary/10 hover:text-text transition btn-press"
                         >
-                            ◼ Stop
+                            <span className="inline-flex items-center gap-1.5"><Square size={13} aria-hidden="true" /> Stop</span>
                         </button>
                     ) : null}
                     {/* Pin */}
@@ -151,18 +156,20 @@ export default function InlineExplainCard({
                         <button
                             onClick={handlePin}
                             title={pinned ? 'Unpin' : 'Pin annotation'}
+                            aria-label={pinned ? 'Unpin annotation' : 'Pin annotation'}
                             className={`text-xs px-2 py-1 rounded-lg transition btn-press ${pinned ? 'text-action font-bold' : 'text-text/50 hover:text-action'}`}
                         >
-                            📌
+                            <Pin size={15} aria-hidden="true" />
                         </button>
                     )}
                     {/* Dismiss */}
                     <button
                         onClick={onDismiss}
                         title="Dismiss"
+                        aria-label="Dismiss explanation"
                         className="text-xs px-2 py-1 rounded-lg text-text/50 hover:text-danger hover:bg-danger/5 transition btn-press"
                     >
-                        ✕
+                        <X size={15} aria-hidden="true" />
                     </button>
                 </div>
             </div>
@@ -176,9 +183,9 @@ export default function InlineExplainCard({
                         <span className="text-danger text-xs">{displayText || 'Something went wrong.'}</span>
                         <button
                             onClick={handleRetry}
-                            className="text-xs font-semibold text-action hover:underline btn-press"
+                            className="inline-flex items-center gap-1 text-xs font-semibold text-action hover:underline btn-press"
                         >
-                            Retry
+                            <RotateCcw size={13} aria-hidden="true" /> Retry
                         </button>
                     </div>
                 )}
