@@ -1,4 +1,5 @@
-import React, { useEffect } from 'react'
+import React from 'react'
+import { History, MessageCircle, Plus, Trash2, X } from 'lucide-react'
 
 function formatDate(isoString) {
     if (!isoString) return ''
@@ -30,11 +31,11 @@ export default function EdahHistoryDrawer({
     if (!isOpen) return null
 
     return (
-        <div className="absolute inset-0 bg-[#FAF6EE] dark:bg-[#1A1E1A] z-20 flex flex-col font-sans animate-scale-in">
+        <div className="absolute inset-0 bg-[var(--chat-drawer-surface)] z-20 flex flex-col font-sans animate-scale-in">
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 border-b border-primary/10 bg-primary/5 shrink-0">
                 <div className="flex items-center gap-2">
-                    <span className="text-base" aria-hidden="true">◷</span>
+                    <History size={16} aria-hidden="true" />
                     <h3 className="text-sm font-bold tracking-wide uppercase text-action">Chat History</h3>
                 </div>
                 <div className="flex items-center gap-2">
@@ -43,7 +44,7 @@ export default function EdahHistoryDrawer({
                         className="px-2.5 py-1 text-xs font-semibold text-action hover:bg-action/10 rounded-lg transition-colors btn-press flex items-center gap-1"
                         aria-label="Start a new conversation"
                     >
-                        <span>+ New</span>
+                        <Plus size={14} aria-hidden="true" /><span>New</span>
                     </button>
                     <button
                         onClick={onClose}
@@ -51,7 +52,7 @@ export default function EdahHistoryDrawer({
                         aria-label="Back to chat"
                         className="p-1.5 text-text/75 hover:text-action hover:bg-primary/10 rounded-full transition-colors text-sm"
                     >
-                        ✕
+                        <X size={16} aria-hidden="true" />
                     </button>
                 </div>
             </div>
@@ -66,7 +67,7 @@ export default function EdahHistoryDrawer({
                     </div>
                 ) : (!Array.isArray(conversations) || conversations.length === 0) ? (
                     <div className="flex flex-col items-center justify-center h-full text-center p-6 text-text/70">
-                        <span className="text-3xl mb-2">💬</span>
+                        <MessageCircle size={28} className="mb-2 text-action" aria-hidden="true" />
                         <p className="text-sm font-medium">No previous conversations yet.</p>
                         <p className="text-xs text-text/60 mt-1">Start a conversation and it will appear here.</p>
                     </div>
@@ -110,7 +111,7 @@ export default function EdahHistoryDrawer({
                                     aria-label={`Delete ${conv.title || 'conversation'}`}
                                     className="mr-2 p-2 text-text/65 hover:text-red-500 hover:bg-red-500/10 rounded-lg transition-all text-xs focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                                 >
-                                    <span aria-hidden="true">🗑</span>
+                                    <Trash2 size={15} aria-hidden="true" />
                                 </button>
                             </div>
                         )

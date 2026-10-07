@@ -42,7 +42,7 @@ export default function EdahAIAssistant({ isOpen, onClose, lessonId = null, onWi
                 ? data
                 : Object.entries(data || {}).map(([id, title]) => ({ id, title }))
             setConversations(items)
-        } catch (_) {
+        } catch {
             setConversations([])
         } finally {
             setHistoryLoading(false)
@@ -67,7 +67,7 @@ export default function EdahAIAssistant({ isOpen, onClose, lessonId = null, onWi
             if (!response.ok) throw new Error('Could not delete conversation')
             if (String(id) === String(conversationId)) clearChat()
             await loadConversations()
-        } catch (_) {
+        } catch {
             // Keep the item visible when deletion fails so the user can retry.
         }
     }

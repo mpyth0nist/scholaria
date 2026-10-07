@@ -37,6 +37,15 @@
   --border-hover: rgba(74, 124, 89, 0.5);
   --danger: #ef4444;
   --muted: rgba(19, 42, 19, 0.78);
+  --chat-user-surface: #2D5337;
+  --chat-user-text: #FFFFFF;
+  --chat-ai-surface: #FFFFFF;
+  --chat-ai-border: rgba(74, 124, 89, 0.18);
+  --chat-composer-surface: #FFFFFF;
+  --chat-composer-border: rgba(74, 124, 89, 0.35);
+  --chat-control-surface: #2D5337;
+  --chat-control-text: #FFFFFF;
+  --chat-drawer-surface: #FAF6EE;
   --shadow-ui: 0 12px 40px -8px rgba(74, 124, 89, 0.25);
 }
 
@@ -51,6 +60,15 @@ html.dark {
   --border-hover: rgba(118, 169, 132, 0.5);
   --danger: #f87171;
   --muted: rgba(236, 239, 234, 0.8);
+  --chat-user-surface: #3D684A;
+  --chat-user-text: #FFFFFF;
+  --chat-ai-surface: #202A22;
+  --chat-ai-border: rgba(146, 197, 160, 0.18);
+  --chat-composer-surface: #18221A;
+  --chat-composer-border: rgba(146, 197, 160, 0.32);
+  --chat-control-surface: #A2D4B0;
+  --chat-control-text: #132A13;
+  --chat-drawer-surface: #1A1E1A;
   --shadow-ui: 0 12px 40px -8px rgba(0, 0, 0, 0.7);
 }
 

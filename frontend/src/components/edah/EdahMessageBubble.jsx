@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { AlertTriangle, Check, Copy, RotateCcw } from 'lucide-react'
 import MarkdownRenderer from './MarkdownRenderer'
 
 export default function EdahMessageBubble({ message, isLatest, isStreaming, isExpandedWidth, onRetry }) {
@@ -11,7 +12,9 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
             await navigator.clipboard.writeText(contentStr)
             setCopied(true)
             setTimeout(() => setCopied(false), 2000)
-        } catch (_) {}
+        } catch {
+            // Clipboard access can be unavailable in restricted browser contexts.
+        }
     }
 
     const isError = !isUser && (
@@ -31,15 +34,15 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
                     `}
                 >
                     <div className="flex items-center gap-2 min-w-0">
-                        <span className="shrink-0 text-base">⚠️</span>
+                        <AlertTriangle size={17} className="shrink-0" aria-hidden="true" />
                         <span className="truncate">{contentStr.replace('\n\n[Error: Stream interrupted]', '')}</span>
                     </div>
                     {onRetry && (
                         <button
                             onClick={onRetry}
-                            className="px-3 py-1 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm shrink-0 btn-press"
+                            className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors shadow-sm shrink-0 btn-press"
                         >
-                            Retry
+                            <RotateCcw size={13} aria-hidden="true" /> Retry
                         </button>
                     )}
                 </div>
@@ -53,8 +56,8 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
                 className={`
                     ${isExpandedWidth ? 'max-w-[96%]' : 'max-w-[85%]'} min-w-0 rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm relative transition-all
                     ${isUser
-                        ? 'bg-action text-white rounded-br-sm whitespace-pre-wrap'
-                        : 'bg-white dark:bg-[#2D332D] text-text border border-primary/10 rounded-bl-sm'}
+                        ? 'bg-[var(--chat-user-surface)] text-[var(--chat-user-text)] rounded-br-sm whitespace-pre-wrap'
+                        : 'bg-[var(--chat-ai-surface)] text-text border border-[var(--chat-ai-border)] rounded-bl-sm'}
                 `}
             >
                 {isUser ? (
@@ -70,21 +73,24 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
 
                 {/* Hover Actions for AI bubbles */}
                 {!isUser && (
-                    <div className="absolute -bottom-6 right-2 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 bg-surface border border-border rounded-lg px-1.5 py-0.5 shadow-md z-10 text-xs">
+                    <div className="absolute -bottom-6 right-2 opacity-0 group-hover:opacity-100 group-focus-within:opacity-100 transition-opacity flex items-center gap-1 bg-surface border border-border rounded-lg px-1.5 py-0.5 shadow-md z-10 text-xs">
                         <button
                             onClick={handleCopy}
                             title="Copy message"
-                            className="text-text/60 hover:text-action px-1.5 py-0.5 rounded transition-colors"
+                            aria-label={copied ? 'Message copied' : 'Copy message'}
+                            className="inline-flex items-center gap-1.5 text-text/75 hover:text-action px-1.5 py-0.5 rounded transition-colors"
                         >
-                            {copied ? 'Copied ✓' : '📋 Copy'}
+                            {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
+                            {copied ? 'Copied' : 'Copy'}
                         </button>
                         {isLatest && !isStreaming && onRetry && (
                             <button
-                                onClick={onRetry}
-                                title="Regenerate response"
-                                className="text-text/60 hover:text-action px-1.5 py-0.5 rounded transition-colors border-l border-border pl-1.5"
+                            onClick={onRetry}
+                            title="Regenerate response"
+                            aria-label="Regenerate response"
+                            className="inline-flex items-center gap-1.5 text-text/75 hover:text-action px-1.5 py-0.5 rounded transition-colors border-l border-border pl-1.5"
                             >
-                                🔄 Retry
+                                <RotateCcw size={14} aria-hidden="true" /> Retry
                             </button>
                         )}
                     </div>

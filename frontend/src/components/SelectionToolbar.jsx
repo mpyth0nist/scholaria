@@ -9,11 +9,12 @@
  *   onAction(action, selectedText, surroundingText, anchorKey) — callback
  */
 import { useState, useEffect, useRef, useCallback } from 'react'
+import { FlaskConical, Lightbulb, Pencil } from 'lucide-react'
 
 const ACTIONS = [
-    { id: 'explain',  label: '💡 Explain' },
-    { id: 'simplify', label: '✏️ Simplify' },
-    { id: 'example',  label: '🔬 Example' },
+    { id: 'explain', label: 'Explain', Icon: Lightbulb },
+    { id: 'simplify', label: 'Simplify', Icon: Pencil },
+    { id: 'example', label: 'Example', Icon: FlaskConical },
 ]
 
 /** Collect up to 3000 chars of surrounding text from a block element and its neighbours. */
@@ -123,9 +124,10 @@ export default function SelectionToolbar({ containerRef, onAction }) {
                 <button
                     key={a.id}
                     onClick={() => handleAction(a.id)}
-                    className="px-2.5 py-1 text-xs font-semibold rounded-lg text-text hover:bg-action/10 hover:text-action transition whitespace-nowrap btn-press"
+                    className="inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-lg text-text hover:bg-action/10 hover:text-action transition whitespace-nowrap btn-press"
                 >
-                    {a.label}
+                    <a.Icon size={14} strokeWidth={1.8} aria-hidden="true" />
+                    <span>{a.label}</span>
                 </button>
             ))}
         </div>
