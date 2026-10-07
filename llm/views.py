@@ -3,10 +3,12 @@ from logging import getLogger
 from django.conf import settings
 from django.db.models import Q
 from django.http import StreamingHttpResponse
+import rest_framework
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework import generics
 
 from courses.models import Course
 from rag.rag import ServiceUnavailable, llm
@@ -95,19 +97,14 @@ class ConversationListView(APIView):
         return Response(conversations)
 
 
-class ConversationMessagesHistoryView(APIView):
+class ConversationDeleteView(generics.DestroyAPIView):
 
     permission_classes = [IsAuthenticated]
 
-    def get(self, request, pk):
-        from llm.models import ChatMessage
+    def get_queryset(self):
+        from llm.models import Conversation
 
-        student = request.user
-        conversation_id = pk
-
-        conversation_messages = list(ChatMessage.objects.filter(conversation = conversation_id, conversation__user = student).values('id', 'role', 'content', 'created_at'))
-
-        return Response(conversation_messages)
+        return Conversation.objects.filter(user=self.request.user)
 
 
 
