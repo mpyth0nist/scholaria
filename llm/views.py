@@ -80,3 +80,40 @@ class ConversationMessagesView(APIView):
             'messages': serialized,
         })
 
+
+class ConversationListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        from llm.models import Conversation
+
+        student = request.user
+
+        conversations = dict(Conversation.objects.filter(user=student).order_by('created_at').values_list('id', 'title'))
+
+        
+        return Response(conversations)
+
+
+class ConversationMessagesHistoryView(APIView):
+
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, pk):
+        from llm.models import ChatMessage
+
+        student = request.user
+        conversation_id = pk
+
+        conversation_messages = list(ChatMessage.objects.filter(conversation = conversation_id, conversation__user = student).values('id', 'role', 'content', 'created_at'))
+
+        return Response(conversation_messages)
+
+
+
+
+
+
+        
+
+
