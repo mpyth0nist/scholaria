@@ -353,7 +353,9 @@ class LessonDelete(generics.DestroyAPIView):
 
 class LessonMarkRead(APIView):
     """
-    Marks a lesson as read for the requesting student.
+    Marks a lesson as read or unread for the requesting student (double-edged).
+    → If explicitly passed (action='unread'/'read', done=False/True), sets that state.
+    → If called without explicit action, toggles the read state.
     → Only enrolled students may mark progress (teachers and unenrolled
       users are rejected to prevent fake progress records).
     """
@@ -368,5 +370,48 @@ class LessonMarkRead(APIView):
         # Verify the student is actually enrolled in this course
         if not course.student.filter(pk=request.user.pk).exists():
             raise PermissionDenied("You are not enrolled in this course.")
-        UserLessonProgress.objects.get_or_create(student=request.user, lesson=lesson)
-        return Response({"status": "marked as read"}, status=status.HTTP_200_OK)
+
+        data = request.data if isinstance(request.data, dict) else {}
+        action = data.get('action')
+        done = data.get('done')
+        read = data.get('read')
+
+        should_mark_unread = (
+            action == 'unread'
+            or done is False
+            or read is False
+        )
+        should_mark_read = (
+            action == 'read'
+            or done is True
+            or read is True
+        )
+
+        progress = UserLessonProgress.objects.filter(student=request.user, lesson=lesson)
+
+        if should_mark_unread:
+            progress.delete()
+            return Response({"status": "marked as unread", "done": False}, status=status.HTTP_200_OK)
+        elif should_mark_read:
+            UserLessonProgress.objects.get_or_create(student=request.user, lesson=lesson)
+            return Response({"status": "marked as read", "done": True}, status=status.HTTP_200_OK)
+        else:
+            # Default toggle behavior
+            if progress.exists():
+                progress.delete()
+                return Response({"status": "marked as unread", "done": False}, status=status.HTTP_200_OK)
+            else:
+                UserLessonProgress.objects.create(student=request.user, lesson=lesson)
+                return Response({"status": "marked as read", "done": True}, status=status.HTTP_200_OK)
+
+    def delete(self, request, lesson_id):
+        lesson = get_object_or_404(
+            Lesson.objects.select_related('module__course'),
+            id=lesson_id,
+        )
+        course = lesson.module.course
+        if not course.student.filter(pk=request.user.pk).exists():
+            raise PermissionDenied("You are not enrolled in this course.")
+
+        UserLessonProgress.objects.filter(student=request.user, lesson=lesson).delete()
+        return Response({"status": "marked as unread", "done": False}, status=status.HTTP_200_OK)

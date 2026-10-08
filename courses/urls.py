@@ -48,6 +48,8 @@ urlpatterns = [
     path('lessons/<int:lesson_id>/update-lesson/', LessonUpdate.as_view(), name="update-lesson"),
     path('lessons/<int:lesson_id>/delete-lesson/', LessonDelete.as_view(), name="delete-lesson"),
     path('lessons/<int:lesson_id>/mark-read/', LessonMarkRead.as_view(), name="mark-lesson-read"),
+    path('lessons/<int:lesson_id>/mark-unread/', LessonMarkRead.as_view(), name="mark-lesson-unread"),
+    path('lessons/<int:lesson_id>/toggle-read/', LessonMarkRead.as_view(), name="toggle-lesson-read"),
     # ── Inline Explain ──────────────────────────────────────────────────────
     path('lessons/<int:lesson_id>/explain/', InlineExplainView.as_view(), name='lesson-explain'),
     path('lessons/<int:lesson_id>/annotations/', LessonAnnotationListView.as_view(), name='lesson-annotations'),
