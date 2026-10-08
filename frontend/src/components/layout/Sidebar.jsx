@@ -136,7 +136,6 @@ const Sidebar = () => {
             </div>
 
             {/* Nav section label */}
-            <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-primary/80 px-3 mb-2 font-sans">Navigation</p>
 
             <div className="flex flex-col gap-1 flex-1 overflow-y-auto pr-1">
                 {isTeacher ? (
@@ -159,7 +158,7 @@ const Sidebar = () => {
                         </NavButton>
 
                         <NavButton
-                            label="Quizzes & Assignments"
+                            label="Quizzes"
                             icon={QuizzesIcon}
                             isActive={activeMenu === 'QuizzesMenu'}
                             onClick={() => toggle('QuizzesMenu')}
@@ -213,14 +212,11 @@ const Sidebar = () => {
                             onClick={() => navigate('/all-courses/')}
                         />
                         <NavButton
-                            label="Quizzes & Assignments"
+                            label="Quizzes"
                             icon={QuizzesIcon}
-                            isActive={activeMenu === 'StudentQuizzesMenu'}
-                            onClick={() => toggle('StudentQuizzesMenu')}
-                        >
-                            <SubNavButton label="Quizzes" onClick={() => navigate('/quizzes/list-quizzes/')} />
-                            <SubNavButton label="Assignments" onClick={() => navigate('/assignments/list/')} />
-                        </NavButton>
+                            isActive={location.pathname === '/quizzes/list-quizzes/'}
+                            onClick={() => navigate('/quizzes/list-quizzes/')}
+                        />
                     </>
                 )}
             </div>

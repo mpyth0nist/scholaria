@@ -3,6 +3,7 @@ import { useSelector } from 'react-redux'
 import api from '../../../api'
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { createPortal } from 'react-dom'
+import { Check, RotateCcw } from 'lucide-react'
 import RichTextEditor, { LessonContent } from '../../../components/RichTextEditor'
 import EdahAIAssistant from '../../../components/EdahAIAssistant'
 import SelectionToolbar from '../../../components/SelectionToolbar'
@@ -146,12 +147,17 @@ const LessonPage = () => {
             .catch(() => {})
     }, [lesson_id, isTeacher])
 
-    // ── student: mark lesson as read ──────────────────────────────────────────
-    const handleMarkRead = async () => {
+    // ── student: toggle lesson read / unread ──────────────────────────────────
+    const handleToggleRead = async () => {
         setMarking(true)
+        const targetState = !lesson.done
         try {
-            await api.post(`api/courses/lessons/${lesson_id}/mark-read/`)
-            setLesson(prev => ({ ...prev, done: true }))
+            const res = await api.post(`api/courses/lessons/${lesson_id}/mark-read/`, {
+                done: targetState,
+                action: targetState ? 'read' : 'unread',
+            })
+            const nextDone = res.data?.done !== undefined ? res.data.done : targetState
+            setLesson(prev => ({ ...prev, done: nextDone }))
         } catch (err) {
             console.error(err)
         } finally {
@@ -376,31 +382,43 @@ const LessonPage = () => {
                     </div>
                 )}
 
-                {/* mark as read */}
+                {/* mark as read / unread */}
                 <div className="pt-2 border-t border-primary/20 max-w-prose w-full mx-auto">
-                    {lesson.done ? (
-                        <div className="flex items-center gap-4">
-                            <span className="text-primary text-base font-semibold">✓ Marked as Read</span>
-                            <button
-                                onClick={() => navigate(-1)}
-                                className="text-base text-action font-semibold hover:underline transition"
-                            >
-                                ← Back to modules
-                            </button>
-                        </div>
-                    ) : (
+                    <div className="flex items-center gap-4 flex-wrap">
                         <button
-                            onClick={handleMarkRead}
+                            onClick={handleToggleRead}
                             disabled={marking}
-                            className="flex items-center gap-2 bg-primary hover:brightness-90 text-white text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50 btn-press"
+                            title={lesson.done ? 'Click to mark as unread' : 'Mark this lesson as read'}
+                            className={`flex items-center gap-2 text-base font-semibold px-7 py-3.5 rounded-lg transition-all disabled:opacity-50 btn-press ${
+                                lesson.done
+                                    ? 'border border-primary/30 bg-primary/10 hover:bg-danger/10 hover:border-danger/30 text-primary hover:text-danger'
+                                    : 'bg-primary hover:brightness-90 text-white'
+                            }`}
                         >
                             {marking ? (
                                 <>Saving…</>
+                            ) : lesson.done ? (
+                                <>
+                                    <RotateCcw className="w-4 h-4" />
+                                    Mark as Unread
+                                </>
                             ) : (
-                                <>✓ Mark as Read</>
+                                <>
+                                    <Check className="w-5 h-5" />
+                                    Mark as Read
+                                </>
                             )}
                         </button>
-                    )}
+
+                        {lesson.done && (
+                            <button
+                                onClick={() => navigate(-1)}
+                                className="text-base text-action font-semibold hover:underline transition ml-auto"
+                            >
+                                ← Back to modules
+                            </button>
+                        )}
+                    </div>
                 </div>
             </div>
             </div>
