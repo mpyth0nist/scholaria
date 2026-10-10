@@ -204,7 +204,7 @@ AUTH_USER_MODEL = 'users.CustomUser'
 CORS_ALLOW_ALL_ORIGINS = os.getenv("CORS_ALLOW_ALL_ORIGINS", "False").lower() in ("true", "1", "t")
 cors_origins = os.getenv("CORS_ALLOWED_ORIGINS")
 if cors_origins:
-    CORS_ALLOWED_ORIGINS = cors_origins.split(",")
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins.split(",") if origin.strip()]
 else:
     CORS_ALLOWED_ORIGINS = []
 
@@ -213,7 +213,7 @@ CORS_ALLOW_CREDENTIALS = True  # Required for httpOnly cookie auth
 # CSRF configuration
 csrf_origins = os.getenv("CSRF_TRUSTED_ORIGINS")
 if csrf_origins:
-    CSRF_TRUSTED_ORIGINS = csrf_origins.split(",")
+    CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_origins.split(",") if origin.strip()]
 
 # Security settings for production
 if not DEBUG:
