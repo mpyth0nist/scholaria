@@ -20,8 +20,7 @@ RUN pip install uv
 COPY pyproject.toml uv.lock /app/
 
 # Install dependencies
-RUN uv sync --frozen --no-dev
-
+RUN uv sync --frozen --no-dev --extra-index-url https://download.pytorch.org/whl/cpu
 # Copy the rest of the project
 COPY . /app/
 
