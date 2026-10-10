@@ -23,14 +23,14 @@ function Student() {
     const firstName = user?.first_name ?? ''
 
     return (
-        <div className="flex flex-col gap-6 p-6 text-text">
+        <div className="flex flex-col gap-5 p-4 text-text sm:gap-6 sm:p-6">
 
             {/* ── greeting ── */}
             <div>
-                <h1 className="text-3xl font-serif font-bold text-text">
+                <h1 className="text-3xl font-serif font-bold text-text leading-tight">
                     Welcome back, <span className="text-action">{firstName}</span>
                 </h1>
-                <p className="text-text/50 font-medium text-sm mt-1.5">Here's an overview of your enrolled courses and upcoming quizzes.</p>
+                <p className="text-muted font-medium text-sm mt-2 max-w-2xl">Here's an overview of your enrolled courses and upcoming quizzes.</p>
             </div>
 
             {/* ── stats row ── */}
@@ -48,7 +48,7 @@ function Student() {
             {/* ── my courses ── */}
             <div className="premium-card p-5">
                 <div className="flex items-center justify-between mb-4 border-b border-primary/10 pb-3">
-                    <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-primary font-sans">My Courses</h2>
+                    <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-primary font-sans">My Courses</h2>
                     <button
                         onClick={() => navigate('/all-courses')}
                         className="text-xs text-action hover:text-action/80 font-semibold transition"
@@ -80,10 +80,10 @@ function Student() {
                             <button
                                 key={course.id}
                                 onClick={() => navigate(`/course/${course.id}/modules/`)}
-                                className="animate-item-enter btn-press flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/10 hover:border-primary/30 transition-colors text-left group"
+                                className="animate-item-enter btn-press flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-raised hover:bg-primary/10 border border-border hover:border-border-hover transition-colors text-left group focus-ring"
                                 style={{ animationDelay: `${i * 0.06}s` }}
                             >
-                                <div className="w-9 h-9 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center text-lg shrink-0 overflow-hidden">
+                                <div className="w-11 h-11 rounded-lg bg-primary/20 border border-primary/30 flex items-center justify-center text-lg shrink-0 overflow-hidden">
                                     {course.thumbnail ? (
                                         <img
                                             src={
@@ -103,7 +103,7 @@ function Student() {
                                     </span>
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-sm text-text font-bold group-hover:text-action truncate transition-colors">{course.course_name}</span>
+                                    <span className="text-lg text-text font-bold group-hover:text-action truncate transition-colors">{course.course_name}</span>
                                     {course.subject && <span className="text-xs text-primary font-semibold">{course.subject}</span>}
                                 </div>
                                 <span className="ml-auto text-primary/50 group-hover:text-action text-xs transition-colors">→</span>
@@ -116,7 +116,7 @@ function Student() {
             {/* ── available quizzes ── */}
             <div className="premium-card p-5">
                 <div className="flex items-center justify-between mb-4 border-b border-primary/10 pb-3">
-                    <h2 className="text-sm font-bold uppercase tracking-[0.15em] text-primary font-sans">Available Quizzes</h2>
+                    <h2 className="text-sm font-bold uppercase tracking-[0.1em] text-primary font-sans">Available Quizzes</h2>
                     <button
                         onClick={() => navigate('/quizzes/list-quizzes/')}
                         className="text-xs text-action hover:text-action/80 font-semibold transition"
@@ -148,7 +148,7 @@ function Student() {
                             <button
                                 key={quiz.id}
                                 onClick={() => navigate(`/quizzes/${quiz.id}/`)}
-                                className="animate-item-enter btn-press flex items-center gap-3 px-4 py-3 rounded-lg bg-primary/5 hover:bg-primary/10 border border-primary/10 hover:border-primary/30 transition-colors text-left group"
+                                className="animate-item-enter btn-press flex items-center gap-3 px-4 py-3 rounded-lg bg-surface-raised hover:bg-primary/10 border border-border hover:border-border-hover transition-colors text-left group focus-ring"
                                 style={{ animationDelay: `${i * 0.06}s` }}
                             >
                                 <div className="w-9 h-9 rounded-lg bg-action/10 border border-action/20 flex items-center justify-center text-action shrink-0">

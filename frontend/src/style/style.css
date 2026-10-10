@@ -13,6 +13,9 @@
   --color-border-hover: var(--border-hover);
   --color-danger: var(--danger);
   --color-muted: var(--muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-on-primary: var(--on-primary);
+  --color-on-action: var(--on-action);
 
   --radius-ui: 1rem;
   --shadow-ui: var(--shadow-ui);
@@ -20,23 +23,29 @@
   --font-serif: "Lora", serif;
   --font-sans: "Inter", sans-serif;
   
-  --font-size-h1: 2rem;
-  --font-size-h2: 1.5rem;
+  --font-size-h1: clamp(1.875rem, 2.4vw, 2.5rem);
+  --font-size-h2: 1.375rem;
   --font-size-h3: 1.125rem;
   --font-size-body: 1rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
 }
 
 :root {
-  --primary: #356241;
-  --action: #2D5337;
-  --accent: #86EFAC;
-  --background: #FFFDF5;
-  --text: #132A13;
-  --surface: rgba(255, 255, 255, 0.9);
-  --border: rgba(74, 124, 89, 0.35);
-  --border-hover: rgba(74, 124, 89, 0.5);
+  color-scheme: light;
+  --primary: #315C3D;
+  --action: #285239;
+  --accent: #B7E2C0;
+  --background: #F3F6F1;
+  --text: #17251A;
+  --surface: #FFFFFF;
+  --surface-raised: #F8FAF7;
+  --on-primary: #FFFFFF;
+  --on-action: #FFFFFF;
+  --border: #D4DED3;
+  --border-hover: #A8BBAA;
   --danger: #ef4444;
-  --muted: rgba(19, 42, 19, 0.78);
+  --muted: #536257;
   --chat-user-surface: #2D5337;
   --chat-user-text: #FFFFFF;
   --chat-ai-surface: #FFFFFF;
@@ -50,16 +59,20 @@
 }
 
 html.dark {
-  --primary: #92C5A0;
-  --action: #A2D4B0;
-  --accent: #86EFAC;
-  --background: #0B140D;
-  --text: #ECEFEA;
-  --surface: rgba(30, 40, 30, 0.95);
-  --border: rgba(118, 169, 132, 0.35);
-  --border-hover: rgba(118, 169, 132, 0.5);
+  color-scheme: dark;
+  --primary: #A8D6B3;
+  --action: #B6DFC0;
+  --accent: #C5EBD0;
+  --background: #101711;
+  --text: #F0F4EF;
+  --surface: #1B261E;
+  --surface-raised: #222F25;
+  --on-primary: #102016;
+  --on-action: #102016;
+  --border: #3C5141;
+  --border-hover: #62836B;
   --danger: #f87171;
-  --muted: rgba(236, 239, 234, 0.8);
+  --muted: #B5C1B7;
   --chat-user-surface: #3D684A;
   --chat-user-text: #FFFFFF;
   --chat-ai-surface: #202A22;
@@ -82,11 +95,21 @@ html.dark {
     background-color: var(--color-background);
     color: var(--color-text);
     font-family: var(--font-sans);
+    line-height: 1.5;
   }
   
   h1 { font-family: var(--font-serif); font-size: var(--font-size-h1); font-weight: 700; }
   h2 { font-family: var(--font-serif); font-size: var(--font-size-h2); font-weight: 600; }
   h3 { font-family: var(--font-serif); font-size: var(--font-size-h3); font-weight: 500; }
+
+  :focus-visible {
+    outline: 3px solid var(--color-action);
+    outline-offset: 3px;
+  }
+
+  button, a, input, select, textarea {
+    -webkit-tap-highlight-color: transparent;
+  }
 
   /* ── Custom App Scrollbar ────────────────────────────────────────────── */
   * {
@@ -196,11 +219,10 @@ html.dark {
 
   .premium-card {
     background-color: var(--color-surface);
-    backdrop-filter: blur(12px);
     border: 1px solid var(--color-border);
     box-shadow: var(--shadow-ui);
     border-radius: var(--radius-ui);
-    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
   }
   
   .premium-card:hover {
@@ -224,7 +246,7 @@ html.dark {
     border: 1px solid var(--color-border);
     border-radius: var(--radius-ui);
     padding: 0.75rem 1rem;
-    font-size: 0.875rem;
+    font-size: 0.9375rem;
     color: var(--color-text);
     outline: none;
     transition: all 0.2s ease;
@@ -255,25 +277,39 @@ html.dark {
     box-shadow: 0 0 0 4px var(--color-border);
     background-color: var(--color-surface);
   }
+
+  .surface-raised {
+    background-color: var(--color-surface-raised);
+  }
+
+  .text-muted {
+    color: var(--color-muted);
+  }
+
+  .focus-ring:focus-visible {
+    outline: 3px solid var(--color-action);
+    outline-offset: 3px;
+  }
 }
 
 /* ── Responsive Font-Size Scaling ────────────────────────────────────────── */
-@media (min-width: 1280px) {
-  html {
-    font-size: 17px;
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
 
-@media (min-width: 1536px) {
-  html {
-    font-size: 18px;
-  }
-}
+/* Solid brand fills always carry their matching foreground color. */
+.bg-primary { color: var(--on-primary); }
+.bg-action { color: var(--on-action); }
 
-@media (min-width: 1920px) {
-  html {
-    font-size: 19px;
-  }
+/* Replace low-opacity body copy with a deliberate, legible muted tone. */
+[class~="text-text/50"], [class~="text-text/60"], [class~="text-text/65"],
+[class~="text-text/70"], [class~="text-text/75"] {
+  color: var(--color-muted);
 }
 :root {
   --palette-slate: #334155;

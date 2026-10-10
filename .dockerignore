@@ -1,1 +1,14 @@
 frontend/
+.venv/
+.git/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.pytest_cache/
+.ruff_cache/
+db.sqlite3
+*.log
+response.json
+staticfiles/
+media/

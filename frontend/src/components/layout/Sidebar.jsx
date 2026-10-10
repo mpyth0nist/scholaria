@@ -9,10 +9,10 @@ const NavButton = ({ label, icon, isActive, onClick, children }) => (
         <button
             onClick={onClick}
             className={`
-                relative overflow-hidden w-full text-left px-3.5 py-2.5 rounded-md text-xs font-bold tracking-wider uppercase transition-all duration-200 z-10 group flex items-center gap-2.5 font-sans
+                relative overflow-hidden w-full text-left px-3.5 py-2.5 rounded-md text-sm font-bold tracking-wide uppercase transition-all duration-200 z-10 group flex items-center gap-2.5 font-sans
                 ${isActive
-                    ? 'text-white shadow-md bg-primary'
-                    : 'text-text/75 hover:text-white'}
+                    ? 'text-on-primary shadow-md bg-primary'
+                    : 'text-text hover:text-on-primary'}
             `}
         >
             {icon && <span className="text-base leading-none shrink-0 opacity-90">{icon}</span>}
@@ -30,7 +30,7 @@ const NavButton = ({ label, icon, isActive, onClick, children }) => (
 const SubNavButton = ({ label, onClick }) => (
     <button
         onClick={onClick}
-        className="text-left text-xs font-semibold text-text/60 hover:text-action py-1.5 px-3 rounded hover:bg-primary/5 transition-colors tracking-[0.12em] uppercase font-sans"
+        className="text-left text-sm font-semibold text-muted hover:text-action py-2 px-3 rounded hover:bg-primary/10 transition-colors tracking-wide uppercase font-sans"
     >
         {label}
     </button>
@@ -104,7 +104,7 @@ const ThemeToggle = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364-6.364l-.707.707M6.343 17.657l-.707.707m0-12.728l.707.707m12.728 12.728l.707.707M12 8a4 4 0 100 8 4 4 0 000-8z" />
                     </svg>
                 )}
-                <span className="text-[10px] font-bold uppercase tracking-[0.15em] font-sans">
+                <span className="text-xs font-bold uppercase tracking-wide font-sans">
                     {isDark ? 'Dark Theme' : 'Light Theme'}
                 </span>
             </div>
@@ -232,17 +232,17 @@ const Sidebar = () => {
                             </span>
                         </div>
                         <div className="flex flex-col min-w-0">
-                            <span className="text-xs font-semibold text-text truncate">
+                            <span className="text-sm font-semibold text-text truncate">
                                 {firstName} {lastName}
                             </span>
-                            <span className="text-[10px] font-medium text-text/50 capitalize truncate">
+                            <span className="text-xs font-medium text-muted capitalize truncate">
                                 {role}
                             </span>
                         </div>
                     </div>
                 )}
                 
-                <LogoutButton className="w-full justify-start text-xs font-bold tracking-[0.15em] uppercase py-2 px-3 hover:bg-red-500/10 text-primary hover:text-red-400 active:scale-95 transition-all font-sans" />
+                <LogoutButton className="w-full justify-start text-sm font-bold tracking-wide uppercase py-2 px-3 hover:bg-red-500/10 text-primary hover:text-red-400 active:scale-95 transition-all font-sans" />
             </div>
         </div>
     );
