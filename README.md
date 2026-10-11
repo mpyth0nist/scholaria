@@ -92,20 +92,35 @@ cp .env.example .env
 ```
 *(The default database credentials in `.env.example` work out of the box with Docker Compose. Add your `GROQ_API_KEY` in `.env`).*
 
-### 3. Run with Docker Compose
+### 3. Start Services with Docker Compose
+Start all containers in detached mode:
 ```bash
-docker compose up --build
+docker compose up -d --build
+```
+*(To follow logs at any time, run: `docker compose logs -f`)*
+
+### 4. Database Setup & Seeding (Initial Run)
+Apply database migrations, optionally seed demo courses and quizzes, and create an administrator account:
+```bash
+# 1. Apply database migrations
+docker compose exec backend uv run manage.py migrate
+
+# 2. (Optional) Seed realistic demo courses, modules, quizzes, and enrolled Moroccan students
+docker compose exec backend uv run manage.py seed_demo
+
+# 3. Create an administrator account for admin dashboard access
+docker compose exec backend uv run manage.py createsuperuser
 ```
 
-The application will be available at:
-* **Frontend**: `http://localhost:80`
-* **Backend API**: `http://localhost:8000/api/`
+### 5. Access the Platform
+* **Frontend**: [http://localhost](http://localhost)
+* **Backend API**: [http://localhost:8000/api/](http://localhost:8000/api/)
+* **Django Admin**: [http://localhost:8000/admin/](http://localhost:8000/admin/)
+* **Silk Performance Profiler**: [http://localhost:8000/silk/](http://localhost:8000/silk/)
 
-### 4. Database Setup (Initial Run)
-In a separate terminal, apply migrations and create an administrator:
+*(Optional: To run background vector embedding ingestion outside of tests, start the Celery worker)*:
 ```bash
-docker compose exec backend uv run manage.py migrate
-docker compose exec backend uv run manage.py createsuperuser
+docker compose exec -d backend uv run celery -A scholaria worker -l info
 ```
 
 ### 5. Seed a Teacher Dashboard Demo
@@ -123,13 +138,16 @@ Use the same `--anchor-date` and `--seed` values on reruns; generated quiz attem
 
 The test suite covers the RAG utility layer, document ingestion idempotency, LLM mocking, and role-based API scoping.
 
-Run the test suite inside the backend container:
+### Run tests inside the backend container:
 ```bash
 docker compose exec backend uv run pytest
 ```
 
-Or locally with a running PostgreSQL container:
+### Or run tests natively on your host:
 ```bash
-docker compose up -d postgres
+# Ensure PostgreSQL & Redis containers are running
+docker compose up -d postgres redis
+
+# Run test suite using uv
 uv run pytest
 ```
