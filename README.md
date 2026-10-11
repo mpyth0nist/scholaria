@@ -108,6 +108,15 @@ docker compose exec backend uv run manage.py migrate
 docker compose exec backend uv run manage.py createsuperuser
 ```
 
+### 5. Seed a Teacher Dashboard Demo
+The demo seeder uses the existing Django models and requires an existing teacher account. Run it from the repository root against the intended demo database:
+```bash
+ALLOW_DEMO_SEEDING=1 DEMO_PASSWORD='choose-a-demo-password' \
+  uv run python scripts/seed_demo.py --teacher youssef_kaddioui --anchor-date 2026-10-11
+```
+
+Use the same `--anchor-date` and `--seed` values on reruns; generated quiz attempts then reuse their stable timestamps. The script does not reset or delete data. It expects the teacher to have no courses/quizzes yet, or only the two demo courses and quizzes. It aborts if those assumptions or the reserved demo student identities conflict with existing data. `DEMO_PASSWORD` is applied only to newly created demo students.
+
 ---
 
 ## 🧪 Testing
