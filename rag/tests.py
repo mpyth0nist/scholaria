@@ -6,6 +6,8 @@ These run the real task (CELERY_TASK_ALWAYS_EAGER in tests); only the
 embedding model is stubbed, by the autouse fixture in the root conftest.
 """
 import datetime
+import logging
+from unittest.mock import patch
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
@@ -74,3 +76,33 @@ class TestIngestTask:
             due_date=datetime.date(2030, 1, 1), document='assignment_docs/hw1.pdf',
         )
         assert _chunks_for(assignment).exists()
+
+
+class TestUtilityModelCalls:
+
+    @patch('rag.rag.client')
+    def test_classifier_and_rewriter_use_configured_model(self, mock_client, settings):
+        from rag.rag import is_on_topic, rewrite_query
+
+        settings.RAG_UTILITY_MODEL = 'some-utility-model'
+        mock_client.chat.completions.create.return_value.choices[0].message.content = 'YES'
+
+        is_on_topic('What is a variable?', course_names=['Intro to Python'])
+        rewrite_query('and lists?', [{'role': 'user', 'content': 'What is a variable?'}])
+
+        models = [c.kwargs['model'] for c in mock_client.chat.completions.create.call_args_list]
+        assert models == ['some-utility-model', 'some-utility-model']
+
+    @patch('rag.rag.client')
+    def test_failures_are_logged_not_silent(self, mock_client, caplog):
+        from rag.rag import is_on_topic, rewrite_query
+
+        mock_client.chat.completions.create.side_effect = RuntimeError('model_decommissioned')
+
+        with caplog.at_level(logging.WARNING, logger='rag.rag'):
+            assert is_on_topic('What is a variable?') is True
+            assert rewrite_query('What is a variable?', []) == 'What is a variable?'
+
+        messages = [r.getMessage() for r in caplog.records]
+        assert any('Topic classifier failed' in m for m in messages)
+        assert any('Query rewriter failed' in m for m in messages)

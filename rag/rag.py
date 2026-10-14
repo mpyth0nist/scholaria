@@ -5,6 +5,7 @@ from functools import lru_cache
 from logging import getLogger
 
 import tiktoken
+from django.conf import settings
 from openai import (
     APIConnectionError,
     APIStatusError,
@@ -125,7 +126,7 @@ NO: "What's the best movie?", "Tell me a joke", "Who won the football game?" """
 
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model=settings.RAG_UTILITY_MODEL,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": query},
@@ -136,7 +137,8 @@ NO: "What's the best movie?", "Tell me a joke", "Who won the football game?" """
         answer = response.choices[0].message.content.strip().upper()
         return answer.startswith("YES")
     except Exception:
-        return True  
+        logger.warning('Topic classifier failed; allowing query through', exc_info=True)
+        return True
 
 
 def rag_search(query: str, courses_ids: list, top_k=5, lesson_id=None):
@@ -207,13 +209,14 @@ Do not include any explanations, prefixes, or conversational text. Return ONLY t
 
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model=settings.RAG_UTILITY_MODEL,
             messages=messages,
             temperature=0.0,
             max_tokens=50
         )
         return response.choices[0].message.content.strip().strip('"').strip("'")
     except Exception:
+        logger.warning('Query rewriter failed; using the raw query', exc_info=True)
         return raw_query
 
 def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=None):
