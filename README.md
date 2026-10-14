@@ -49,7 +49,9 @@ flowchart TD
 - **Admins**: Platform oversight and system administration.
 
 ### AI Learning Companion (RAG Pipeline)
-- **Automated Ingestion**: Django post-save signals automatically trigger text chunking (`RecursiveCharacterTextSplitter`) and vector embedding (`sentence-transformers/all-MiniLM-L6-v2`) upon lesson, quiz, or assignment creation.
+- **Two-Tier Ingestion Architecture**:
+  - *Cold-Start / Bulk Ingestion*: The `python manage.py ingest_all_data` command iterates over all `RAGSearchableMixin` models (`Lesson`, `Quiz`, `Question`, `Assignment`) to chunk and embed existing content into `DocumentChunk` table.
+  - *Real-Time Incremental Sync*: Django `post_save` signals automatically dispatch background Celery tasks (`ingest_searchable_object_task`) to re-chunk and embed content whenever lessons, quizzes, or assignments are created or updated.
 - **PostgreSQL Vector Retrieval**: Uses PostgreSQL with `pgvector` and HNSW indexing for scalable, low-latency cosine distance vector similarity search.
 - **Database-Level Multi-Tenancy**: Vector retrieval strictly filters candidate chunks by the student's enrolled `course_id`s at the database level, preventing cross-course data leakage.
 - **Dual-Mode Response Generation**:
@@ -105,25 +107,52 @@ Apply database migrations, optionally seed demo courses and quizzes, and create 
 # 1. Apply database migrations
 docker compose exec backend uv run manage.py migrate
 
-# 2. (Optional) Seed realistic demo courses, modules, quizzes, and enrolled Moroccan students
-docker compose exec backend uv run manage.py seed_demo
+# 2. Seed demo university courses, student account, quiz, and vector embeddings
+docker compose exec backend uv run python scripts/seed_demo.py
 
-# 3. Create an administrator account for admin dashboard access
+# 3. (Optional) Create an administrator account
 docker compose exec backend uv run manage.py createsuperuser
 ```
 
-### 5. Access the Platform
+#### Demo Credentials (Created by `seed_demo.py`):
+| Role | Username | Password | Enrolled Courses |
+| :--- | :--- | :--- | :--- |
+| **Student** | `sarah_chen` | `student123` | 3 University Courses (CS, Microeconomics, History) |
+| **Teacher** | `youssef_kaddioui` | `yousef1234` | Course Creator & Manager |
+
+
+### 5. RAG Vector Ingestion (Cold Start vs. Runtime)
+
+The RAG pipeline operates in two modes:
+
+#### A. Initial Batch Ingestion (Cold Start)
+If you have existing database records (from custom seeds, migrations, or data dumps) that have not yet been indexed into `pgvector`, run:
+```bash
+docker compose exec backend uv run manage.py ingest_all_data
+```
+> **When is `ingest_all_data` required?**
+> - **Initial Setup / Post-Seed**: Signals only react to *future* saves. Any existing records in the database must be indexed once via this batch command.
+> - **Switching Embedding Models**: If you change `RAG_EMBEDDING_MODEL` in settings (e.g., changing from `all-MiniLM-L6-v2` to another model), old vectors are incompatible and the index must be rebuilt.
+> - **Chunking Strategy Changes**: If you update `CHUNK_THRESHOLD`, `chunk_size`, or `overlap` in `utils/chunking.py`.
+> - **Reconciliation**: If the Celery worker or Redis broker was temporarily down and some real-time updates were missed.
+
+#### B. Real-Time Incremental Sync (Runtime)
+In day-to-day use, you **do not** need to run `ingest_all_data`. Whenever a teacher creates or updates a lesson, quiz, or assignment via the platform, Django `post_save` signals automatically dispatch a background Celery task (`ingest_searchable_object_task`) to re-chunk and embed the content dynamically.
+
+Start the Celery worker to process these background ingestion tasks:
+```bash
+docker compose exec -d backend uv run celery -A scholaria worker -l info
+```
+
+---
+
+### 6. Access the Platform
 * **Frontend**: [http://localhost](http://localhost)
 * **Backend API**: [http://localhost:8000/api/](http://localhost:8000/api/)
 * **Django Admin**: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 * **Silk Performance Profiler**: [http://localhost:8000/silk/](http://localhost:8000/silk/)
 
-*(Optional: To run background vector embedding ingestion outside of tests, start the Celery worker)*:
-```bash
-docker compose exec -d backend uv run celery -A scholaria worker -l info
-```
-
-### 5. Seed a Teacher Dashboard Demo
+### 7. Seed a Teacher Dashboard Demo
 The demo seeder uses the existing Django models and requires an existing teacher account. Run it from the repository root against the intended demo database:
 ```bash
 ALLOW_DEMO_SEEDING=1 DEMO_PASSWORD='choose-a-demo-password' \
