@@ -1,7 +1,8 @@
-from django.db import transaction
-from django.db.models.signals import post_save, post_delete
 from django.contrib.contenttypes.models import ContentType
+from django.db import transaction
+from django.db.models.signals import post_delete, post_save
 from django.dispatch import receiver
+
 from courses.models import Lesson
 from rag.models import DocumentChunk
 from rag.tasks import ingest_searchable_object_task
