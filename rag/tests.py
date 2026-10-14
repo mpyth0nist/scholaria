@@ -6,13 +6,15 @@ These run the real task (CELERY_TASK_ALWAYS_EAGER in tests); only the
 embedding model is stubbed, by the autouse fixture in the root conftest.
 """
 import datetime
+import io
 import logging
 from unittest.mock import patch
 
 import pytest
 from django.contrib.contenttypes.models import ContentType
+from django.core.management import call_command
 
-from courses.models import Course, Module
+from courses.models import Course, Lesson, Module
 from quizzes.models import Assignment, Question, Quiz
 from rag.models import DocumentChunk
 from rag.tasks import ingest_searchable_object_task
@@ -76,6 +78,69 @@ class TestIngestTask:
             due_date=datetime.date(2030, 1, 1), document='assignment_docs/hw1.pdf',
         )
         assert _chunks_for(assignment).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+class TestDraftsStayOutOfIndex:
+
+    def test_unpublished_lesson_is_not_indexed(self, module):
+        lesson = Lesson.objects.create(title='Draft', content='Secret draft', module=module)
+        assert not _chunks_for(lesson).exists()
+
+    def test_publish_then_unpublish(self, module):
+        lesson = Lesson.objects.create(title='L1', content='Loops', module=module, is_published=True)
+        assert _chunks_for(lesson).exists()
+
+        lesson.is_published = False
+        lesson.save()
+        assert not _chunks_for(lesson).exists()
+
+    def test_queued_task_does_not_index_a_lesson_unpublished_since(self, module):
+        lesson = Lesson.objects.create(title='L1', content='Loops', module=module, is_published=True)
+        # Unpublish without signals, as if it happened while the task sat in the queue
+        Lesson.objects.filter(id=lesson.id).update(is_published=False)
+
+        ingest_searchable_object_task.delay(app_label='courses', model_name='Lesson', object_id=lesson.id)
+        assert not _chunks_for(lesson).exists()
+
+    def test_bulk_ingest_skips_drafts(self, module):
+        published = Lesson.objects.create(title='Live', content='Loops', module=module, is_published=True)
+        draft = Lesson.objects.create(title='Draft', content='Secret draft', module=module)
+        DocumentChunk.objects.all().delete()
+
+        call_command('ingest_all_data', stdout=io.StringIO())
+
+        assert _chunks_for(published).exists()
+        assert not _chunks_for(draft).exists()
+
+
+@pytest.mark.django_db(transaction=True)
+class TestDeletedItemsLeaveIndex:
+
+    def test_deleting_quiz_removes_quiz_and_question_chunks(self, quiz):
+        question = Question.objects.create(question_text='What is a variable?', quiz=quiz)
+        assert _chunks_for(quiz).exists() and _chunks_for(question).exists()
+
+        quiz.delete()
+        assert not DocumentChunk.objects.filter(object_id__in=[quiz.id, question.id]).exists()
+
+    def test_deleting_question_removes_its_chunks(self, quiz):
+        question = Question.objects.create(question_text='What is a variable?', quiz=quiz)
+        question_id = question.id
+        question.delete()
+        ct = ContentType.objects.get_for_model(Question)
+        assert not DocumentChunk.objects.filter(content_type=ct, object_id=question_id).exists()
+        assert _chunks_for(quiz).exists()
+
+    def test_deleting_assignment_removes_its_chunks(self, teacher, course):
+        assignment = Assignment.objects.create(
+            name='Homework 1', teacher=teacher, course=course,
+            due_date=datetime.date(2030, 1, 1), document='assignment_docs/hw1.pdf',
+        )
+        assignment_id = assignment.id
+        assignment.delete()
+        ct = ContentType.objects.get_for_model(Assignment)
+        assert not DocumentChunk.objects.filter(content_type=ct, object_id=assignment_id).exists()
 
 
 class TestUtilityModelCalls:

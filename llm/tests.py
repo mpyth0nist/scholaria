@@ -95,6 +95,7 @@ def lesson(module):
         title='Variables and Types',
         content='<p>Variables store data values. Python has no command for declaring a variable.</p>',
         module=module,
+        is_published=True,
     )
 
 
@@ -225,7 +226,7 @@ class TestIngestion:
         """A lesson with long content should produce multiple chunks."""
         long_content = 'This is a test sentence. ' * 100  # ~2500 chars
         lesson = Lesson.objects.create(
-            title='Long Lesson', content=long_content, module=module,
+            title='Long Lesson', content=long_content, module=module, is_published=True,
         )
         # Return one vector per expected chunk
         num_chunks = len(long_content) // 200 + 1

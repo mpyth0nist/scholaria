@@ -8,11 +8,24 @@ from utils.embeddings import embed_data
 
 CHUNK_THRESHOLD = 1000
 
+
+def delete_chunks_for(obj):
+    """Remove every indexed chunk belonging to `obj`."""
+    ct = ContentType.objects.get_for_model(obj)
+    DocumentChunk.objects.filter(content_type=ct, object_id=obj.id).delete()
+
+
 def ingest_searchable_object(obj):
 
     with transaction.atomic():
         if not isinstance(obj, RAGSearchableMixin):
             raise ValueError("Object is not searchable")
+
+        # Drafts must never reach the index, even if a task was queued while
+        # the object was still published.
+        if not obj.is_rag_visible():
+            delete_chunks_for(obj)
+            return
 
         rag_data = obj.to_rag_document()
         content = rag_data['content']
@@ -26,7 +39,7 @@ def ingest_searchable_object(obj):
         vectors = embed_data(chunks)
         ct = ContentType.objects.get_for_model(obj)
 
-        DocumentChunk.objects.filter(content_type =ct, object_id=obj.id).delete()
+        DocumentChunk.objects.filter(content_type=ct, object_id=obj.id).delete()
 
         chunks_to_create = [
             DocumentChunk(
@@ -39,20 +52,3 @@ def ingest_searchable_object(obj):
             ) for chunk, vector in zip(chunks, vectors)
         ]
         DocumentChunk.objects.bulk_create(chunks_to_create)
-
-
-
-
-
-    
-
-
-    
-
-
-
-
-    
-
-    
-    
