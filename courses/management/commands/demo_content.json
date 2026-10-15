@@ -1,0 +1,555 @@
+[
+  {
+    "course_name": "Introduction to Computer Science",
+    "subject": "Computer Science",
+    "description": "A foundational course covering programming fundamentals, data structures, algorithms, and core CS concepts.",
+    "modules": [
+      {
+        "title": "Module 1: Programming Fundamentals",
+        "lessons": [
+          {
+            "title": "What is Programming?",
+            "content": "# What is Programming?\n\n## Definition\nProgramming is the process of creating a set of instructions that tell a computer how to perform a task. These instructions are written in a **programming language** — a formal language with precise syntax and semantics.\n\n## Why Learn to Program?\n1. **Problem-solving**: Programming teaches you to break complex problems into manageable steps\n2. **Automation**: Computers can execute repetitive tasks millions of times faster than humans\n3. **Career opportunities**: Software engineering, data science, AI, cybersecurity, and more\n4. **Creativity**: Programming is a creative act — you're building something from nothing\n\n## How a Computer Executes Code\n1. **Source code** — Human-readable instructions (e.g., Python, Java, C++)\n2. **Compiler/Interpreter** — Translates source code into machine code\n3. **Machine code** — Binary instructions (0s and 1s) the CPU can execute\n4. **Output** — The result: a calculation, a webpage, a game, a robot movement\n\n## Compiled vs. Interpreted Languages\n| Feature | Compiled (C, C++, Rust) | Interpreted (Python, JavaScript) |\n|---------|------------------------|----------------------------------|\n| Translation | All at once before running | Line by line during execution |\n| Speed | Faster execution | Slower execution |\n| Error detection | Errors caught before running | Errors caught during running |\n| Portability | Must recompile for each OS | Runs anywhere with interpreter |\n\n## Your First Python Program\n```python\n# This is a comment — Python ignores it\nprint(\"Hello, World!\")    # Output: Hello, World!\n\n# Variables\nname = \"Scholaria\"\nyear = 2025\n\n# String formatting\nprint(f\"Welcome to {name}! Est. {year}\")\n```\n\n## Key Concepts\n- **Syntax**: The rules for writing valid code (like grammar in a language)\n- **Semantics**: The meaning of the code (what it actually does)\n- **Bug**: An error in your code — named after a literal moth found in a Harvard computer (1947)\n- **Debugging**: The process of finding and fixing bugs\n\n## Exercise\nWrite a Python program that:\n1. Stores your name in a variable\n2. Stores your age in a variable\n3. Prints: \"My name is [name] and I am [age] years old.\"\n4. Calculates and prints the year you were born"
+          },
+          {
+            "title": "Variables, Data Types, and Operators",
+            "content": "# Variables, Data Types, and Operators\n\n## Variables\nA variable is a named container for storing data. Think of it as a labeled box.\n\n```python\n# Variable assignment\nage = 21              # Integer\nheight = 1.75         # Float\nname = \"Maliki\"       # String\nis_student = True     # Boolean\n\n# Variables can be reassigned\nage = 22              # Now age is 22\n```\n\n### Naming Rules\n- Must start with a letter or underscore: `my_var`, `_count`\n- Can contain letters, numbers, underscores: `student_2`, `total_score`\n- Case-sensitive: `Name` ≠ `name` ≠ `NAME`\n- Cannot use reserved words: `if`, `for`, `while`, `class`, etc.\n\n## Data Types\n\n### Primitive Types\n| Type | Example | Description |\n|------|---------|-------------|\n| `int` | `42`, `-7`, `0` | Whole numbers |\n| `float` | `3.14`, `-0.5` | Decimal numbers |\n| `str` | `\"hello\"`, `'world'` | Text (strings) |\n| `bool` | `True`, `False` | Boolean (logical) values |\n\n### Type Checking and Conversion\n```python\nx = 42\nprint(type(x))        # <class 'int'>\n\n# Type conversion (casting)\ny = float(x)           # 42.0\nz = str(x)             # \"42\"\nw = int(\"100\")         # 100\n```\n\n## Operators\n\n### Arithmetic Operators\n```python\na, b = 17, 5\n\nprint(a + b)    # 22   Addition\nprint(a - b)    # 12   Subtraction\nprint(a * b)    # 85   Multiplication\nprint(a / b)    # 3.4  Division (always returns float)\nprint(a // b)   # 3    Floor division (integer result)\nprint(a % b)    # 2    Modulo (remainder)\nprint(a ** b)   # 1419857  Exponentiation\n```\n\n### Comparison Operators\n```python\nprint(5 == 5)    # True   Equal to\nprint(5 != 3)    # True   Not equal to\nprint(5 > 3)     # True   Greater than\nprint(5 < 3)     # False  Less than\nprint(5 >= 5)    # True   Greater than or equal\nprint(5 <= 3)    # False  Less than or equal\n```\n\n### Logical Operators\n```python\nprint(True and False)   # False\nprint(True or False)    # True\nprint(not True)         # False\n\n# Practical example\nage = 20\nhas_id = True\ncan_enter = age >= 18 and has_id  # True\n```\n\n## String Operations\n```python\ngreeting = \"Hello\"\nname = \"World\"\n\n# Concatenation\nmessage = greeting + \", \" + name + \"!\"   # \"Hello, World!\"\n\n# Repetition\nline = \"-\" * 30   # \"------------------------------\"\n\n# Length\nprint(len(message))   # 13\n\n# Indexing and Slicing\nprint(message[0])      # 'H'\nprint(message[-1])     # '!'\nprint(message[0:5])    # 'Hello'\n```\n\n## Practice Problems\n1. Calculate the area of a circle with radius 7 (area = π × r²). Use `3.14159` for π.\n2. Given a temperature in Celsius, convert it to Fahrenheit: F = (C × 9/5) + 32\n3. Write a program that swaps the values of two variables without using a third variable."
+          },
+          {
+            "title": "Control Flow: Conditionals and Loops",
+            "content": "# Control Flow: Conditionals and Loops\n\n## What is Control Flow?\nBy default, Python executes code line by line, top to bottom. **Control flow** statements let you change this order — skipping lines, repeating blocks, or choosing between alternatives.\n\n## Conditionals (if/elif/else)\n\n### Basic Structure\n```python\ntemperature = 35\n\nif temperature > 30:\n    print(\"It's hot outside! 🌞\")\nelif temperature > 20:\n    print(\"Nice weather! 😊\")\nelif temperature > 10:\n    print(\"A bit chilly. 🧥\")\nelse:\n    print(\"It's cold! 🥶\")\n```\n\n### Key Rules\n- **Indentation matters**: Python uses 4 spaces to define code blocks (no curly braces)\n- `elif` is short for \"else if\" — you can have as many as you need\n- `else` is optional and catches everything not matched above\n- Conditions are evaluated top-to-bottom; the first `True` wins\n\n### Nested Conditionals\n```python\nage = 20\nhas_ticket = True\n\nif age >= 18:\n    if has_ticket:\n        print(\"Welcome to the show!\")\n    else:\n        print(\"You need a ticket.\")\nelse:\n    print(\"You must be 18 or older.\")\n```\n\n## Loops\n\n### The `for` Loop\nRepeats a block of code for each item in a sequence:\n\n```python\n# Iterating over a list\nfruits = [\"apple\", \"banana\", \"cherry\"]\nfor fruit in fruits:\n    print(f\"I like {fruit}\")\n\n# Using range()\nfor i in range(5):          # 0, 1, 2, 3, 4\n    print(f\"Count: {i}\")\n\nfor i in range(2, 10, 3):   # 2, 5, 8\n    print(i)\n```\n\n### The `while` Loop\nRepeats as long as a condition is `True`:\n\n```python\ncount = 0\nwhile count < 5:\n    print(f\"Count is {count}\")\n    count += 1   # Don't forget this or you get an infinite loop!\n\n# User input loop\npassword = \"\"\nwhile password != \"secret123\":\n    password = input(\"Enter password: \")\nprint(\"Access granted!\")\n```\n\n### Loop Control\n```python\n# break — exit the loop immediately\nfor num in range(100):\n    if num == 5:\n        break\n    print(num)   # Prints 0, 1, 2, 3, 4\n\n# continue — skip to the next iteration\nfor num in range(10):\n    if num % 2 == 0:\n        continue\n    print(num)   # Prints 1, 3, 5, 7, 9\n```\n\n## Common Patterns\n\n### Accumulator Pattern\n```python\n# Sum all numbers from 1 to 100\ntotal = 0\nfor i in range(1, 101):\n    total += i\nprint(f\"Sum = {total}\")   # 5050\n```\n\n### Search Pattern\n```python\n# Find the first even number in a list\nnumbers = [7, 3, 9, 4, 11, 2]\nfor num in numbers:\n    if num % 2 == 0:\n        print(f\"Found even number: {num}\")\n        break\n```\n\n### Counting Pattern\n```python\n# Count vowels in a string\ntext = \"Hello World\"\nvowel_count = 0\nfor char in text.lower():\n    if char in \"aeiou\":\n        vowel_count += 1\nprint(f\"Vowels: {vowel_count}\")   # 3\n```\n\n## Practice Exercises\n1. Write a program that prints all numbers from 1 to 50 that are divisible by both 3 and 5.\n2. Write a guessing game: the program picks a random number between 1-100, and the user guesses until correct, receiving \"too high\" or \"too low\" hints.\n3. Write a program that prints the first 20 terms of the Fibonacci sequence (0, 1, 1, 2, 3, 5, 8, ...)."
+          }
+        ]
+      },
+      {
+        "title": "Module 2: Data Structures",
+        "lessons": [
+          {
+            "title": "Lists and Tuples",
+            "content": "# Lists and Tuples\n\n## Lists\nA **list** is an ordered, mutable collection of items. Lists can hold any data type and can mix types.\n\n```python\n# Creating lists\nfruits = [\"apple\", \"banana\", \"cherry\"]\nnumbers = [1, 2, 3, 4, 5]\nmixed = [1, \"hello\", 3.14, True]\nempty = []\n\n# Accessing elements (0-indexed)\nprint(fruits[0])     # \"apple\"\nprint(fruits[-1])    # \"cherry\" (last element)\nprint(fruits[1:3])   # [\"banana\", \"cherry\"] (slicing)\n```\n\n### Common List Operations\n```python\nfruits = [\"apple\", \"banana\"]\n\n# Adding elements\nfruits.append(\"cherry\")         # [\"apple\", \"banana\", \"cherry\"]\nfruits.insert(1, \"blueberry\")   # [\"apple\", \"blueberry\", \"banana\", \"cherry\"]\nfruits.extend([\"date\", \"fig\"])  # Adds multiple items\n\n# Removing elements\nfruits.remove(\"banana\")         # Removes first occurrence\npopped = fruits.pop()           # Removes and returns last item\ndel fruits[0]                   # Removes by index\n\n# Other operations\nfruits.sort()                   # Sorts in place\nfruits.reverse()                # Reverses in place\nprint(len(fruits))              # Length\nprint(\"apple\" in fruits)        # Membership test → True/False\n```\n\n### List Comprehensions\nA concise way to create lists:\n```python\n# Traditional approach\nsquares = []\nfor x in range(10):\n    squares.append(x ** 2)\n\n# List comprehension (same result, one line)\nsquares = [x ** 2 for x in range(10)]\n\n# With a condition\nevens = [x for x in range(20) if x % 2 == 0]\n\n# String processing\nwords = [\"hello\", \"world\", \"python\"]\nupper_words = [w.upper() for w in words]\n# [\"HELLO\", \"WORLD\", \"PYTHON\"]\n```\n\n## Tuples\nA **tuple** is an ordered, **immutable** collection. Once created, it cannot be changed.\n\n```python\n# Creating tuples\ncoordinates = (10, 20)\nrgb = (255, 128, 0)\nsingle = (42,)      # Note the comma — without it, it's just an int in parentheses\n\n# Accessing elements (same as lists)\nprint(coordinates[0])   # 10\n\n# Tuple unpacking\nx, y = coordinates      # x=10, y=20\nname, age, city = (\"Maliki\", 21, \"Casablanca\")\n```\n\n### When to Use Tuples vs Lists\n| Feature | List | Tuple |\n|---------|------|-------|\n| Mutable? | ✅ Yes | ❌ No |\n| Use case | Collections that change | Fixed data (coordinates, RGB colors) |\n| Performance | Slightly slower | Slightly faster |\n| As dict key? | ❌ No | ✅ Yes |\n\n## Practice\n1. Write a function that takes a list of numbers and returns a new list with duplicates removed (preserving order).\n2. Create a list of 10 random numbers, then use list comprehension to create a new list containing only the numbers greater than the average.\n3. Given a list of tuples `[(name, score), ...]`, sort them by score in descending order."
+          },
+          {
+            "title": "Dictionaries and Sets",
+            "content": "# Dictionaries and Sets\n\n## Dictionaries\nA **dictionary** stores data as **key-value pairs**. Keys must be unique and immutable; values can be anything.\n\n```python\n# Creating dictionaries\nstudent = {\n    \"name\": \"Youssef\",\n    \"age\": 25,\n    \"courses\": [\"History\", \"Art\"],\n    \"is_active\": True\n}\n\n# Accessing values\nprint(student[\"name\"])              # \"Youssef\"\nprint(student.get(\"email\", \"N/A\")) # \"N/A\" (default if key missing)\n\n# Adding/updating\nstudent[\"email\"] = \"youssef@scholaria.com\"\nstudent[\"age\"] = 26\n\n# Removing\ndel student[\"is_active\"]\nemail = student.pop(\"email\")   # Removes and returns value\n```\n\n### Iterating Over Dictionaries\n```python\nstudent = {\"name\": \"Youssef\", \"age\": 25, \"grade\": \"A\"}\n\n# Keys\nfor key in student:\n    print(key)\n\n# Values\nfor value in student.values():\n    print(value)\n\n# Key-value pairs\nfor key, value in student.items():\n    print(f\"{key}: {value}\")\n```\n\n### Dictionary Comprehensions\n```python\n# Square numbers dictionary\nsquares = {x: x**2 for x in range(1, 6)}\n# {1: 1, 2: 4, 3: 9, 4: 16, 5: 25}\n\n# Word frequency counter\ntext = \"the cat sat on the mat the cat\"\nword_count = {}\nfor word in text.split():\n    word_count[word] = word_count.get(word, 0) + 1\n# {\"the\": 3, \"cat\": 2, \"sat\": 1, \"on\": 1, \"mat\": 1}\n```\n\n### Nested Dictionaries\n```python\nschool = {\n    \"course_1\": {\n        \"name\": \"History\",\n        \"students\": 30,\n        \"teacher\": \"Prof. Kaddioui\"\n    },\n    \"course_2\": {\n        \"name\": \"Computer Science\",\n        \"students\": 45,\n        \"teacher\": \"Prof. Smith\"\n    }\n}\n\nprint(school[\"course_1\"][\"teacher\"])   # \"Prof. Kaddioui\"\n```\n\n## Sets\nA **set** is an unordered collection of **unique** elements. Duplicates are automatically removed.\n\n```python\n# Creating sets\ncolors = {\"red\", \"green\", \"blue\"}\nnumbers = set([1, 2, 2, 3, 3, 3])   # {1, 2, 3}\n\n# Adding/removing\ncolors.add(\"yellow\")\ncolors.discard(\"red\")     # No error if missing\ncolors.remove(\"green\")    # Raises error if missing\n```\n\n### Set Operations\n```python\na = {1, 2, 3, 4, 5}\nb = {4, 5, 6, 7, 8}\n\nprint(a | b)     # Union:        {1, 2, 3, 4, 5, 6, 7, 8}\nprint(a & b)     # Intersection: {4, 5}\nprint(a - b)     # Difference:   {1, 2, 3}\nprint(a ^ b)     # Symmetric:    {1, 2, 3, 6, 7, 8}\n```\n\n### Practical Use: Removing Duplicates\n```python\nnames = [\"Alice\", \"Bob\", \"Alice\", \"Charlie\", \"Bob\"]\nunique_names = list(set(names))   # [\"Alice\", \"Bob\", \"Charlie\"]\n```\n\n## Practice\n1. Write a program that counts the frequency of each character in a string using a dictionary.\n2. Given two lists, use sets to find elements that appear in both lists.\n3. Create a simple phonebook using a dictionary: add contacts, look up numbers, and delete contacts."
+          },
+          {
+            "title": "Functions and Modular Code",
+            "content": "# Functions and Modular Code\n\n## What Are Functions?\nA function is a reusable block of code that performs a specific task. Functions help you:\n- **Avoid repetition** (DRY — Don't Repeat Yourself)\n- **Organize code** into logical, manageable pieces\n- **Test and debug** individual components independently\n\n## Defining Functions\n```python\n# Basic function\ndef greet():\n    print(\"Hello, World!\")\n\ngreet()   # Call the function\n\n# Function with parameters\ndef greet_user(name):\n    print(f\"Hello, {name}!\")\n\ngreet_user(\"Youssef\")   # \"Hello, Youssef!\"\n\n# Function with return value\ndef add(a, b):\n    return a + b\n\nresult = add(3, 5)   # result = 8\n```\n\n## Parameters and Arguments\n\n### Default Parameters\n```python\ndef greet(name, greeting=\"Hello\"):\n    return f\"{greeting}, {name}!\"\n\nprint(greet(\"Youssef\"))              # \"Hello, Youssef!\"\nprint(greet(\"Youssef\", \"Salam\"))     # \"Salam, Youssef!\"\n```\n\n### Keyword Arguments\n```python\ndef create_profile(name, age, city):\n    return f\"{name}, {age}, from {city}\"\n\n# Positional\ncreate_profile(\"Youssef\", 25, \"Rabat\")\n\n# Keyword (order doesn't matter)\ncreate_profile(city=\"Rabat\", name=\"Youssef\", age=25)\n```\n\n### *args and **kwargs\n```python\n# *args — variable number of positional arguments\ndef sum_all(*numbers):\n    return sum(numbers)\n\nprint(sum_all(1, 2, 3, 4, 5))   # 15\n\n# **kwargs — variable number of keyword arguments\ndef print_info(**info):\n    for key, value in info.items():\n        print(f\"{key}: {value}\")\n\nprint_info(name=\"Youssef\", role=\"Teacher\", subject=\"History\")\n```\n\n## Scope\n```python\nx = 10   # Global scope\n\ndef my_function():\n    y = 5   # Local scope — only exists inside this function\n    print(x)   # Can read global variables\n    print(y)\n\nmy_function()\n# print(y)   # ❌ Error! y doesn't exist outside the function\n```\n\n## Lambda Functions\nSmall anonymous functions for simple operations:\n```python\n# Regular function\ndef square(x):\n    return x ** 2\n\n# Lambda equivalent\nsquare = lambda x: x ** 2\n\n# Common use: sorting\nstudents = [(\"Alice\", 85), (\"Bob\", 92), (\"Charlie\", 78)]\nstudents.sort(key=lambda s: s[1], reverse=True)\n# [(\"Bob\", 92), (\"Alice\", 85), (\"Charlie\", 78)]\n```\n\n## Docstrings\n```python\ndef calculate_bmi(weight_kg, height_m):\n    \"\"\"\n    Calculate Body Mass Index (BMI).\n\n    Args:\n        weight_kg (float): Weight in kilograms\n        height_m (float): Height in meters\n\n    Returns:\n        float: The calculated BMI value\n    \"\"\"\n    return weight_kg / (height_m ** 2)\n```\n\n## Practice\n1. Write a function `is_palindrome(text)` that returns `True` if the text reads the same forwards and backwards.\n2. Write a function `fibonacci(n)` that returns a list of the first `n` Fibonacci numbers.\n3. Write a function `caesar_cipher(text, shift)` that encrypts text by shifting each letter by `shift` positions in the alphabet."
+          }
+        ]
+      },
+      {
+        "title": "Module 3: Algorithms and Problem Solving",
+        "lessons": [
+          {
+            "title": "Introduction to Algorithms",
+            "content": "# Introduction to Algorithms\n\n## What is an Algorithm?\nAn algorithm is a finite, step-by-step procedure for solving a problem or performing a computation. The word comes from the name of the 9th-century Persian mathematician **al-Khwarizmi**.\n\n## Properties of a Good Algorithm\n1. **Input**: Zero or more inputs\n2. **Output**: At least one output\n3. **Definiteness**: Each step is precisely defined\n4. **Finiteness**: Terminates after a finite number of steps\n5. **Effectiveness**: Each step is basic enough to be carried out\n\n## Algorithm Example: Finding the Maximum\n```\nAlgorithm: Find Maximum in a List\nInput: A list of numbers L\nOutput: The largest number in L\n\n1. Set max_value = L[0]\n2. For each number n in L (starting from index 1):\n   a. If n > max_value:\n      Set max_value = n\n3. Return max_value\n```\n\n```python\ndef find_max(numbers):\n    max_value = numbers[0]\n    for n in numbers[1:]:\n        if n > max_value:\n            max_value = n\n    return max_value\n```\n\n## Big O Notation\nBig O describes how an algorithm's performance scales with input size:\n\n| Notation | Name | Example |\n|----------|------|---------|\n| O(1) | Constant | Accessing an array element by index |\n| O(log n) | Logarithmic | Binary search |\n| O(n) | Linear | Searching an unsorted list |\n| O(n log n) | Linearithmic | Merge sort, quicksort |\n| O(n²) | Quadratic | Bubble sort, nested loops |\n| O(2ⁿ) | Exponential | Brute-force subset generation |\n\n### How to Determine Big O\n- **Drop constants**: O(3n) → O(n)\n- **Drop lower terms**: O(n² + n) → O(n²)\n- **Focus on the worst case**: What happens with very large inputs?\n\n## Searching Algorithms\n\n### Linear Search — O(n)\n```python\ndef linear_search(arr, target):\n    for i, item in enumerate(arr):\n        if item == target:\n            return i\n    return -1\n```\n\n### Binary Search — O(log n)\nRequires a **sorted** array:\n```python\ndef binary_search(arr, target):\n    low, high = 0, len(arr) - 1\n    while low <= high:\n        mid = (low + high) // 2\n        if arr[mid] == target:\n            return mid\n        elif arr[mid] < target:\n            low = mid + 1\n        else:\n            high = mid - 1\n    return -1\n```\n\nBinary search is dramatically faster: searching 1,000,000 items takes at most 20 comparisons vs. 1,000,000 for linear search.\n\n## Practice\n1. What is the Big O of a function that prints all pairs from a list? (Hint: nested loops)\n2. Implement binary search recursively.\n3. Compare the actual number of steps for linear vs. binary search on a sorted list of 1,000 elements."
+          },
+          {
+            "title": "Sorting Algorithms",
+            "content": "# Sorting Algorithms\n\n## Why Sorting Matters\nSorting is one of the most fundamental operations in computer science. Many algorithms (like binary search) require sorted data. Understanding sorting teaches algorithm design, complexity analysis, and trade-offs.\n\n## Bubble Sort — O(n²)\nRepeatedly swaps adjacent elements if they're in the wrong order.\n\n```python\ndef bubble_sort(arr):\n    n = len(arr)\n    for i in range(n):\n        swapped = False\n        for j in range(0, n - i - 1):\n            if arr[j] > arr[j + 1]:\n                arr[j], arr[j + 1] = arr[j + 1], arr[j]\n                swapped = True\n        if not swapped:\n            break   # Already sorted\n    return arr\n```\n\n**Pros**: Simple to understand and implement\n**Cons**: Very slow for large datasets\n\n## Selection Sort — O(n²)\nFinds the minimum element and places it at the beginning, then repeats for the remaining elements.\n\n```python\ndef selection_sort(arr):\n    n = len(arr)\n    for i in range(n):\n        min_idx = i\n        for j in range(i + 1, n):\n            if arr[j] < arr[min_idx]:\n                min_idx = j\n        arr[i], arr[min_idx] = arr[min_idx], arr[i]\n    return arr\n```\n\n## Merge Sort — O(n log n)\nDivides the array in half, recursively sorts each half, then merges them.\n\n```python\ndef merge_sort(arr):\n    if len(arr) <= 1:\n        return arr\n\n    mid = len(arr) // 2\n    left = merge_sort(arr[:mid])\n    right = merge_sort(arr[mid:])\n\n    return merge(left, right)\n\ndef merge(left, right):\n    result = []\n    i = j = 0\n    while i < len(left) and j < len(right):\n        if left[i] <= right[j]:\n            result.append(left[i])\n            i += 1\n        else:\n            result.append(right[j])\n            j += 1\n    result.extend(left[i:])\n    result.extend(right[j:])\n    return result\n```\n\n**Key insight**: Merge sort uses a **divide-and-conquer** strategy — breaking a problem into smaller subproblems, solving them independently, and combining results.\n\n## Comparison Table\n\n| Algorithm | Best Case | Average | Worst Case | Space | Stable? |\n|-----------|-----------|---------|------------|-------|---------|\n| Bubble Sort | O(n) | O(n²) | O(n²) | O(1) | Yes |\n| Selection Sort | O(n²) | O(n²) | O(n²) | O(1) | No |\n| Merge Sort | O(n log n) | O(n log n) | O(n log n) | O(n) | Yes |\n\n**Stable** = equal elements maintain their original relative order.\n\n## Visualization\nImagine sorting a hand of playing cards:\n- **Bubble Sort**: Compare adjacent cards, swap if needed, repeat\n- **Selection Sort**: Find the lowest card, place it first, find the next lowest, and so on\n- **Merge Sort**: Split the hand in half, sort each half, then interleave them back together\n\n## Practice\n1. Trace through bubble sort step-by-step on the list `[64, 34, 25, 12, 22, 11, 90]`.\n2. Implement quicksort (another divide-and-conquer algorithm that partitions around a pivot).\n3. Experimentally compare the running time of bubble sort vs. merge sort on lists of size 100, 1000, and 10000."
+          },
+          {
+            "title": "Recursion: Functions That Call Themselves",
+            "content": "# Recursion: Functions That Call Themselves\n\n## What is Recursion?\nRecursion is a technique where a function calls itself to solve a problem by breaking it into smaller, identical subproblems.\n\nEvery recursive function needs:\n1. **Base case**: The condition that stops the recursion\n2. **Recursive case**: The function calls itself with a \"smaller\" input\n\n## Classic Example: Factorial\nThe factorial of n (written n!) is: n! = n × (n-1) × (n-2) × ... × 1\n\n```python\ndef factorial(n):\n    # Base case\n    if n == 0 or n == 1:\n        return 1\n    # Recursive case\n    return n * factorial(n - 1)\n\nprint(factorial(5))   # 120\n```\n\n### How It Works (Call Stack)\n```\nfactorial(5)\n  → 5 * factorial(4)\n    → 4 * factorial(3)\n      → 3 * factorial(2)\n        → 2 * factorial(1)\n          → 1              ← base case reached\n        ← 2 * 1 = 2\n      ← 3 * 2 = 6\n    ← 4 * 6 = 24\n  ← 5 * 24 = 120\n```\n\n## Fibonacci Sequence\nEach number is the sum of the two preceding ones: 0, 1, 1, 2, 3, 5, 8, 13, 21, ...\n\n```python\n# Simple recursive (inefficient — O(2^n))\ndef fib(n):\n    if n <= 1:\n        return n\n    return fib(n - 1) + fib(n - 2)\n\n# With memoization (efficient — O(n))\ndef fib_memo(n, memo={}):\n    if n in memo:\n        return memo[n]\n    if n <= 1:\n        return n\n    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)\n    return memo[n]\n```\n\n## Recursion vs. Iteration\nAny recursive solution can be rewritten iteratively, and vice versa.\n\n```python\n# Recursive sum\ndef sum_recursive(lst):\n    if not lst:\n        return 0\n    return lst[0] + sum_recursive(lst[1:])\n\n# Iterative sum\ndef sum_iterative(lst):\n    total = 0\n    for item in lst:\n        total += item\n    return total\n```\n\n### When to Use Recursion\n| Use Recursion When... | Use Iteration When... |\n|----------------------|----------------------|\n| Problem has natural recursive structure (trees, fractals) | Simple counting or accumulation |\n| Code clarity matters more than performance | Performance is critical |\n| Divide-and-conquer fits naturally | Deep recursion would cause stack overflow |\n\n## Common Recursive Problems\n\n### Power Function\n```python\ndef power(base, exp):\n    if exp == 0:\n        return 1\n    return base * power(base, exp - 1)\n```\n\n### Reverse a String\n```python\ndef reverse(s):\n    if len(s) <= 1:\n        return s\n    return reverse(s[1:]) + s[0]\n\nprint(reverse(\"hello\"))   # \"olleh\"\n```\n\n### Tower of Hanoi\n```python\ndef hanoi(n, source, target, auxiliary):\n    if n == 1:\n        print(f\"Move disk 1 from {source} to {target}\")\n        return\n    hanoi(n - 1, source, auxiliary, target)\n    print(f\"Move disk {n} from {source} to {target}\")\n    hanoi(n - 1, auxiliary, target, source)\n\nhanoi(3, 'A', 'C', 'B')\n```\n\n## Common Pitfalls\n1. **Missing base case** → Infinite recursion → Stack overflow\n2. **Base case never reached** → Same problem\n3. **Redundant computation** → Exponential time (fix with memoization)\n\n## Practice\n1. Write a recursive function to calculate the sum of digits of a number (e.g., 1234 → 10).\n2. Write a recursive function to check if a string is a palindrome.\n3. Write a recursive function to find all permutations of a string."
+          }
+        ]
+      }
+    ],
+    "quizzes": [
+      {
+        "name": "Programming Fundamentals Quiz",
+        "description": "Test your understanding of variables, data types, operators, and control flow in Python.",
+        "questions": [
+          {
+            "text": "What is the output of the following Python code?\n\nx = 17\ny = 5\nprint(x // y)",
+            "choices": [
+              [
+                "3.4",
+                false
+              ],
+              [
+                "3",
+                true
+              ],
+              [
+                "4",
+                false
+              ],
+              [
+                "2",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "Which of the following is an immutable data type in Python?",
+            "choices": [
+              [
+                "list",
+                false
+              ],
+              [
+                "dictionary",
+                false
+              ],
+              [
+                "tuple",
+                true
+              ],
+              [
+                "set",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "What will this code print?\n\nfor i in range(3):\n    if i == 1:\n        continue\n    print(i)",
+            "choices": [
+              [
+                "0 1 2",
+                false
+              ],
+              [
+                "0 2",
+                true
+              ],
+              [
+                "1 2",
+                false
+              ],
+              [
+                "0",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "What is the correct way to define a function in Python that takes two parameters and returns their sum?",
+            "choices": [
+              [
+                "function add(a, b): return a + b",
+                false
+              ],
+              [
+                "def add(a, b): return a + b",
+                true
+              ],
+              [
+                "define add(a, b) { return a + b }",
+                false
+              ],
+              [
+                "func add(a, b) => a + b",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "What does the 'break' statement do inside a loop?",
+            "choices": [
+              [
+                "Skips the current iteration and moves to the next one",
+                false
+              ],
+              [
+                "Pauses the loop for one second",
+                false
+              ],
+              [
+                "Exits the loop immediately",
+                true
+              ],
+              [
+                "Restarts the loop from the beginning",
+                false
+              ]
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Algorithms & Sorting Quiz",
+        "description": "Complexity, searching and sorting: check your understanding of Module 3.",
+        "questions": [
+          {
+            "text": "What is the worst-case time complexity of merge sort?",
+            "choices": [
+              [
+                "O(n log n)",
+                true
+              ],
+              [
+                "O(n²)",
+                false
+              ],
+              [
+                "O(n)",
+                false
+              ],
+              [
+                "O(log n)",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "What is the time complexity of binary search on a sorted list?",
+            "choices": [
+              [
+                "O(log n)",
+                true
+              ],
+              [
+                "O(n)",
+                false
+              ],
+              [
+                "O(1)",
+                false
+              ],
+              [
+                "O(n²)",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "In the worst case, linear search has a time complexity of:",
+            "choices": [
+              [
+                "O(n)",
+                true
+              ],
+              [
+                "O(1)",
+                false
+              ],
+              [
+                "O(log n)",
+                false
+              ],
+              [
+                "O(n log n)",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "Which strategy does merge sort use?",
+            "choices": [
+              [
+                "Divide and conquer",
+                true
+              ],
+              [
+                "Greedy choice",
+                false
+              ],
+              [
+                "Dynamic programming",
+                false
+              ],
+              [
+                "Brute force",
+                false
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_name": "World History: Ancient Civilizations",
+    "subject": "History",
+    "description": "The great civilizations of the ancient world, from the Mediterranean and the river valleys to East Asia and the Silk Road.",
+    "modules": [
+      {
+        "title": "Module 1: The Ancient Mediterranean",
+        "lessons": [
+          {
+            "title": "Ancient Greece: Democracy and Philosophy",
+            "content": "# Ancient Greece: Democracy and Philosophy\n\n## The Birthplace of Western Thought\nAncient Greece (c. 800–146 BCE) produced revolutionary ideas in governance, philosophy, science, and art that continue to shape the modern world.\n\n## The Polis: City-State System\nGreece was not a unified nation but a collection of independent city-states (poleis):\n- **Athens**: Democracy, philosophy, drama, and the arts\n- **Sparta**: Military discipline, oligarchy, and communal living\n- **Corinth**: Trade, wealth, and architectural innovation\n- **Thebes**: Military power and the Sacred Band\n\n## Athenian Democracy\nAthens developed the world's first known democracy (demokratia = \"rule by the people\"):\n- **Ecclesia**: Assembly of all male citizens (age 18+) — voted on laws and policy\n- **Boule**: Council of 500 chosen by lottery — set the agenda for the Ecclesia\n- **Dikasteria**: People's courts with juries of 200–6,000 citizens\n- **Ostracism**: Citizens could vote to exile anyone deemed a threat to democracy for 10 years\n\n### Limitations\n- Women, slaves, and non-citizens (metics) were excluded — roughly 80% of the population\n- Direct democracy was possible only because of the small citizen body (~30,000 adult males)\n\n## The Greek Philosophers\n\n### Socrates (470–399 BCE)\n- Developed the **Socratic Method**: Rigorous questioning to expose contradictions in one's beliefs\n- Left no writings — known through Plato's dialogues\n- Convicted of \"corrupting the youth\" and \"impiety\"; chose death by hemlock over exile\n\n### Plato (428–348 BCE)\n- Student of Socrates; founded the **Academy** in Athens\n- **Theory of Forms**: True reality consists of abstract, perfect Forms; the physical world is a shadow\n- *The Republic*: Envisioned an ideal state ruled by philosopher-kings\n\n### Aristotle (384–322 BCE)\n- Student of Plato; tutor of Alexander the Great\n- Rejected the Theory of Forms in favor of empirical observation\n- Wrote on logic, physics, biology, ethics, politics, and poetics\n- Founded the **Lyceum**; his works dominated Western thought for nearly 2,000 years\n\n## The Persian Wars (499–449 BCE)\n- **Battle of Marathon (490 BCE)**: 10,000 Athenians defeated a much larger Persian force\n- **Battle of Thermopylae (480 BCE)**: 300 Spartans held the pass against Xerxes' army\n- **Battle of Salamis (480 BCE)**: Greek naval victory turned the tide of the war\n- Result: Greek independence preserved; Athens entered its Golden Age\n\n## Legacy\nGreek concepts of democracy, rational inquiry, and individual rights form the foundation of Western civilization. The tension between Athenian democracy and Spartan authoritarianism remains relevant in political discourse today.\n\n## Discussion Question\nSocrates argued that \"the unexamined life is not worth living.\" How does this idea connect to the democratic principle that citizens should actively participate in governance?"
+          },
+          {
+            "title": "The Phoenicians: Masters of the Sea",
+            "content": "# The Phoenicians: Masters of the Sea\n\n## Who Were the Phoenicians?\nThe Phoenicians (c. 1500–300 BCE) inhabited the coastal strip of modern-day Lebanon, Syria, and northern Israel. They were among the ancient world's greatest traders, sailors, and cultural innovators.\n\n## Major City-States\n- **Tyre**: The wealthiest and most powerful Phoenician city, famous for Tyrian purple dye\n- **Sidon**: Renowned for glassmaking and metalwork\n- **Byblos**: One of the oldest continuously inhabited cities; the Greek word *biblos* (book) derives from it\n- **Carthage**: Founded by Tyre (814 BCE), became a Mediterranean superpower rivaling Rome\n\n## The Phoenician Alphabet\nPerhaps their most enduring contribution: the Phoenician alphabet (c. 1050 BCE)\n- **22 consonant letters** — no vowels (an abjad system)\n- Adapted from earlier Proto-Sinaitic/Proto-Canaanite scripts\n- Adopted and modified by the Greeks (who added vowels), then passed to the Romans\n- **Every alphabet used in Europe, the Middle East, and South Asia today** traces back to the Phoenician system\n\n## Maritime Innovation\n- Built the fastest and most seaworthy ships in the ancient world\n- Developed the **bireme** (two rows of oars) and possibly the trireme\n- Navigated by the stars — the constellation Ursa Minor was called the \"Phoenician Star\"\n- Established trade routes spanning the entire Mediterranean: from Lebanon to Spain, North Africa, and possibly Britain\n\n## Trade and Economy\nPhoenician exports included:\n1. **Tyrian purple dye** — Extracted from murex sea snails; so expensive it became associated with royalty\n2. **Cedar wood** — Prized for shipbuilding and temple construction (used in Solomon's Temple)\n3. **Glass** — Pioneered glassblowing techniques\n4. **Metalwork** — Bronze and silver objects traded throughout the Mediterranean\n\n## The Carthaginian Legacy\nCarthage, Phoenicia's greatest colony, built its own empire:\n- Controlled western Mediterranean trade for centuries\n- Hannibal Barca crossed the Alps with elephants to invade Italy (218 BCE)\n- Destroyed by Rome in the Third Punic War (146 BCE); city razed and salted\n\n## Key Takeaway\nThe Phoenicians remind us that cultural influence doesn't require military conquest. Through trade, navigation, and the alphabet, they shaped civilizations far beyond their small coastal homeland.\n\n## Research Activity\nCompare the Phoenician alphabet with the modern Arabic and Latin alphabets. Can you identify letter shapes that evolved from common Phoenician ancestors?"
+          }
+        ]
+      },
+      {
+        "title": "Module 2: Ancient River Valley Civilizations",
+        "lessons": [
+          {
+            "title": "Ancient Egypt: The Gift of the Nile",
+            "content": "# Ancient Egypt: The Gift of the Nile\n\n## Geography and the Nile\nHerodotus called Egypt \"the gift of the Nile\" — without the river's annual flood depositing fertile silt, civilization could not have flourished in the Sahara.\n\n## Timeline of Ancient Egypt\n- **Early Dynastic Period (c. 3100–2686 BCE)**: Unification of Upper and Lower Egypt under Narmer\n- **Old Kingdom (c. 2686–2181 BCE)**: Age of the pyramids — Djoser's Step Pyramid, Giza complex\n- **Middle Kingdom (c. 2055–1650 BCE)**: Cultural golden age; expansion into Nubia\n- **New Kingdom (c. 1550–1069 BCE)**: Egypt's imperial height — Hatshepsut, Akhenaten, Tutankhamun, Ramesses II\n- **Late Period and Ptolemaic Era**: Persian and Greek rule, ending with Cleopatra VII (30 BCE)\n\n## The Pharaoh and Ma'at\nThe pharaoh was both king and god — the living embodiment of Horus and son of Ra:\n- Responsible for maintaining **Ma'at** (cosmic order, truth, and justice)\n- Owned all land, commanded the army, and served as chief priest\n- Built monumental architecture to demonstrate divine power and ensure eternal life\n\n## The Pyramids\n- **Great Pyramid of Giza** (c. 2560 BCE): Built for Pharaoh Khufu; 2.3 million stone blocks, each averaging 2.5 tons\n- Originally stood 146.5 meters tall — the tallest human-made structure for 3,800 years\n- Aligned to the cardinal directions with remarkable precision (error < 0.05°)\n\n## Hieroglyphics and Writing\n- Egyptian writing system with ~700 symbols combining logographic and alphabetic elements\n- Used for religious texts, royal decrees, and monumental inscriptions\n- Deciphered in 1822 by Jean-François Champollion using the Rosetta Stone\n\n## Religion and the Afterlife\n- Polytheistic: Ra (sun), Osiris (afterlife), Isis (magic), Anubis (embalming)\n- **Mummification**: Elaborate 70-day process to preserve the body for the afterlife\n- **Book of the Dead**: Collection of spells to guide the deceased through the underworld\n- **Weighing of the Heart**: The heart was weighed against Ma'at's feather; failure meant destruction\n\n## Legacy\nEgyptian contributions to mathematics (base-10 system, geometry for land surveying), medicine (surgical papyri), and architecture influenced Greek, Roman, and modern civilizations.\n\n## Study Question\nHow did the geography of the Nile Valley shape Egyptian political organization, religion, and daily life? Consider what would have been different if Egypt had reliable rainfall instead of depending on annual floods."
+          },
+          {
+            "title": "Mesopotamia: The Cradle of Civilization",
+            "content": "# Mesopotamia: The Cradle of Civilization\n\n## The Land Between Two Rivers\nMesopotamia (Greek: \"between rivers\") occupied the fertile plain between the Tigris and Euphrates rivers in modern-day Iraq. It witnessed many of humanity's earliest innovations.\n\n## Major Civilizations\n\n### Sumerians (c. 4500–1900 BCE)\n- Built the world's first cities: Ur, Uruk, Eridu, Lagash\n- Invented **cuneiform** — the earliest known writing system (c. 3400 BCE)\n- Developed the sexagesimal (base-60) number system — why we have 60 seconds/minutes and 360°\n- Created the first legal codes, schools, and literary works\n\n### Akkadians (c. 2334–2154 BCE)\n- Sargon of Akkad created the world's first empire\n- Unified Sumer under a single ruler using a standing professional army\n- Akkadian language became the lingua franca of the ancient Near East\n\n### Babylonians (c. 1894–539 BCE)\n- **Hammurabi's Code** (c. 1754 BCE): 282 laws covering property, family, labor, and commerce — \"an eye for an eye\"\n- Advanced mathematics: Solved quadratic equations, understood the Pythagorean theorem 1,000 years before Pythagoras\n- **Hanging Gardens of Babylon**: One of the Seven Wonders of the Ancient World (existence debated)\n\n### Assyrians (c. 2500–609 BCE)\n- Built the most feared military machine of the ancient world\n- Developed iron weapons, siege warfare, and psychological terror tactics\n- **Library of Ashurbanipal** at Nineveh: 30,000+ clay tablets — the first systematically organized library\n\n## Key Innovations\n1. **Writing** (cuneiform on clay tablets)\n2. **The wheel** (c. 3500 BCE, initially for pottery)\n3. **Irrigation canals** (transformed arid land into farmland)\n4. **The plow** (increased agricultural productivity)\n5. **Astronomy** (identified constellations, predicted eclipses)\n6. **The Epic of Gilgamesh** — the world's oldest surviving work of literature\n\n## Religion\n- Polytheistic: Anu (sky), Enlil (wind), Enki (water), Inanna/Ishtar (love and war)\n- **Ziggurats**: Stepped pyramid temples — the dwelling place of the city's patron god\n- Priests held enormous power and managed temple estates\n\n## Decline\nMesopotamia was successively conquered by Persians (539 BCE), Greeks (331 BCE), and eventually absorbed into the Islamic caliphate (7th century CE).\n\n## Comparative Exercise\nCompare the Code of Hammurabi with modern legal principles. Which laws seem just by today's standards? Which seem harsh? What does this tell us about Babylonian society?"
+          },
+          {
+            "title": "The Indus Valley Civilization",
+            "content": "# The Indus Valley Civilization\n\n## A Forgotten Civilization\nThe Indus Valley Civilization (c. 3300–1300 BCE), also called the Harappan Civilization, was one of the world's three earliest urban civilizations, alongside Egypt and Mesopotamia. Yet it was unknown to modern scholars until the 1920s.\n\n## Geography\n- Centered on the Indus River basin in modern Pakistan and northwest India\n- Covered an area larger than ancient Egypt and Mesopotamia combined (~1.3 million km²)\n- Over 1,400 sites identified, from coastal Gujarat to the Afghan border\n\n## Major Cities\n\n### Mohenjo-daro (\"Mound of the Dead\")\n- Population: estimated 30,000–40,000\n- Remarkable urban planning: Grid-pattern streets, standardized brick sizes\n- The **Great Bath**: A large waterproof pool — possibly for ritual purification\n- Advanced drainage system with covered sewers running beneath the streets\n\n### Harappa\n- One of the first sites excavated (1921)\n- Large granaries suggesting centralized food storage\n- Evidence of craft specialization: bead-making, pottery, metalwork\n\n## Distinctive Features\n1. **Urban planning**: Cities built on a standardized grid — an achievement not seen again until the Romans\n2. **Sanitation**: Nearly every house had a private toilet and bath connected to a citywide drainage system\n3. **Standardized weights and measures**: Cube-shaped stone weights in precise ratios — evidence of regulated trade\n4. **No evidence of a palace or temple**: Unlike Egypt and Mesopotamia, there are no monumental buildings dedicated to a ruler or deity\n5. **No evidence of warfare**: No defensive walls, no weapons caches, no depictions of battles\n\n## The Undeciphered Script\n- Over 4,000 inscribed objects found (seals, tablets, pottery)\n- The script contains ~400 symbols — likely a mix of logographic and syllabic elements\n- **Still undeciphered** — one of the great unsolved puzzles of archaeology\n- Without reading their texts, we cannot know their language, religion, or political organization\n\n## Trade Networks\n- Traded with Mesopotamia (Indus seals found at Ur)\n- Exported: carnelian beads, cotton textiles, timber, ivory\n- Imported: tin, copper, gold, silver\n\n## Decline (c. 1900–1300 BCE)\nMultiple theories:\n- **Climate change**: Shifts in monsoon patterns dried up the Ghaggar-Hakra River\n- **Tectonic activity**: Earthquakes may have diverted rivers\n- **Gradual abandonment**: Cities were slowly depopulated, not violently destroyed\n- The population likely migrated eastward into the Ganges plain\n\n## Reflection\nThe Indus Valley Civilization challenges our assumptions about ancient societies. How do we explain a complex, urban civilization with no apparent monarchy, military, or monumental religious architecture? What does their emphasis on sanitation and standardization tell us about their values?"
+          }
+        ]
+      },
+      {
+        "title": "Module 3: Ancient East Asia",
+        "lessons": [
+          {
+            "title": "Ancient China: Dynasties and Philosophy",
+            "content": "# Ancient China: Dynasties and Philosophy\n\n## Overview\nChinese civilization is one of the oldest continuous civilizations in the world, with a written history stretching back over 3,500 years.\n\n## Key Dynasties\n\n### Shang Dynasty (c. 1600–1046 BCE)\n- First historically verified Chinese dynasty\n- Developed **oracle bone script** — earliest Chinese writing (used for divination)\n- Advanced bronze casting technology — ritual vessels of extraordinary complexity\n- Hierarchical society: king, nobles, artisans, peasants, slaves\n\n### Zhou Dynasty (c. 1046–256 BCE)\n- Longest-lasting dynasty in Chinese history\n- Introduced the **Mandate of Heaven**: A ruler's authority comes from divine approval, which can be withdrawn if the ruler is unjust\n- **Feudal system**: Land granted to lords in exchange for loyalty and military service\n- Later Zhou period saw the rise of China's greatest philosophers\n\n### Qin Dynasty (221–206 BCE)\n- **Qin Shi Huang** unified China and became the first Emperor\n- Standardized weights, measures, currency, and writing across the empire\n- Built the first version of the **Great Wall** and a national road network\n- The **Terracotta Army**: 8,000 life-size clay soldiers buried to protect the emperor in the afterlife\n- Ruthlessly authoritarian: burned books and buried scholars alive\n\n### Han Dynasty (206 BCE–220 CE)\n- Golden age of Chinese civilization\n- Opened the **Silk Road** connecting China to Rome\n- Invented **paper** (c. 105 CE), the compass, and the seismograph\n- Confucianism became the state ideology and the basis for the civil service exam\n\n## Chinese Philosophy\n\n### Confucius (551–479 BCE)\n- **Core idea**: Social harmony through proper relationships and moral cultivation\n- Five relationships: ruler-subject, parent-child, husband-wife, elder-younger, friend-friend\n- Emphasized **ren** (benevolence), **li** (ritual propriety), and **xiao** (filial piety)\n- The *Analects* record his teachings\n\n### Laozi and Daoism\n- **Core idea**: Live in harmony with the **Dao** (the Way) — the natural order of the universe\n- *Dao De Jing*: \"The Dao that can be spoken is not the true Dao\"\n- Values: Simplicity, spontaneity, non-action (wu wei), humility\n- Complementary to Confucianism: Confucius organized society; Daoism freed the individual\n\n### Legalism (Han Fei, Li Si)\n- **Core idea**: Humans are inherently selfish; only strict laws and harsh punishments maintain order\n- The philosophy that built the Qin Empire — and was blamed for its rapid collapse\n- Influence persists: Chinese political thought retains a strong legalist strand\n\n## Discussion\nCompare the Mandate of Heaven with the European concept of the \"divine right of kings.\" How do they differ in their implications for revolution and political change?"
+          },
+          {
+            "title": "Japan: From Jomon to the First Emperors",
+            "content": "# Japan: From Jomon to the First Emperors\n\n## The Japanese Archipelago\nJapan's geography — four main islands in a volcanic arc — profoundly shaped its civilization: isolation bred cultural uniqueness, while proximity to the continent allowed selective adoption of Chinese and Korean innovations.\n\n## Jomon Period (c. 14,000–300 BCE)\n- One of the world's earliest pottery traditions (possibly the earliest)\n- **Jomon** means \"cord-marked\" — pottery decorated by pressing twisted cords into wet clay\n- Hunter-gatherer-fishers who built semi-permanent settlements\n- Created distinctive clay figurines (dogū) — possibly used in fertility rituals or healing\n- Remarkably long-lived culture: ~13,000 years, making it one of the most stable societies in human history\n\n## Yayoi Period (c. 300 BCE–300 CE)\n- **Wet-rice agriculture** introduced from the Korean Peninsula transformed Japanese society\n- Iron and bronze tools replaced stone\n- Social stratification emerged: chiefs, warriors, farmers\n- Population grew rapidly as agriculture supported denser settlements\n- Chinese texts (*Wei Zhi*, 3rd century CE) describe Japan (\"Wa\") as a land of ~100 small kingdoms\n\n### Queen Himiko\n- Described in Chinese records as the shamaness-queen of **Yamatai**\n- Ruled through spiritual authority rather than military power\n- Sent ambassadors to the Chinese Wei court (239 CE)\n- Her exact location remains one of Japanese archaeology's greatest debates (Kyushu vs. Kinai)\n\n## Kofun Period (c. 300–538 CE)\n- Named after **kofun** — massive keyhole-shaped burial mounds\n- The largest, **Daisen Kofun** (attributed to Emperor Nintoku), is 486 meters long — larger in footprint than the Great Pyramid of Giza\n- Emergence of the **Yamato clan**, which claimed descent from the sun goddess Amaterasu\n- The Yamato leaders became the ancestors of the Japanese Imperial family — the world's oldest hereditary monarchy\n\n## The Arrival of Writing and Buddhism\n- Chinese writing system adopted (5th–6th century CE)\n- **Buddhism** arrived from Korea (538 or 552 CE)\n- Prince Shōtoku (574–622 CE) promoted Buddhism and Chinese-style governance\n- Issued the **Seventeen-Article Constitution** — a moral guide for officials blending Confucian, Buddhist, and Shinto principles\n\n## Key Themes\n1. **Selective borrowing**: Japan adopted Chinese writing, Buddhism, and governance structures but adapted them to local contexts\n2. **Continuity**: The Imperial line has remained unbroken (at least symbolically) for over 1,500 years\n3. **Nature and spirituality**: Shinto reverence for nature (kami) permeates Japanese culture from ancient times to the present\n\n## Research Task\nCompare the Jomon-to-Yayoi transition in Japan with the transition from hunter-gatherer to agricultural societies in Mesopotamia. What similarities and differences do you observe?"
+          },
+          {
+            "title": "The Silk Road: Connecting East and West",
+            "content": "# The Silk Road: Connecting East and West\n\n## What Was the Silk Road?\nThe Silk Road was not a single road but a vast network of overland and maritime trade routes connecting China to the Mediterranean world. It flourished from the 2nd century BCE to the 15th century CE.\n\n## Origins\n- **Zhang Qian** (c. 164–113 BCE): A Han dynasty envoy sent west by Emperor Wu to seek allies against the Xiongnu (nomadic raiders)\n- His 13-year journey opened diplomatic and commercial relations with Central Asian kingdoms\n- The Han court realized the West had a huge appetite for Chinese silk — trade exploded\n\n## The Routes\n### Overland Routes\n1. **Northern Route**: Chang'an → Dunhuang → Taklamakan Desert (north edge) → Kashgar → Samarkand → Persia → Mediterranean\n2. **Southern Route**: Chang'an → Dunhuang → Taklamakan Desert (south edge) → Khotan → Bactria → Persia\n3. **Steppe Route**: North of the Tian Shan mountains through Kazakh grasslands\n\n### Maritime Route\n- From Chinese ports (Guangzhou, Quanzhou) through the South China Sea, Strait of Malacca, Indian Ocean, Persian Gulf/Red Sea\n- Became increasingly important after the 7th century as overland routes faced political instability\n\n## What Was Traded?\n| Direction | Goods |\n|-----------|-------|\n| East → West | Silk, porcelain, tea, paper, gunpowder, lacquerware, spices |\n| West → East | Gold, silver, glass, wool, horses, grapevines, precious stones |\n\n## More Than Trade: The Exchange of Ideas\nThe Silk Road's most significant cargo was invisible — ideas:\n- **Buddhism**: Spread from India to Central Asia, China, Korea, and Japan\n- **Islam**: Spread along trade routes to Central Asia, western China, and Southeast Asia\n- **Technology**: Papermaking (China → Arab world → Europe), gunpowder, printing\n- **Art**: Gandharan Buddhist art blended Greek and Indian styles; Tang dynasty pottery shows Persian and Central Asian influences\n- **Science**: Indian numerals and the concept of zero traveled west, transforming mathematics\n\n## Key Cities Along the Route\n- **Samarkand** (Uzbekistan): Crossroads of civilizations; center of paper production after Chinese craftsmen were captured (751 CE)\n- **Dunhuang** (China): Oasis city; the Mogao Caves contain 1,000 years of Buddhist art in 492 painted caves\n- **Bukhara** (Uzbekistan): Center of Islamic scholarship; home of the great physician Ibn Sina (Avicenna)\n- **Constantinople/Istanbul**: Western terminus; gateway between Europe and Asia\n\n## The Silk Road's End\n- The fall of the Mongol Empire (14th century) fragmented the overland routes\n- The Ottoman Empire's control of eastern Mediterranean trade raised costs\n- European maritime exploration (15th century) created sea routes that bypassed the Silk Road entirely\n\n## Discussion\nThe Silk Road shows that cultural exchange is rarely one-directional. Choose one technology or idea that traveled along the Silk Road and trace how it was transformed by each civilization that adopted it."
+          }
+        ]
+      }
+    ],
+    "quizzes": [
+      {
+        "name": "Ancient Civilizations Quiz",
+        "description": "Test what you learned about Mesopotamia, Egypt, the Phoenicians and the Silk Road.",
+        "questions": [
+          {
+            "text": "Which writing system did the Mesopotamians invent?",
+            "choices": [
+              [
+                "Cuneiform",
+                true
+              ],
+              [
+                "Hieroglyphics",
+                false
+              ],
+              [
+                "The Phoenician alphabet",
+                false
+              ],
+              [
+                "Linear B",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "Who called Egypt \"the gift of the Nile\"?",
+            "choices": [
+              [
+                "Herodotus",
+                true
+              ],
+              [
+                "Plato",
+                false
+              ],
+              [
+                "Hammurabi",
+                false
+              ],
+              [
+                "Zhang Qian",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "Which Phoenician colony became a Mediterranean power rivaling Rome?",
+            "choices": [
+              [
+                "Carthage",
+                true
+              ],
+              [
+                "Tyre",
+                false
+              ],
+              [
+                "Babylon",
+                false
+              ],
+              [
+                "Samarkand",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "Which Han dynasty envoy was sent west by Emperor Wu, opening contacts that grew into the Silk Road?",
+            "choices": [
+              [
+                "Zhang Qian",
+                true
+              ],
+              [
+                "Confucius",
+                false
+              ],
+              [
+                "Khufu",
+                false
+              ],
+              [
+                "Hammurabi",
+                false
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "course_name": "Introduction to Islamic Art & Architecture",
+    "subject": "Art",
+    "description": "Calligraphy, architecture and geometric design across the Islamic world, from Thuluth script to Moroccan zellige.",
+    "modules": [
+      {
+        "title": "Module 1: Arabic Calligraphy Foundations",
+        "lessons": [
+          {
+            "title": "The Art of Thuluth Script",
+            "content": "# The Art of Thuluth Script\n\n## Overview\nThuluth is one of the most elegant and complex scripts in Islamic calligraphy. Its name means \"one-third,\" referring to the proportion of straight to curved strokes.\n\n## Historical Context\nThuluth emerged during the 7th century and reached its peak during the Ottoman Empire. It was primarily used for:\n- Mosque decorations and inscriptions\n- Quran chapter headings\n- Royal decrees and official documents\n\n## Key Characteristics\n1. **Tall vertical strokes** — Letters like Alif (ا) and Lam (ل) are elongated\n2. **Sweeping curves** — The baseline curves dramatically, giving a flowing rhythm\n3. **Diacritical marks** — Elaborate vowel marks add decorative flourishes\n4. **Ligatures** — Letters connect in complex, overlapping patterns\n\n## Anatomy of Thuluth Letters\n- **Ascenders**: Rise well above the baseline (e.g., ك, ل, ط)\n- **Descenders**: Drop below the baseline with wide loops (e.g., ر, و, ن)\n- **Bowls**: Rounded enclosed spaces within letters are generous and open\n\n## Modern Applications\nToday, Thuluth is used in:\n- Logo design for institutions in the Arab world\n- Contemporary art installations\n- Book cover design and typography\n- Architectural ornamentation in modern mosques\n\n## Practice Exercise\nTry writing the Basmala (بسم الله الرحمن الرحيم) in Thuluth style, focusing on:\n- Maintaining consistent letter height\n- Creating smooth, uninterrupted curves\n- Balancing dense and open areas within the composition"
+          },
+          {
+            "title": "Geometry in Islamic Calligraphy",
+            "content": "# Geometry in Islamic Calligraphy\n\n## The Mathematical Foundation\nIslamic calligraphy is deeply rooted in geometric principles. Calligraphers use a system of dots and circles to maintain precise proportions across all letters.\n\n## The Dot System (Nuqta)\nThe **rhombic dot** — created by pressing the pen nib at a 45° angle — is the fundamental unit of measurement:\n- The width of the Alif (ا) = 1 dot\n- The height of the Alif = varies by script (3–12 dots)\n- Spacing between words = 1 Alif width\n\n## The Circle Method\nA circle drawn with the Alif height as its diameter defines:\n- Maximum letter height (ascenders touch the top)\n- Maximum letter depth (descenders touch the bottom)\n- Proportional width of rounded letters (ص, ض, ط, ظ)\n\n## Golden Ratio in Calligraphy\nThe golden ratio (φ ≈ 1.618) appears naturally in:\n- The proportion between ascending and descending strokes\n- The spacing of words in a harmonious composition\n- The relationship between text blocks in manuscript layout\n\n## Practical Application\nWhen composing a calligraphic piece:\n1. Decide on a script and its dot-to-Alif ratio\n2. Draw guidelines based on multiples of the dot unit\n3. Sketch the composition lightly in pencil\n4. Execute the final piece with ink, maintaining geometric precision\n5. Add diacritical marks and decorative elements last\n\n## Key Takeaway\nUnderstanding the geometry behind calligraphy transforms it from mere handwriting into a precise, mathematical art form where beauty emerges from structure."
+          }
+        ]
+      },
+      {
+        "title": "Module 2: Islamic Architecture",
+        "lessons": [
+          {
+            "title": "The Mosque: Form and Function",
+            "content": "# The Mosque: Form and Function\n\n## Introduction\nThe mosque (masjid) is the central architectural expression of Islam. Its design has evolved over 14 centuries while maintaining core functional elements.\n\n## Essential Components\n1. **Prayer Hall (Musalla)** — The main covered space oriented toward Mecca\n2. **Mihrab** — A niche in the qibla wall indicating the direction of prayer\n3. **Minbar** — The pulpit from which the imam delivers the Friday sermon\n4. **Minaret** — The tower from which the adhan (call to prayer) is made\n5. **Courtyard (Sahn)** — An open space for overflow prayers and gathering\n6. **Ablution Fountain (Wudu area)** — Where worshippers perform ritual purification\n\n## Architectural Evolution\n- **Early period (7th–8th c.)**: Hypostyle plan — rows of columns supporting a flat roof (e.g., Great Mosque of Córdoba)\n- **Classical period (9th–13th c.)**: Four-iwan plan — four vaulted halls opening onto a central courtyard (e.g., Isfahan Friday Mosque)\n- **Ottoman period (15th–17th c.)**: Central dome plan — a single massive dome inspired by the Hagia Sophia (e.g., Süleymaniye Mosque)\n- **Modern period (20th c.–present)**: Experimental forms incorporating steel, glass, and concrete\n\n## The Qibla Orientation\nEvery mosque is oriented toward the Kaaba in Mecca. This orientation (qibla) determined:\n- The placement of the mihrab\n- The alignment of prayer rows\n- The entire urban layout of historic Islamic cities\n\n## Case Study: The Great Mosque of Córdoba\nBuilt in 784 CE, its forest of 856 columns with double-tiered horseshoe arches remains one of the most iconic spaces in world architecture. The alternating red and white voussoirs create a visual rhythm that echoes the repetitive patterns of Islamic art."
+          },
+          {
+            "title": "Muqarnas: Honeycomb Vaulting",
+            "content": "# Muqarnas: Honeycomb Vaulting\n\n## What Are Muqarnas?\nMuqarnas are a form of ornamental vaulting composed of small, niche-like cells arranged in tiers. They create a honeycomb or stalactite effect, typically found in:\n- Dome interiors\n- Squinches (corners transitioning from square to dome)\n- Entrance portals and window hoods\n- Cornices and capitals\n\n## Mathematical Structure\nDespite their organic appearance, muqarnas are based on strict geometric rules:\n- Each cell is derived from a **basic plan unit** (square, rhombus, or irregular polygon)\n- Cells are stacked in **concentric tiers** that project incrementally\n- The overall composition follows **radial symmetry** (4-fold, 6-fold, or 8-fold)\n\n## Historical Development\n1. **Origin (10th c.)**: First appeared in northeastern Iran and North Africa independently\n2. **Spread (11th–12th c.)**: Adopted across the Islamic world from Andalusia to Central Asia\n3. **Peak complexity (14th–15th c.)**: The Alhambra in Granada contains muqarnas with over 5,000 individual cells\n4. **Modern revival**: Computer-aided design allows architects to create parametric muqarnas\n\n## Cultural Significance\nMuqarnas embody core Islamic aesthetic principles:\n- **Infinity**: The fractal-like nesting suggests the infinite nature of creation\n- **Light play**: Cells catch and scatter light, creating a shimmering, immaterial effect\n- **Unity in multiplicity**: Thousands of individual cells form one coherent whole\n\n## Study Exercise\nExamine photos of the Hall of the Two Sisters in the Alhambra. Count how many tiers of muqarnas are visible and identify the base geometric shapes used in each tier."
+          },
+          {
+            "title": "Geometric Patterns in Islamic Tile Work",
+            "content": "# Geometric Patterns in Islamic Tile Work\n\n## The Language of Pattern\nIslamic geometric patterns are among the most sophisticated decorative systems ever developed. They transform simple shapes — circles, squares, triangles — into infinitely repeating designs of breathtaking complexity.\n\n## The Construction Process\n1. **Start with a grid** — A regular grid of squares, triangles, or hexagons\n2. **Draw circles** at grid intersections\n3. **Connect intersection points** to form a star or rosette\n4. **Extend lines** to create an interlocking network\n5. **Erase construction lines**, keeping only the final pattern\n6. **Color or tile** the resulting regions\n\n## Common Pattern Types\n- **6-fold patterns**: Based on equilateral triangles and hexagons. Common in Moroccan zellige.\n- **8-fold patterns**: Based on squares rotated 45°. Creates the classic octagonal star. Prevalent in Mamluk and Ottoman art.\n- **10-fold patterns**: Based on pentagons. Creates quasicrystalline patterns. Found in the Darb-i Imam shrine in Isfahan (1453), predating Western discovery of quasicrystals by 500 years.\n\n## Zellige: The Moroccan Tradition\nZellige (from Arabic زليج, \"polished stone\") is a mosaic tilework made from individually hand-chiseled geometric tiles:\n- Tiles are cut from larger glazed squares using a specialized hammer\n- Colors are traditionally limited to white, black, green, yellow, and blue\n- Patterns are assembled face-down on a flat surface, then set in plaster\n- A single fountain panel may contain over 10,000 individual pieces\n\n## Philosophical Dimensions\n- **Tawhid (Unity)**: The single underlying grid represents divine unity\n- **Tessellation**: The infinite repeatability mirrors the eternal nature of God\n- **Aniconism**: Abstract geometry avoids figurative representation, adhering to Islamic artistic tradition\n\n## Activity\nUsing compass and straightedge, construct a basic 8-fold rosette pattern starting from a square grid. Identify which polygons emerge (squares, kite shapes, 8-pointed stars)."
+          }
+        ]
+      },
+      {
+        "title": "Module 3: Islamic Art in the Modern World",
+        "lessons": [
+          {
+            "title": "Contemporary Islamic Artists",
+            "content": "# Contemporary Islamic Artists\n\n## Bridging Tradition and Modernity\nContemporary Islamic art draws on 14 centuries of tradition while engaging with global contemporary art movements. Artists navigate questions of identity, faith, and cultural heritage in a modern context.\n\n## Key Artists\n\n### eL Seed (born 1981, Tunisia/France)\n- Known for **calligraffiti** — monumental Arabic calligraphy as street art\n- Notable work: \"Perception\" (2016) — a mural spanning 50 buildings in Cairo's Zaraeeb district\n- Approach: Uses classical Arabic poetry and Quranic verses in urban contexts\n\n### Monir Shahroudy Farmanfarmaian (1924–2019, Iran)\n- Pioneer of **geometric mirror mosaics** inspired by traditional Iranian architecture\n- Combined Muqarnas geometry with Western minimalism\n- Works held at the Guggenheim, MoMA, and Tehran Museum of Contemporary Art\n\n### Ahmed Mater (born 1979, Saudi Arabia)\n- Explores the intersection of Islamic culture and rapid modernization\n- \"Magnetism\" series: Iron filings arranged around a magnet to form the shape of the Kaaba during Hajj\n- Documents the transformation of Mecca through photography and mixed media\n\n### Shirin Neshat (born 1957, Iran)\n- Photography and video art exploring gender, identity, and exile in Islamic societies\n- \"Women of Allah\" series: Portraits overlaid with Persian calligraphy\n- Won the Golden Lion at the Venice Film Festival (2009)\n\n## Themes in Contemporary Islamic Art\n1. **Identity and diaspora** — Navigating dual cultural identities\n2. **Sacred and secular** — Reinterpreting religious symbols in contemporary contexts\n3. **Urbanization** — Documenting the transformation of Islamic cities\n4. **Gender** — Challenging and exploring gender roles within Islamic frameworks\n5. **Calligraphy as liberation** — Freeing the written word from the page into space\n\n## Discussion Question\nHow do contemporary Islamic artists balance respect for tradition with the desire for artistic innovation? Choose one artist and analyze how their work bridges these two worlds."
+          },
+          {
+            "title": "Islamic Art in Museum Collections",
+            "content": "# Islamic Art in Museum Collections\n\n## The Global Reach of Islamic Art\nIslamic art spans three continents and 14 centuries. Major museum collections allow us to study objects ranging from 7th-century Quran manuscripts to 19th-century Ottoman textiles.\n\n## Major Collections Worldwide\n\n### The Metropolitan Museum of Art (New York)\n- Over 12,000 objects in the Islamic Art galleries\n- Highlights: The Damascus Room (1707), Simonetti Carpet, rock crystal ewer from Fatimid Egypt\n- Reopened in 2011 with redesigned galleries covering art from Spain to Southeast Asia\n\n### The Museum of Islamic Art (Doha, Qatar)\n- Designed by I.M. Pei, opened in 2008\n- Covers 1,400 years of Islamic art across three continents\n- Highlights: 9th-century Iraqi tiles, Mughal jewelry, Ottoman manuscripts\n\n### The Louvre (Paris)\n- Dedicated Islamic Art department opened in 2012\n- Housed beneath an undulating glass-and-metal roof by Mario Bellini\n- 3,000 objects on display from 18,000 in the collection\n\n### The Aga Khan Museum (Toronto)\n- Focused on Islamic artistic heritage and cross-cultural connections\n- Combines permanent collection with contemporary art exhibitions\n\n## Curatorial Challenges\n1. **Terminology**: \"Islamic art\" encompasses secular and sacred, Arab and non-Arab\n2. **Periodization**: How to organize art spanning the Umayyads to modern nation-states\n3. **Decontextualization**: Objects removed from their original architectural settings\n4. **Repatriation**: Ongoing debates about cultural property and colonial collecting\n\n## The Digital Turn\nMuseums are increasingly using:\n- **3D scanning** to create virtual models of architectural fragments\n- **Interactive displays** that reconstruct original contexts (e.g., a tile panel in its original mosque wall)\n- **Online databases** making collections accessible globally\n\n## Research Exercise\nVisit the Metropolitan Museum's online collection (metmuseum.org) and find three objects from different centuries and regions. For each, note the material, technique, and original function. What common aesthetic principles connect them?"
+          },
+          {
+            "title": "The Future of Islamic Art and Design",
+            "content": "# The Future of Islamic Art and Design\n\n## From Heritage to Innovation\nIslamic art and design are experiencing a renaissance driven by technology, globalization, and a new generation of designers who see tradition as a springboard, not a constraint.\n\n## Computational Islamic Geometry\nModern tools enable exploration that was impossible by hand:\n- **Parametric design software** (Grasshopper, Processing) generates infinite geometric variations from a single rule set\n- **3D printing** allows physical realization of complex muqarnas and geometric screens\n- **Generative algorithms** create patterns that follow traditional rules but produce novel results\n\n## Architecture: The New Wave\nContemporary architects are reimagining Islamic architectural elements:\n- **Mashrabiya reimagined**: Jean Nouvel's Louvre Abu Dhabi (2017) uses a layered dome of geometric stars to filter sunlight — a 21st-century mashrabiya\n- **Minaret as skyscraper**: The Abraj Al-Bait towers in Mecca integrate traditional minaret forms at an unprecedented scale\n- **Sustainable design**: Traditional Islamic architecture's natural cooling strategies (wind towers, courtyards, thick walls) are being studied for modern sustainable buildings\n\n## Typography and Branding\nArabic typography is evolving:\n- New digital Arabic typefaces balance readability with calligraphic beauty\n- Bilingual (Arabic-Latin) type design is a growing field\n- Brands across the Middle East are commissioning custom Arabic typefaces that reflect both heritage and modernity\n\n## Islamic Fashion and Textile Design\n- Modest fashion has become a global industry worth over $300 billion\n- Designers like Hana Tajima (for Uniqlo) blend Islamic modesty with contemporary aesthetics\n- Traditional textile techniques (ikat, suzani embroidery) inspire luxury fashion collections\n\n## The Challenge Ahead\nThe central question: How does Islamic art maintain its spiritual and philosophical depth while adapting to digital media, mass production, and global audiences?\n\n## Final Reflection\nWrite a short essay (300 words) proposing how one traditional Islamic art form (calligraphy, geometry, architecture, or textiles) could be reimagined for a 21st-century context. Consider both the opportunities and the risks of such a transformation."
+          }
+        ]
+      }
+    ],
+    "quizzes": [
+      {
+        "name": "Islamic Art & Architecture Quiz",
+        "description": "Check your understanding of mosque architecture, calligraphy and geometric ornament.",
+        "questions": [
+          {
+            "text": "In a mosque, what does the mihrab indicate?",
+            "choices": [
+              [
+                "The direction of prayer (qibla)",
+                true
+              ],
+              [
+                "The pulpit for the Friday sermon",
+                false
+              ],
+              [
+                "The tower for the call to prayer",
+                false
+              ],
+              [
+                "The ablution area",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "What does the name of the Thuluth script mean?",
+            "choices": [
+              [
+                "One-third",
+                true
+              ],
+              [
+                "The elegant one",
+                false
+              ],
+              [
+                "The sacred line",
+                false
+              ],
+              [
+                "The eternal script",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "How are muqarnas best described?",
+            "choices": [
+              [
+                "Ornamental vaulting made of niche-like cells arranged in tiers",
+                true
+              ],
+              [
+                "A cursive calligraphy script",
+                false
+              ],
+              [
+                "A mosaic of hand-chiseled tiles",
+                false
+              ],
+              [
+                "A prayer niche in the qibla wall",
+                false
+              ]
+            ]
+          },
+          {
+            "text": "What is zellige, the Moroccan tilework tradition?",
+            "choices": [
+              [
+                "A mosaic made from individually hand-chiseled geometric tiles",
+                true
+              ],
+              [
+                "A carved wooden screen",
+                false
+              ],
+              [
+                "A style of minaret",
+                false
+              ],
+              [
+                "A type of calligraphy ink",
+                false
+              ]
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

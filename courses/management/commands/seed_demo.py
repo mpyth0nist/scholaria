@@ -1,22 +1,41 @@
+"""
+Seed a complete, coherent demo: a teacher, three courses with modules,
+published lessons and quizzes, a student roster with enrollments, quiz
+attempts and lesson progress, and the RAG index for the AI tutor.
+
+Safe to rerun: content is synced by name, and the demo students' activity
+is regenerated from the same random seed, so counts stay the same.
+"""
 import datetime
+import json
 import os
 import random
 import re
 import unicodedata
+from contextlib import contextmanager
 from decimal import Decimal
+from pathlib import Path
 
 from django.conf import settings
+from django.contrib.auth.hashers import make_password
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
-from django.db.models import Count, Sum
+from django.db.models import Count, ProtectedError, Sum
 from django.db.models.signals import post_save
 from django.utils import timezone
 
-from courses.models import Course, Lesson, UserLessonProgress
+from courses.models import Course, Lesson, Module, UserLessonProgress
 from quizzes.models import Assignment, Choice, Question, Quiz, UserAnswer, UserAttempt
 from users.models import CustomUser
 
-# ── 20 Realistic Moroccan Students ───────────────────────────────────────────
+CONTENT_FILE = Path(__file__).with_name("demo_content.json")
+DEMO_EMAIL_DOMAIN = "scholaria.ai"
+DEFAULT_DEMO_PASSWORD = "ScholariaDemo2026!"
+
+# Account for trying the student experience; it gets enrollments but no
+# activity, so visitors can take quizzes and complete lessons themselves.
+DEMO_STUDENT = ("demo_student", "Sara", "Alaoui", datetime.date(2003, 2, 9))
+
 STUDENT_ROSTER = [
     ("Youssef", "El Amrani", datetime.date(2002, 4, 12)),
     ("Fatima-Zahra", "Benali", datetime.date(2003, 1, 25)),
@@ -40,6 +59,17 @@ STUDENT_ROSTER = [
     ("Imane", "Kadiri", datetime.date(2002, 6, 4)),
 ]
 
+# Roster indexes enrolled in each course, in demo_content.json order
+# (Computer Science, World History, Islamic Art). The ranges overlap so
+# some students take several courses.
+ENROLLMENT = [range(16), range(6, 20), range(12, 20)]
+
+# Created by earlier versions of this seeder with inconsistent data; --reset removes them
+LEGACY_COURSE_NAMES = ["Algorithmique & Structures de Données", "Développement Web & APIs"]
+
+QUIZ_TAKE_RATE = 0.8  # chance an enrolled student has taken a given quiz
+ACTIVITY_WINDOW_DAYS = 28
+
 
 def clean_name_for_username(name_str):
     """Normalizes string to lowercase ASCII alphanumeric."""
@@ -48,26 +78,64 @@ def clean_name_for_username(name_str):
     return re.sub(r"[^a-z0-9]", "", ascii_only)
 
 
+def roster_username(first_name, last_name):
+    return f"{clean_name_for_username(first_name)}.{clean_name_for_username(last_name)}"
+
+
+def demo_usernames():
+    return [roster_username(first, last) for first, last, _ in STUDENT_ROSTER] + [DEMO_STUDENT[0]]
+
+
+@contextmanager
+def ingestion_signals_paused():
+    """Seeding indexes everything once at the end instead of queueing a task per save."""
+    from courses.signals import on_lesson_saved
+    from quizzes.signals import on_assignment_saved, on_question_saved, on_quiz_saved
+
+    receivers = [
+        (on_lesson_saved, Lesson),
+        (on_quiz_saved, Quiz),
+        (on_question_saved, Question),
+        (on_assignment_saved, Assignment),
+    ]
+    for receiver, sender in receivers:
+        post_save.disconnect(receiver, sender=sender)
+    try:
+        yield
+    finally:
+        for receiver, sender in receivers:
+            post_save.connect(receiver, sender=sender)
+
+
 class Command(BaseCommand):
-    help = "Seed the database with realistic demo students, courses, quizzes, and attempts for the Teacher Dashboard."
+    help = "Seed a complete demo: teacher, courses with lessons and quizzes, students, activity and the RAG index."
 
     def add_arguments(self, parser):
         parser.add_argument(
             "--teacher",
-            type=str,
             default="youssef_kaddioui",
-            help="Username of the target teacher account (default: youssef_kaddioui).",
-        )
-        parser.add_argument(
-            "--reset",
-            action="store_true",
-            help="Remove previously seeded demo students and their attempts before seeding.",
+            help="Username of the demo teacher; created if missing (default: youssef_kaddioui).",
         )
         parser.add_argument(
             "--seed",
             type=int,
             default=42,
-            help="Random seed for reproducible, deterministic generation.",
+            help="Random seed for reproducible scores, answers and progress.",
+        )
+        parser.add_argument(
+            "--anchor-date",
+            type=datetime.date.fromisoformat,
+            help="Pin generated timestamps to this ISO date instead of now.",
+        )
+        parser.add_argument(
+            "--reset",
+            action="store_true",
+            help="Delete the demo students and demo courses before seeding.",
+        )
+        parser.add_argument(
+            "--skip-index",
+            action="store_true",
+            help="Do not build the RAG index (run `manage.py ingest_all_data` later).",
         )
         parser.add_argument(
             "--force",
@@ -76,374 +144,244 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args, **options):
-        # 1. Environment Safety Check
-        if not getattr(settings, "DEBUG", False) and not options.get("force"):
+        if not settings.DEBUG and not options["force"]:
             raise CommandError(
                 "Safety guard: seed_demo can only run when DEBUG=True. "
                 "Pass --force if you intentionally wish to seed in this environment."
             )
 
-        random.seed(options["seed"])
-        teacher_username = options["teacher"]
-        is_reset = options["reset"]
-        demo_password = os.getenv("DEMO_PASSWORD", getattr(settings, "DEMO_PASSWORD", "ScholariaDemo2026!"))
+        self.rng = random.Random(options["seed"])
+        anchor = options["anchor_date"]
+        self.now = (
+            datetime.datetime.combine(anchor, datetime.time(12), tzinfo=datetime.UTC)
+            if anchor else timezone.now()
+        )
+        password = os.getenv("DEMO_PASSWORD", getattr(settings, "DEMO_PASSWORD", DEFAULT_DEMO_PASSWORD))
+        # Hash once: every demo account shares the password, and hashing is slow by design
+        self.password_hash = make_password(password)
+        content = json.loads(CONTENT_FILE.read_text(encoding="utf-8"))
 
-        # Temporarily disconnect RAG ingestion signals to prevent Celery/Redis dependency during seed
-        signals_to_restore = []
-        try:
-            from courses.signals import on_lesson_saved
-            post_save.disconnect(on_lesson_saved, sender=Lesson)
-            signals_to_restore.append((on_lesson_saved, Lesson))
-        except (ImportError, Exception):  # noqa: S110
-            pass
+        with ingestion_signals_paused(), transaction.atomic():
+            if options["reset"]:
+                self._reset(options["teacher"], content)
+            teacher = self._get_teacher(options["teacher"])
+            courses = [self._sync_course(teacher, data) for data in content]
+            roster, demo_student = self._get_students()
+            enrolled = self._enroll(courses, roster, demo_student)
+            self._seed_activity(courses, enrolled, roster)
 
-        try:
-            from quizzes.signals import (
-                on_assignment_saved,
-                on_question_saved,
-                on_quiz_saved,
-            )
-            post_save.disconnect(on_quiz_saved, sender=Quiz)
-            post_save.disconnect(on_question_saved, sender=Question)
-            post_save.disconnect(on_assignment_saved, sender=Assignment)
-            signals_to_restore.extend([
-                (on_quiz_saved, Quiz),
-                (on_question_saved, Question),
-                (on_assignment_saved, Assignment),
-            ])
-        except (ImportError, Exception):  # noqa: S110
-            pass
+        if options["skip_index"]:
+            self.stdout.write("Skipped RAG indexing; run `manage.py ingest_all_data` before using the AI tutor.")
+        else:
+            self._index(courses)
 
-        try:
-            with transaction.atomic():
-                self._run_seeding(teacher_username, is_reset, demo_password)
-        finally:
-            # Reconnect signals
-            for receiver, sender_model in signals_to_restore:
-                post_save.connect(receiver, sender=sender_model)
+        self._print_summary(teacher, courses)
 
-    def _run_seeding(self, teacher_username, is_reset, demo_password):
-        self.stdout.write(self.style.MIGRATE_HEADING("=== Scholaria Demo Seeder ==="))
+    # ── Accounts ──────────────────────────────────────────────────────────────
 
-        # ── 1. Target Teacher Resolution ──────────────────────────────────────
-        teacher = CustomUser.objects.filter(username=teacher_username).first()
-        if not teacher:
-            self.stdout.write(f"Creating teacher account '{teacher_username}'...")
-            teacher = CustomUser.objects.create_user(
-                username=teacher_username,
-                password="yousef1234",
-                email=f"{teacher_username}@scholaria.net",
+    def _get_teacher(self, username):
+        teacher = CustomUser.objects.filter(username=username).first()
+        if teacher is None:
+            return CustomUser.objects.create(
+                username=username,
+                password=self.password_hash,
+                email=f"{username}@{DEMO_EMAIL_DOMAIN}",
                 first_name="Youssef",
                 last_name="Kaddioui",
                 role="Teacher",
                 birth_date=datetime.date(1990, 1, 1),
             )
-        elif teacher.role != "Teacher":
-            teacher.role = "Teacher"
-            teacher.save(update_fields=["role"])
+        if teacher.role != "Teacher":
+            raise CommandError(f"'{username}' exists but is not a Teacher; pass another --teacher.")
+        return teacher
 
-        self.stdout.write(
-            self.style.SUCCESS(f"Teacher locked: {teacher.get_full_name()} ({teacher.username})")
-        )
-
-        # ── 2. Handle --reset ─────────────────────────────────────────────────
-        if is_reset:
-            demo_students = CustomUser.objects.filter(
-                email__endswith="@scholaria.ai",
+    def _get_student(self, username, first_name, last_name, birth_date):
+        email = f"{username}@{DEMO_EMAIL_DOMAIN}"
+        student = CustomUser.objects.filter(username=username).first()
+        if student is None:
+            return CustomUser.objects.create(
+                username=username,
+                password=self.password_hash,
+                email=email,
+                first_name=first_name,
+                last_name=last_name,
                 role="Student",
-                is_staff=False,
-                is_superuser=False,
+                birth_date=birth_date,
             )
-            deleted_count = demo_students.count()
-            demo_students.delete()
-            self.stdout.write(
-                self.style.WARNING(f"Reset: Removed {deleted_count} demo students (and cascaded attempts).")
+        if student.email != email or student.role != "Student":
+            raise CommandError(f"Username '{username}' belongs to a non-demo account; resolve the collision first.")
+        return student
+
+    def _get_students(self):
+        roster = [
+            self._get_student(roster_username(first, last), first, last, birth_date)
+            for first, last, birth_date in STUDENT_ROSTER
+        ]
+        return roster, self._get_student(*DEMO_STUDENT)
+
+    # ── Content ───────────────────────────────────────────────────────────────
+
+    def _sync_course(self, teacher, data):
+        course, _ = Course.objects.update_or_create(
+            teacher=teacher,
+            course_name=data["course_name"],
+            defaults={
+                "subject": data["subject"],
+                "description": data["description"],
+                "published": True,
+                "is_published": True,
+            },
+        )
+        for order, module_data in enumerate(data["modules"], start=1):
+            module, _ = Module.objects.update_or_create(
+                course=course,
+                title=module_data["title"],
+                defaults={"order": order, "is_published": True},
             )
-
-        # ── 3. Courses Resolution ─────────────────────────────────────────────
-        teacher_courses = list(Course.objects.filter(teacher=teacher))
-        if not teacher_courses:
-            self.stdout.write("Teacher has no courses. Creating 2 realistic demo courses...")
-            c1 = Course.objects.create(
-                course_name="Algorithmique & Structures de Données",
-                subject="Informatique",
-                description="Concepts fondamentaux d'algorithmes, complexité et structures de données avancées.",
-                teacher=teacher,
-                is_published=True,
-                published=True,
-            )
-            c2 = Course.objects.create(
-                course_name="Développement Web & APIs",
-                subject="Informatique",
-                description="Architecture web moderne, développement d'APIs REST avec Django et bonnes pratiques.",
-                teacher=teacher,
-                is_published=True,
-                published=True,
-            )
-            teacher_courses = [c1, c2]
-        else:
-            self.stdout.write(f"Using {len(teacher_courses)} existing courses for teacher.")
-
-        # ── 4. Quizzes & Questions Resolution ─────────────────────────────────
-        teacher_quizzes = list(Quiz.objects.filter(teacher=teacher))
-        if len(teacher_quizzes) < 2:
-            self.stdout.write("Teacher has fewer than 2 quizzes. Creating demo quizzes...")
-            primary_course = teacher_courses[0]
-            secondary_course = teacher_courses[1] if len(teacher_courses) > 1 else teacher_courses[0]
-
-            q1_name = "Contrôle 1 : Algorithmes & Tris"
-            q2_name = "Contrôle 1 : REST APIs & Architecture"
-
-            due = timezone.now().date() + datetime.timedelta(days=30)
-
-            quiz1, _ = Quiz.objects.get_or_create(
-                name=q1_name,
-                teacher=teacher,
-                defaults={"course": primary_course, "due_date": due, "description": "Évaluation sur la complexité et les tris."},
-            )
-            quiz2, _ = Quiz.objects.get_or_create(
-                name=q2_name,
-                teacher=teacher,
-                defaults={"course": secondary_course, "due_date": due, "description": "Évaluation sur les conventions REST et Django."},
-            )
-
-            # Ensure questions exist for quiz 1
-            if quiz1.questions.count() == 0:
-                self._seed_quiz_questions(
-                    quiz1,
-                    [
-                        ("Quelle est la complexité temporelle moyenne du tri rapide (Quicksort) ?",
-                         [("O(n log n)", True), ("O(n^2)", False), ("O(n)", False), ("O(log n)", False)]),
-                        ("Quelle structure de données utilise le principe LIFO ?",
-                         [("Pile (Stack)", True), ("File (Queue)", False), ("Arbre binaire", False), ("Table de hachage", False)]),
-                        ("Dans le pire des cas, la recherche linéaire a une complexité de :",
-                         [("O(n)", True), ("O(1)", False), ("O(log n)", False), ("O(n log n)", False)]),
-                        ("Un arbre binaire de recherche équilibré garantit une recherche en :",
-                         [("O(log n)", True), ("O(n)", False), ("O(1)", False), ("O(n^2)", False)]),
-                    ]
+            for lesson_data in module_data["lessons"]:
+                Lesson.objects.update_or_create(
+                    module=module,
+                    title=lesson_data["title"],
+                    defaults={"content": lesson_data["content"], "is_published": True},
                 )
 
-            # Ensure questions exist for quiz 2
-            if quiz2.questions.count() == 0:
-                self._seed_quiz_questions(
-                    quiz2,
-                    [
-                        ("Quel code de statut HTTP indique une création réussie de ressource ?",
-                         [("201 Created", True), ("200 OK", False), ("204 No Content", False), ("202 Accepted", False)]),
-                        ("Quelle méthode HTTP doit être idempotente selon le standard REST ?",
-                         [("PUT", True), ("POST", False), ("PATCH", False), ("CONNECT", False)]),
-                        ("Dans Django REST Framework, quel composant transforme les QuerySets en JSON ?",
-                         [("Serializer", True), ("ModelForm", False), ("View", False), ("Router", False)]),
-                        ("Quel en-tête HTTP est standard pour l'authentification par Token JWT ?",
-                         [("Authorization: Bearer <token>", True), ("Auth-Token: <token>", False), ("Token: <token>", False), ("X-Auth: <token>", False)]),
-                    ]
-                )
-
-            teacher_quizzes = list(Quiz.objects.filter(teacher=teacher))
-
-        self.stdout.write(f"Using {len(teacher_quizzes)} quizzes for attempt seeding.")
-
-        # ── 5. Seed Students with Credentials ─────────────────────────────────
-        created_students = []
-        for first_name, last_name, b_date in STUDENT_ROSTER:
-            f_clean = clean_name_for_username(first_name)
-            l_clean = clean_name_for_username(last_name)
-            base_username = f"{f_clean}.{l_clean}"
-
-            # Ensure username fits 150-char constraint and resolves collisions deterministically
-            candidate = base_username
-            suffix = 2
-            while CustomUser.objects.filter(username=candidate).exclude(email=f"{candidate}@scholaria.ai").exists():
-                candidate = f"{base_username}{suffix}"
-                suffix += 1
-
-            email = f"{candidate}@scholaria.ai"
-
-            student, was_created = CustomUser.objects.get_or_create(
-                username=candidate,
+        for quiz_data in data["quizzes"]:
+            quiz, _ = Quiz.objects.get_or_create(
+                course=course,
+                name=quiz_data["name"],
                 defaults={
-                    "first_name": first_name,
-                    "last_name": last_name,
-                    "email": email,
-                    "role": "Student",
-                    "birth_date": b_date,
+                    "teacher": teacher,
+                    "description": quiz_data["description"],
+                    "due_date": self.now.date() + datetime.timedelta(days=30),
                 },
             )
-            if was_created:
-                student.set_password(demo_password)
-                student.save()
-            created_students.append(student)
+            # Questions are only created once: real attempts may reference them
+            if not quiz.questions.exists():
+                for question_data in quiz_data["questions"]:
+                    question = Question.objects.create(quiz=quiz, question_text=question_data["text"])
+                    Choice.objects.bulk_create(
+                        Choice(question=question, choice=text, is_correct=is_correct)
+                        for text, is_correct in question_data["choices"]
+                    )
+        return course
 
-        self.stdout.write(self.style.SUCCESS(f"Seeded {len(created_students)} demo students."))
-
-        # ── 6. Enrollment Coverage ────────────────────────────────────────────
-        # Varied distribution across courses:
-        # e.g. 14 students in Course 0, 7 students in Course 1 (2 overlapping, 1 unenrolled)
-        c0 = teacher_courses[0]
-        c1 = teacher_courses[1] if len(teacher_courses) > 1 else teacher_courses[0]
-
-        for s in created_students[:14]:
-            c0.student.add(s)
-
-        if c1 != c0:
-            for s in created_students[12:19]:
-                c1.student.add(s)
-
-        total_enrolled = (
-            CustomUser.objects
-            .filter(student_courses__teacher=teacher)
-            .distinct()
-            .count()
+    def _reset(self, teacher_username, content):
+        students = CustomUser.objects.filter(
+            username__in=demo_usernames(), email__endswith=f"@{DEMO_EMAIL_DOMAIN}", role="Student",
         )
-        self.stdout.write(f"Total enrolled students across teacher courses: {total_enrolled}")
-
-        # ── 7. Generate 50 Quiz Attempts ──────────────────────────────────────
-        # Target Distribution:
-        # 20% at 90-100% (10 attempts)
-        # 40% at 70-89%  (20 attempts)
-        # 25% at 50-69%  (13 attempts)
-        # 15% < 50%      (7 attempts)
-        score_pools = (
-            [round(random.uniform(90.0, 100.0), 1) for _ in range(10)]
-            + [round(random.uniform(70.0, 89.0), 1) for _ in range(20)]
-            + [round(random.uniform(50.0, 69.0), 1) for _ in range(13)]
-            + [round(random.uniform(20.0, 48.0), 1) for _ in range(7)]
+        courses = Course.objects.filter(
+            teacher__username=teacher_username,
+            course_name__in=[data["course_name"] for data in content] + LEGACY_COURSE_NAMES,
         )
-        random.shuffle(score_pools)
+        try:
+            # Attempts protect their quiz, so the students (and their attempts) go first
+            students.delete()
+            courses.delete()
+        except ProtectedError as exc:
+            raise CommandError(
+                "Reset blocked: non-demo students have attempts on demo quizzes. Remove them first."
+            ) from exc
+        self.stdout.write(self.style.WARNING("Reset: removed demo students and demo courses."))
 
-        now = timezone.now()
+    # ── Enrollment & activity ─────────────────────────────────────────────────
 
-        # The Top 5 latest attempts: 5 distinct students, alternating quizzes, last 48 hours
-        top5_students = created_students[:5]
-        top5_offsets_hours = [1.5, 5.0, 14.0, 23.0, 36.0]
-        top5_attempts_meta = []
+    def _enroll(self, courses, roster, demo_student):
+        enrolled = {}
+        for course, indexes in zip(courses, ENROLLMENT, strict=True):
+            students = [roster[i] for i in indexes]
+            course.student.add(*students, demo_student)
+            enrolled[course.id] = students
+        return enrolled
 
-        for idx, s in enumerate(top5_students):
-            q = teacher_quizzes[idx % len(teacher_quizzes)]
-            submitted_time = now - datetime.timedelta(hours=top5_offsets_hours[idx])
-            score_val = score_pools.pop()
-            top5_attempts_meta.append((s, q, score_val, submitted_time))
+    def _seed_activity(self, courses, enrolled, roster):
+        """Regenerate the roster's attempts and progress so reruns stay identical."""
+        lessons = Lesson.objects.filter(module__course__in=courses)
+        quizzes = Quiz.objects.filter(course__in=courses)
+        UserAttempt.objects.filter(student__in=roster, quiz__in=quizzes).delete()
+        UserLessonProgress.objects.filter(student__in=roster, lesson__in=lessons).delete()
 
-        # Remaining 45 attempts: spread across days 2 to 29
-        remaining_attempts_meta = []
-        enrolled_students = created_students[:18]  # leave a couple students with 0 attempts
+        # A stable per-student ability makes scores and progress look consistent
+        ability = {student.id: self.rng.uniform(0.45, 0.95) for student in roster}
 
-        for _ in range(45):
-            s = random.choice(enrolled_students)
-            q = random.choice(teacher_quizzes)
-            days_ago = random.uniform(2.0, 29.0)
-            submitted_time = now - datetime.timedelta(days=days_ago)
-            score_val = score_pools.pop()
-            remaining_attempts_meta.append((s, q, score_val, submitted_time))
-
-        all_attempts_meta = top5_attempts_meta + remaining_attempts_meta
-        # Sort so we create cleanly
-        all_attempts_meta.sort(key=lambda item: item[3], reverse=True)
-
-        attempts_created_count = 0
-        for student, quiz, score_val, sub_time in all_attempts_meta:
-            # Idempotency check: don't create identical attempt at the exact same second
-            attempt, created = UserAttempt.objects.get_or_create(
-                student=student,
-                quiz=quiz,
-                submitted_at=sub_time,
-                defaults={"score": Decimal(str(score_val))},
+        for course in courses:
+            course_lessons = list(
+                Lesson.objects.filter(module__course=course).order_by("module__order", "id")
             )
-            if created:
-                attempts_created_count += 1
-                self._seed_user_answers(attempt, quiz, score_val)
-
-        self.stdout.write(self.style.SUCCESS(f"Created {attempts_created_count} quiz attempts with answers."))
-
-        # ── 8. Seed Lesson Progress if Teacher has Lessons ────────────────────
-        teacher_lessons = list(Lesson.objects.filter(module__course__in=teacher_courses))
-        if teacher_lessons:
-            # Seed proportional progress to align course_engagement with ~60%
-            progress_count = 0
-            for lesson in teacher_lessons:
-                course_students = list(lesson.module.course.student.all())
-                target_completions = int(len(course_students) * 0.60)
-                for s in course_students[:target_completions]:
-                    _, p_created = UserLessonProgress.objects.get_or_create(student=s, lesson=lesson)
-                    if p_created:
-                        progress_count += 1
-            self.stdout.write(f"Seeded {progress_count} UserLessonProgress records for {len(teacher_lessons)} lessons.")
-
-        # ── 9. Final Dashboard Metric Verification ────────────────────────────
-        total_courses_count = Course.objects.filter(teacher=teacher).count()
-        total_students_count = CustomUser.objects.filter(student_courses__teacher=teacher).distinct().count()
-
-        # Engagement recalculation
-        total_expected_attempts = (
-            Quiz.objects.filter(teacher=teacher)
-            .annotate(enrolled=Count("course__student", distinct=True))
-            .aggregate(total=Sum("enrolled"))
-        )["total"] or 0
-
-        actual_completed = (
-            UserAttempt.objects
-            .filter(quiz__teacher=teacher, score__isnull=False)
-            .values("student", "quiz")
-            .distinct()
-            .count()
-        )
-        quiz_eng = (actual_completed / total_expected_attempts * 100) if total_expected_attempts > 0 else 0
-
-        recent_5 = (
-            UserAttempt.objects
-            .filter(quiz__teacher=teacher, score__isnull=False)
-            .select_related("student", "quiz")
-            .order_by("-submitted_at")[:5]
-        )
-
-        self.stdout.write(self.style.MIGRATE_HEADING("\n=== Teacher Dashboard Preview ==="))
-        self.stdout.write(f"Teacher          : {teacher.get_full_name()} (@{teacher.username})")
-        self.stdout.write(f"Total Courses    : {total_courses_count}")
-        self.stdout.write(f"Total Students   : {total_students_count}")
-        self.stdout.write(f"Quiz Engagement  : {quiz_eng:.1f}% ({actual_completed}/{total_expected_attempts} completed)")
-
-        self.stdout.write(self.style.MIGRATE_LABEL("\nRecent 5 Submissions:"))
-        for idx, att in enumerate(recent_5, 1):
-            self.stdout.write(
-                f" {idx}. {att.student.get_full_name():<22} | {att.quiz.name:<32} | {att.score}% | {att.submitted_at.strftime('%Y-%m-%d %H:%M')}"
+            course_quizzes = list(
+                Quiz.objects.filter(course=course).order_by("id").prefetch_related("questions__choices")
             )
+            for student in enrolled[course.id]:
+                # Students work through lessons in order
+                completed = round(ability[student.id] * len(course_lessons))
+                UserLessonProgress.objects.bulk_create(
+                    UserLessonProgress(student=student, lesson=lesson) for lesson in course_lessons[:completed]
+                )
+                for quiz in course_quizzes:
+                    if self.rng.random() < QUIZ_TAKE_RATE:
+                        self._create_attempt(student, quiz, ability[student.id])
 
-        self.stdout.write(
-            self.style.SUCCESS("\n✓ Demo data successfully seeded for Scholaria Teacher Dashboard!")
-        )
+    def _create_attempt(self, student, quiz, ability):
+        questions = list(quiz.questions.all())
+        # Squaring skews submissions toward recent days, so the dashboard looks active
+        days_ago = ACTIVITY_WINDOW_DAYS * self.rng.random() ** 2
+        submitted_at = self.now - datetime.timedelta(days=days_ago, minutes=10)
+        attempt = UserAttempt.objects.create(student=student, quiz=quiz, submitted_at=submitted_at)
 
-    def _seed_quiz_questions(self, quiz, questions_data):
-        for q_text, choices_data in questions_data:
-            question = Question.objects.create(quiz=quiz, question_text=q_text)
-            for c_text, is_corr in choices_data:
-                Choice.objects.create(question=question, choice=c_text, is_correct=is_corr)
-
-    def _seed_user_answers(self, attempt, quiz, score_val):
-        questions = list(quiz.questions.all().prefetch_related("choices"))
-        if not questions:
-            return
-
-        total_q = len(questions)
-        # Determine how many questions should be answered correctly based on score
-        target_correct = round(float(score_val) / 100.0 * total_q)
-
-        for idx, question in enumerate(questions):
+        correct = 0
+        for question in questions:
             choices = list(question.choices.all())
-            if not choices:
-                continue
-
-            correct_choices = [c for c in choices if c.is_correct]
-            incorrect_choices = [c for c in choices if not c.is_correct]
-
-            if idx < target_correct and correct_choices:
-                selected_choice = correct_choices[0]
-            elif incorrect_choices:
-                selected_choice = random.choice(incorrect_choices)
+            right = [c for c in choices if c.is_correct]
+            wrong = [c for c in choices if not c.is_correct]
+            if right and (not wrong or self.rng.random() < ability):
+                chosen = right
+                correct += 1
             else:
-                selected_choice = choices[0]
+                chosen = [self.rng.choice(wrong)]
+            answer = UserAnswer.objects.create(attempt=attempt, question=question)
+            answer.chosen_choices.add(*chosen)
 
-            ua = UserAnswer.objects.create(
-                attempt=attempt,
-                question=question,
-            )
-            ua.chosen_choices.add(selected_choice)
+        # Same formula as SubmitQuiz, so seeded scores match what grading would give
+        attempt.score = Decimal(correct * 100 / len(questions)).quantize(Decimal("0.01")) if questions else Decimal(0)
+        attempt.save(update_fields=["score"])
+
+    # ── RAG index ─────────────────────────────────────────────────────────────
+
+    def _index(self, courses):
+        from rag.ingest import ingest_searchable_object
+
+        objects = [
+            *Lesson.objects.filter(module__course__in=courses).select_related("module"),
+            *Quiz.objects.filter(course__in=courses),
+            *Question.objects.filter(quiz__course__in=courses).select_related("quiz").prefetch_related("choices"),
+        ]
+        try:
+            for obj in objects:
+                ingest_searchable_object(obj)
+        except Exception as exc:
+            self.stdout.write(self.style.WARNING(
+                f"RAG indexing failed ({exc}). The demo data is saved; run `manage.py ingest_all_data` to index it."
+            ))
+            return
+        self.stdout.write(self.style.SUCCESS(f"Indexed {len(objects)} lessons, quizzes and questions for the AI tutor."))
+
+    # ── Summary ───────────────────────────────────────────────────────────────
+
+    def _print_summary(self, teacher, courses):
+        quizzes = Quiz.objects.filter(course__in=courses)
+        expected = quizzes.annotate(enrolled=Count("course__student", distinct=True)).aggregate(
+            total=Sum("enrolled"))["total"] or 0
+        taken = (
+            UserAttempt.objects.filter(quiz__in=quizzes, score__isnull=False)
+            .values("student", "quiz").distinct().count()
+        )
+        students = CustomUser.objects.filter(student_courses__in=courses).distinct().count()
+        lessons = Lesson.objects.filter(module__course__in=courses).count()
+
+        self.stdout.write(self.style.MIGRATE_HEADING("\n=== Scholaria demo ready ==="))
+        self.stdout.write(f"Courses: {len(courses)}  Lessons: {lessons}  Quizzes: {quizzes.count()}  Students: {students}")
+        if expected:
+            self.stdout.write(f"Quiz engagement: {taken * 100 / expected:.1f}% ({taken}/{expected})")
+        self.stdout.write(f"Teacher login: {teacher.username}")
+        self.stdout.write(f"Student login: {DEMO_STUDENT[0]}")
+        self.stdout.write("Password for newly created demo accounts: the DEMO_PASSWORD env var, "
+                          f"or '{DEFAULT_DEMO_PASSWORD}' if unset.")
