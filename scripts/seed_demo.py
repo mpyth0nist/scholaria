@@ -20,11 +20,13 @@ from django.core.management.base import CommandError
 from django.db import transaction
 from django.utils import timezone
 
-from courses.management.commands.seed_demo import STUDENT_ROSTER, clean_name_for_username
+from courses.management.commands.seed_demo import (
+    STUDENT_ROSTER,
+    clean_name_for_username,
+)
 from courses.models import Course
 from quizzes.models import Quiz
 from users.models import CustomUser
-
 
 DEMO_COURSES = (
     "Algorithmique & Structures de Données",
@@ -89,7 +91,7 @@ def main():
 
     # The original management command uses timezone.now() for due dates and
     # generated attempt timestamps. Pin it for idempotent reruns with same args.
-    anchor = datetime.datetime.combine(args.anchor_date, datetime.time(12), tzinfo=datetime.timezone.utc)
+    anchor = datetime.datetime.combine(args.anchor_date, datetime.time(12), tzinfo=datetime.UTC)
     original_now = timezone.now
     timezone.now = lambda: anchor
     try:

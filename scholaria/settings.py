@@ -25,6 +25,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # DEFAULT LLM MODEL
 
 DEFAULT_LLM_MODEL = os.getenv('DEFAULT_MODEL_NAME', 'openai/gpt-oss-20b')
+# Small, fast model for the topic classifier and query rewriter
+RAG_UTILITY_MODEL = os.getenv('RAG_UTILITY_MODEL', 'llama-3.1-8b-instant')
 RAG_EMBEDDING_MODEL = os.getenv('RAG_EMBEDDING_MODEL', 'all-MiniLM-L6-v2')
 RAG_WARMUP = os.getenv('RAG_WARMUP', '1').lower() not in ('0', 'false', 'no')
 HF_HUB_OFFLINE = os.getenv('HF_HUB_OFFLINE', 'False').lower() in ('true', '1', 't')

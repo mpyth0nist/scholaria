@@ -1,6 +1,11 @@
 from django.urls import path
 
-from .views import ConversationDeleteView, ConversationListView, ConversationMessagesView, RAGAnswerView
+from .views import (
+    ConversationDeleteView,
+    ConversationListView,
+    ConversationMessagesView,
+    RAGAnswerView,
+)
 
 urlpatterns = [
     path('answer/', RAGAnswerView.as_view(), name='rag_answer'),

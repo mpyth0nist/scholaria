@@ -4,6 +4,7 @@ BEFORE Django migrations run. This is necessary because some migrations
 reference the vector type.
 """
 import os
+from unittest.mock import patch
 
 import psycopg2
 import pytest
@@ -77,3 +78,12 @@ def django_db_setup(django_test_environment, django_db_blocker):
 
     with django_db_blocker.unblock():
         teardown_databases(db_cfg, verbosity=0)
+
+@pytest.fixture(autouse=True)
+def _fake_ingest_embeddings():
+    """
+    Saving searchable models triggers ingestion (Celery runs eagerly in tests).
+    Stub the embedding model so tests never download or load it.
+    """
+    with patch('rag.ingest.embed_data', side_effect=lambda chunks: [[0.1] * 384 for _ in chunks]) as mock:
+        yield mock

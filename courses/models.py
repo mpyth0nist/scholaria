@@ -74,6 +74,9 @@ class Lesson(RAGSearchableMixin):
             }
         }
 
+    def is_rag_visible(self) -> bool:
+        return self.is_published
+
     def __str__(self):
         return self.title
 

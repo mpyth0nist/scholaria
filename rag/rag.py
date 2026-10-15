@@ -5,6 +5,7 @@ from functools import lru_cache
 from logging import getLogger
 
 import tiktoken
+from django.conf import settings
 from openai import (
     APIConnectionError,
     APIStatusError,
@@ -32,6 +33,10 @@ def get_encoder():
 
 class ServiceUnavailable(Exception):
     ''' Exception raised when an API call is timed out or rate limited'''
+
+
+class OffTopicQuery(Exception):
+    ''' Exception raised when a user-written question fails the topic guardrails'''
 
 
 SYSTEM_PROMPT_TEMPLATE = '''You are Edah (إيضاح), an AI learning companion embedded in the Scholaria LMS platform.
@@ -125,7 +130,7 @@ NO: "What's the best movie?", "Tell me a joke", "Who won the football game?" """
 
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model=settings.RAG_UTILITY_MODEL,
             messages=[
                 {"role": "system", "content": prompt},
                 {"role": "user", "content": query},
@@ -136,7 +141,8 @@ NO: "What's the best movie?", "Tell me a joke", "Who won the football game?" """
         answer = response.choices[0].message.content.strip().upper()
         return answer.startswith("YES")
     except Exception:
-        return True  
+        logger.warning('Topic classifier failed; allowing query through', exc_info=True)
+        return True
 
 
 def rag_search(query: str, courses_ids: list, top_k=5, lesson_id=None):
@@ -207,13 +213,14 @@ Do not include any explanations, prefixes, or conversational text. Return ONLY t
 
     try:
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model=settings.RAG_UTILITY_MODEL,
             messages=messages,
             temperature=0.0,
             max_tokens=50
         )
         return response.choices[0].message.content.strip().strip('"').strip("'")
     except Exception:
+        logger.warning('Query rewriter failed; using the raw query', exc_info=True)
         return raw_query
 
 def llm(query, courses_ids, model_name, user, conversation_id=None, lesson_id=None):
@@ -392,6 +399,12 @@ def explain_selection(
     )
     system_prompt = _INLINE_SYSTEM_PROMPT.format(course_scope=course_scope)
 
+    # The follow-up is free text, so it goes through the same guardrails as chat
+    if extra_question:
+        extra_question = clean_text(extra_question[:500])
+        if is_off_topic_keyword(extra_question) or not is_on_topic(extra_question, course_names=course_names):
+            raise OffTopicQuery()
+
     # RAG: lesson-scoped chunks, skip any that already contain the selection
     raw_chunks = rag_search(selected_text[:500], courses_ids, top_k=4, lesson_id=lesson_id)
     encoder = get_encoder()
@@ -414,9 +427,8 @@ def explain_selection(
         f"Surrounding context:\n{surrounding_text}\n\n"
         f"Task: {_ACTION_INSTRUCTIONS[action]}"
     )
-    # Topic filter only applied to extra_question, not to the selection itself
     if extra_question:
-        user_msg += f"\n\nFollow-up question: {clean_text(extra_question[:500])}"
+        user_msg += f"\n\nFollow-up question: {extra_question}"
 
     messages = [
         {"role": "system", "content": system_msg},

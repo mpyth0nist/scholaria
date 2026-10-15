@@ -26,16 +26,12 @@ def should_warmup() -> bool:
             return False
         # In runserver auto-reload, parent process monitors while child process serves requests (RUN_MAIN='true')
         noreload = "--noreload" in sys.argv
-        if not noreload and os.environ.get("RUN_MAIN") != "true":
-            return False
-        return True
+        return noreload or os.environ.get("RUN_MAIN") == "true"
 
     # Skip standalone python scripts and one-liners
     script_name = os.path.basename(sys.argv[0]) if sys.argv else ""
-    if (script_name.endswith(".py") and script_name not in ("wsgi.py", "asgi.py")) or script_name == "-c":
-        return False
-
-    return True
+    is_script = script_name.endswith(".py") and script_name not in ("wsgi.py", "asgi.py")
+    return not (is_script or script_name == "-c")
 
 
 class RagConfig(AppConfig):
