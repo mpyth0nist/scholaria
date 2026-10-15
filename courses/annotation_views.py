@@ -11,7 +11,13 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from courses.models import Course, Lesson, LessonAnnotation
-from rag.rag import INLINE_ACTIONS, ServiceUnavailable, explain_selection
+from rag.rag import (
+    INLINE_ACTIONS,
+    OFF_TOPIC_RESPONSE,
+    OffTopicQuery,
+    ServiceUnavailable,
+    explain_selection,
+)
 from scholaria.throttles import LLMRateThrottle
 
 logger = logging.getLogger(__name__)
@@ -58,7 +64,7 @@ class InlineExplainView(APIView):
         surrounding_text = request.data.get('surrounding_text', '').strip()
         action = request.data.get('action', '').strip()
         language = request.data.get('language', 'en').strip()
-        extra_question = request.data.get('extra_question', None)
+        extra_question = str(request.data.get('extra_question') or '').strip() or None
 
         # Validate required fields
         if not selected_text:
@@ -72,9 +78,11 @@ class InlineExplainView(APIView):
 
         courses_ids = _check_lesson_enrollment(request.user, lesson)
 
-        # Exact-match cache lookup
+        # The cache is shared between users, so only plain selections use it.
+        # A follow-up question makes the answer specific to whoever asked it.
+        use_cache = not extra_question
         cache_key = _annotation_cache_key(lesson_id, selected_text, action, language)
-        cached_text = cache.get(cache_key)
+        cached_text = cache.get(cache_key) if use_cache else None
         if cached_text:
             logger.debug('Annotation cache hit for key %s', cache_key)
             annotation_id = _get_cached_annotation_id(request.user, lesson, selected_text, action, language, cached_text)
@@ -100,6 +108,10 @@ class InlineExplainView(APIView):
             )
         except ValueError as exc:
             raise ValidationError({'action': str(exc)})
+        except OffTopicQuery:
+            def refusal_stream():
+                yield OFF_TOPIC_RESPONSE
+            return StreamingHttpResponse(refusal_stream(), content_type='text/plain')
         except ServiceUnavailable:
             logger.exception('Groq unavailable (inline explain)')
             return Response({'error': 'AI service is temporarily unavailable.'}, status=503)
@@ -124,8 +136,8 @@ class InlineExplainView(APIView):
                 language=language,
                 response=full_text,
             )
-            # Populate cache
-            cache.set(cache_key, full_text, timeout=ANNOTATION_CACHE_TIMEOUT)
+            if use_cache:
+                cache.set(cache_key, full_text, timeout=ANNOTATION_CACHE_TIMEOUT)
             # Emit annotation id as a trailing sentinel line so the client can capture it
             yield f"\n\nX-Annotation-Id:{annotation.id}"
 

@@ -35,6 +35,10 @@ class ServiceUnavailable(Exception):
     ''' Exception raised when an API call is timed out or rate limited'''
 
 
+class OffTopicQuery(Exception):
+    ''' Exception raised when a user-written question fails the topic guardrails'''
+
+
 SYSTEM_PROMPT_TEMPLATE = '''You are Edah (إيضاح), an AI learning companion embedded in the Scholaria LMS platform.
 
 {course_scope}
@@ -395,6 +399,12 @@ def explain_selection(
     )
     system_prompt = _INLINE_SYSTEM_PROMPT.format(course_scope=course_scope)
 
+    # The follow-up is free text, so it goes through the same guardrails as chat
+    if extra_question:
+        extra_question = clean_text(extra_question[:500])
+        if is_off_topic_keyword(extra_question) or not is_on_topic(extra_question, course_names=course_names):
+            raise OffTopicQuery()
+
     # RAG: lesson-scoped chunks, skip any that already contain the selection
     raw_chunks = rag_search(selected_text[:500], courses_ids, top_k=4, lesson_id=lesson_id)
     encoder = get_encoder()
@@ -417,9 +427,8 @@ def explain_selection(
         f"Surrounding context:\n{surrounding_text}\n\n"
         f"Task: {_ACTION_INSTRUCTIONS[action]}"
     )
-    # Topic filter only applied to extra_question, not to the selection itself
     if extra_question:
-        user_msg += f"\n\nFollow-up question: {clean_text(extra_question[:500])}"
+        user_msg += f"\n\nFollow-up question: {extra_question}"
 
     messages = [
         {"role": "system", "content": system_msg},
