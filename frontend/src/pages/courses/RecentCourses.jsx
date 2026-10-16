@@ -43,7 +43,10 @@ const CourseCard = ({ course, isTeacher, onClose }) => {
 
             {/* Content */}
             <div className="flex flex-col flex-1 p-4">
-                <h3 className="font-serif font-bold text-text text-base leading-tight line-clamp-1">
+                <h3 
+                    className="font-serif font-bold text-text text-base leading-tight line-clamp-1 break-words"
+                    title={course.course_name}
+                >
                     {course.course_name}
                 </h3>
                 {course.subject && (
@@ -99,7 +102,10 @@ const CourseBubble = ({ course, index, onClick }) => (
         </div>
 
         {/* Label */}
-        <span className="text-xs font-bold text-primary/80 group-hover:text-text text-center max-w-[125px] line-clamp-2 transition-colors duration-200 uppercase tracking-wider font-sans">
+        <span 
+            className="text-xs font-bold text-primary/80 group-hover:text-text text-center max-w-[125px] line-clamp-2 break-words transition-colors duration-200 uppercase tracking-wider font-sans"
+            title={course.course_name}
+        >
             {course.course_name}
         </span>
     </button>

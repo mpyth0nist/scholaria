@@ -53,7 +53,12 @@ const CoursesList = ({ page }) => {
 
                     {/* Info */}
                     <div className="p-4 md:p-5 flex flex-col flex-1">
-                        <h3 className="text-text font-serif font-bold text-lg leading-tight line-clamp-2 min-h-[3.5rem]">{course.course_name}</h3>
+                        <h3 
+                            className="text-text font-serif font-bold text-lg leading-tight line-clamp-2 break-words" 
+                            title={course.course_name}
+                        >
+                            {course.course_name}
+                        </h3>
                         {course.subject && (
                             <p className="text-primary text-xs uppercase tracking-[0.15em] font-sans mt-1 font-semibold">{course.subject}</p>
                         )}

@@ -20,7 +20,7 @@ const AddLessonForm = ({ moduleId, onCreated }) => {
         if (!title.trim() || !content) return
         setLoading(true)
         try {
-            await api.post(`api/courses/${moduleId}/add-lesson/`, { title, content })
+            await api.post(`api/courses/${moduleId}/add-lesson/`, { title, content, is_published: true })
             setTitle('')
             setContent('')
             setAttachment(null)
