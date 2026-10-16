@@ -79,6 +79,7 @@ const PROSE = `
     [&_p]:mb-3   [&_p]:leading-relaxed
     [&_div]:mb-1 [&_div]:leading-relaxed
     [&_strong]:font-bold [&_em]:italic [&_u]:underline
+    [&_a]:text-action [&_a]:underline [&_a]:cursor-pointer
     [&_span]:leading-[inherit]
     [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
     [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
@@ -92,10 +93,11 @@ const PROSE = `
     [&_td]:px-4 [&_td]:py-2 [&_td]:border-b [&_td]:border-current/10
 `
 
-const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson content here…' }) => {
+const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson content here…', hasError = false }) => {
     const editorRef = useRef(null)
 
-    const [activeColor,  setActiveColor]  = useState('#f1f5f9')
+    // Fix #18: initialize activeColor to the actual default color hex, not the old light-theme value
+    const [activeColor,  setActiveColor]  = useState(COLORS[0].hex)
     const [showColors,   setShowColors]   = useState(false)
     const [activeBlock,  setActiveBlock]  = useState('p')
     const [activeStyles, setActiveStyles] = useState({ bold: false, italic: false, underline: false, ul: false, ol: false })
@@ -103,9 +105,20 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
     const [showFonts,    setShowFonts]    = useState(false)
     const [fontSize,     setFontSize]     = useState(16)
     const [showSizes,    setShowSizes]    = useState(false)
+    // Fix #15: link insertion state
+    const [showLinkInput, setShowLinkInput] = useState(false)
+    const [linkUrl, setLinkUrl] = useState('')
+    const savedRangeRef = useRef(null)
 
-    const closeAll = () => { setShowColors(false); setShowFonts(false); setShowSizes(false) }
+    // Fix #7: track whether focus is inside the editor widget (editor area or toolbar)
+    // so closing dropdowns on blur only fires when focus truly leaves the whole widget.
+    const widgetRef = useRef(null)
 
+    const closeAll = () => { setShowColors(false); setShowFonts(false); setShowSizes(false); setShowLinkInput(false) }
+
+    // Fix #3: when `value` is externally reset to '' (e.g. after a successful submit),
+    // sync the contentEditable DOM. We only write to the DOM when the value is truly
+    // empty and the editor has stale content, to avoid fighting the user while typing.
     useEffect(() => {
         const el = editorRef.current
         if (!el) return
@@ -117,7 +130,17 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [])
 
-    // ── FIX 3: read font-family from cursor position ──────────────────────────
+    // When value is reset externally to empty string (e.g. post-submit),
+    // clear the DOM so the placeholder re-appears.
+    useEffect(() => {
+        const el = editorRef.current
+        if (!el) return
+        if (value === '' && el.innerHTML !== '') {
+            el.innerHTML = ''
+        }
+    }, [value])
+
+    // ── read toolbar state from current cursor position ───────────────────────
     const syncState = useCallback(() => {
         setActiveStyles({
             bold:      document.queryCommandState('bold'),
@@ -133,18 +156,24 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         const color = document.queryCommandValue('foreColor')
         if (color) setActiveColor(color)
 
-        // Walk from cursor node up to detect the effective font-family
+        // Walk from cursor node up to detect the effective font-family AND font-size
         const sel = window.getSelection()
         if (sel && sel.rangeCount > 0) {
             const el = closestEl(sel.getRangeAt(0).startContainer)
             if (el && editorRef.current?.contains(el)) {
-                const computedFamily = window.getComputedStyle(el).fontFamily
-                const primary = extractFamilyName(computedFamily)
+                const computed = window.getComputedStyle(el)
+
+                // Font family
+                const primary = extractFamilyName(computed.fontFamily)
                 const match = FONTS.find(f =>
                     extractFamilyName(f.value) === primary ||
                     f.value.toLowerCase().includes(primary)
                 )
                 if (match) setActiveFont(match.value)
+
+                // Font size — Bug fix: sync panel to actual cursor size
+                const px = Math.round(parseFloat(computed.fontSize))
+                if (!isNaN(px) && px > 0) setFontSize(px)
             }
         }
     }, [])
@@ -156,56 +185,56 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         onChange(editorRef.current?.innerHTML ?? '')
     }, [onChange, syncState])
 
-    const applyColor = (c) => { setActiveColor(c.hex); setShowColors(false); exec('foreColor', c.hex) }
+    // Bug fix: for the "Default" colour, use styleWithCSS so the browser emits
+    // `<span style="color: inherit">` instead of `<font color="#132A13">`.
+    // `color: inherit` correctly picks up the theme's text colour (white in dark
+    // mode, dark in light mode) rather than hardcoding the dark-green hex.
+    const applyColor = (c) => {
+        setActiveColor(c.hex)
+        setShowColors(false)
+        editorRef.current?.focus()
+        if (c.value === 'inherit') {
+            try {
+                document.execCommand('styleWithCSS', false, 'true')
+                document.execCommand('foreColor', false, 'inherit')
+            } finally {
+                document.execCommand('styleWithCSS', false, 'false')
+            }
+            syncState()
+            onChange(editorRef.current?.innerHTML ?? '')
+        } else {
+            exec('foreColor', c.hex)
+        }
+    }
     const applyFont  = (val) => { setActiveFont(val); setShowFonts(false); exec('fontName', val) }
 
-    // ── FIX 1: H1/H2 inline on selection, block on cursor-only ───────────────
+    // Fix #13: always use proper block-level heading elements.
+    // `formatBlock` wraps the entire paragraph that contains the cursor, whether
+    // or not there is a selection — which is the correct semantic behaviour.
+    // The old "inline span for selections" approach produced non-semantic markup
+    // that didn't match the heading CSS applied at render time.
     const applyHeading = (level) => {
         editorRef.current?.focus()
         const sel = window.getSelection()
-        const hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed
-
-        if (!hasSelection) {
-            // No selection → format the whole block (expected behaviour)
-            document.execCommand('formatBlock', false, level)
-            setActiveBlock(level)
-            onChange(editorRef.current?.innerHTML ?? '')
-            return
-        }
-
-        // Has selection → apply inline heading-style span
-        const HEADING_STYLES = {
-            h1: 'font-size:2em;font-weight:bold;',
-            h2: 'font-size:1.5em;font-weight:bold;',
-        }
-
-        const range  = sel.getRangeAt(0)
-        const frag   = range.cloneContents()
-        const tmp    = document.createElement('div')
-        tmp.appendChild(frag)
-        const inner  = tmp.innerHTML || sel.toString()
-
-        document.execCommand('insertHTML', false,
-            `<span style="${HEADING_STYLES[level]}">${inner}</span>`)
-        setActiveBlock(level)
+        // If the current block is already this heading level, toggle back to <p>
+        const currentBlock = document.queryCommandValue('formatBlock').toLowerCase()
+        const targetLevel = currentBlock === level ? 'p' : level
+        document.execCommand('formatBlock', false, targetLevel)
+        setActiveBlock(targetLevel)
         onChange(editorRef.current?.innerHTML ?? '')
     }
 
+    // Fix #12: "Body" only converts the block type to <p>, it does NOT strip
+    // inline formatting (bold/italic/underline/color). Users who want to clear
+    // formatting can use the ✕ Clear button instead.
     const applyBody = () => {
         editorRef.current?.focus()
-        const sel = window.getSelection()
-        const hasSelection = sel && sel.rangeCount > 0 && !sel.getRangeAt(0).collapsed
-
-        if (hasSelection) {
-            document.execCommand('removeFormat', false, null)
-        } else {
-            document.execCommand('formatBlock', false, 'p')
-        }
+        document.execCommand('formatBlock', false, 'p')
         setActiveBlock('p')
         onChange(editorRef.current?.innerHTML ?? '')
     }
 
-    // ── FIX 2: preserve computed font-family when applying font size ──────────
+    // preserve computed font-family when applying font size
     const applyFontSize = (px) => {
         setFontSize(px)
         setShowSizes(false)
@@ -229,6 +258,43 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         onChange(editorRef.current?.innerHTML ?? '')
     }
 
+    // Fix #15: link insertion — save selection before showing the URL input
+    // (focusing the input would otherwise lose the editor selection)
+    const handleLinkButtonClick = () => {
+        editorRef.current?.focus()
+        const sel = window.getSelection()
+        if (sel && sel.rangeCount > 0) {
+            savedRangeRef.current = sel.getRangeAt(0).cloneRange()
+        }
+        setLinkUrl('')
+        setShowLinkInput(v => !v)
+        setShowColors(false)
+        setShowFonts(false)
+        setShowSizes(false)
+    }
+
+    const insertLink = () => {
+        if (!linkUrl.trim()) { setShowLinkInput(false); return }
+        const url = linkUrl.startsWith('http') ? linkUrl : `https://${linkUrl}`
+        editorRef.current?.focus()
+        // Restore saved selection so the link wraps the originally selected text
+        if (savedRangeRef.current) {
+            const sel = window.getSelection()
+            sel.removeAllRanges()
+            sel.addRange(savedRangeRef.current)
+            savedRangeRef.current = null
+        }
+        document.execCommand('createLink', false, url)
+        // Make links open in a new tab
+        editorRef.current?.querySelectorAll('a').forEach(a => {
+            a.target = '_blank'
+            a.rel = 'noopener noreferrer'
+        })
+        setLinkUrl('')
+        setShowLinkInput(false)
+        onChange(editorRef.current?.innerHTML ?? '')
+    }
+
     const handleInput = () => { onChange(editorRef.current?.innerHTML ?? ''); syncState() }
 
     // Pasted Markdown (from a text editor, a README, an AI chat's copy button)
@@ -242,10 +308,25 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         handleInput()
     }
 
+    // Fix #7: close dropdowns only when focus leaves the entire widget,
+    // not when it briefly moves from editor → toolbar button.
+    const handleWidgetBlur = (e) => {
+        const widget = widgetRef.current
+        // relatedTarget is the element receiving focus; if it's inside the widget, don't close.
+        if (widget && widget.contains(e.relatedTarget)) return
+        closeAll()
+    }
+
     const activeFontLabel = FONTS.find(f => f.value === activeFont)?.label ?? 'Font'
 
     return (
-        <div className="flex flex-col rounded-xl border border-primary/20 overflow-hidden focus-within:border-action transition">
+        // Fix #7: attach blur handler to the outer widget container, not just the editable div
+        <div
+            ref={widgetRef}
+            onBlur={handleWidgetBlur}
+            className={`flex flex-col rounded-xl border overflow-hidden focus-within:border-action transition
+                ${hasError ? 'border-danger' : 'border-primary/20'}`}
+        >
 
             {/* ── toolbar ── */}
             <div className="flex flex-wrap items-center gap-1 px-3 py-2 bg-surface border-b border-primary/20">
@@ -255,7 +336,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                     <button
                         type="button"
                         title="Font family"
-                        onMouseDown={(e) => { e.preventDefault(); setShowFonts(v => !v); setShowColors(false); setShowSizes(false) }}
+                        onMouseDown={(e) => { e.preventDefault(); setShowFonts(v => !v); setShowColors(false); setShowSizes(false); setShowLinkInput(false) }}
                         className="flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm text-text/80 hover:bg-primary/10 hover:text-text transition select-none min-w-[108px] justify-between"
                         style={{ fontFamily: activeFont }}
                     >
@@ -286,7 +367,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                     <button
                         type="button"
                         title="Font size"
-                        onMouseDown={(e) => { e.preventDefault(); setShowSizes(v => !v); setShowColors(false); setShowFonts(false) }}
+                        onMouseDown={(e) => { e.preventDefault(); setShowSizes(v => !v); setShowColors(false); setShowFonts(false); setShowLinkInput(false) }}
                         className="flex items-center gap-1 px-2.5 py-1.5 rounded-md text-sm text-text/80 hover:bg-primary/10 hover:text-text transition select-none min-w-[52px] justify-between"
                     >
                         <span>{fontSize}px</span>
@@ -313,10 +394,10 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
 
                 <ToolbarDivider />
 
-                {/* Text type */}
-                <ToolBtn onClick={applyBody}          active={activeBlock === 'p'}  title="Regular text">¶ Body</ToolBtn>
-                <ToolBtn onClick={() => applyHeading('h2')} active={activeBlock === 'h2'} title="Heading 2 — applies to selection only">H2</ToolBtn>
-                <ToolBtn onClick={() => applyHeading('h1')} active={activeBlock === 'h1'} title="Heading 1 — applies to selection only">H1</ToolBtn>
+                {/* Text type — Fix #12: Body only changes block type, does not nuke inline formatting */}
+                <ToolBtn onClick={applyBody}              active={activeBlock === 'p'}  title="Regular paragraph">¶ Body</ToolBtn>
+                <ToolBtn onClick={() => applyHeading('h2')} active={activeBlock === 'h2'} title="Heading 2">H2</ToolBtn>
+                <ToolBtn onClick={() => applyHeading('h1')} active={activeBlock === 'h1'} title="Heading 1">H1</ToolBtn>
 
                 <ToolbarDivider />
 
@@ -355,12 +436,59 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
 
                 <ToolbarDivider />
 
+                {/* Fix #14: Undo / Redo */}
+                <ToolBtn onClick={() => exec('undo')} active={false} title="Undo (Ctrl+Z)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M3 7v6h6"/><path d="M3 13C5.5 6.5 12 4 18 7.5"/>
+                    </svg>
+                </ToolBtn>
+                <ToolBtn onClick={() => exec('redo')} active={false} title="Redo (Ctrl+Y)">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M21 7v6h-6"/><path d="M21 13C18.5 6.5 12 4 6 7.5"/>
+                    </svg>
+                </ToolBtn>
+
+                <ToolbarDivider />
+
+                {/* Fix #15: Link insertion */}
+                <div className="relative">
+                    <ToolBtn onClick={handleLinkButtonClick} active={showLinkInput} title="Insert link">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                            <path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/>
+                            <path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/>
+                        </svg>
+                    </ToolBtn>
+                    {showLinkInput && (
+                        <div className="absolute top-full left-0 mt-1 z-30 bg-surface border border-primary/20 rounded-xl p-3 shadow-2xl flex gap-2 min-w-[280px]">
+                            <input
+                                type="url"
+                                value={linkUrl}
+                                onChange={(e) => setLinkUrl(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); insertLink() } if (e.key === 'Escape') setShowLinkInput(false) }}
+                                placeholder="https://example.com"
+                                className="flex-1 bg-surface border border-primary/20 rounded-lg px-3 py-1.5 text-sm text-text outline-none focus:border-action transition"
+                                // eslint-disable-next-line jsx-a11y/no-autofocus
+                                autoFocus
+                            />
+                            <button
+                                type="button"
+                                onMouseDown={(e) => { e.preventDefault(); insertLink() }}
+                                className="bg-action text-white text-xs font-semibold px-3 py-1.5 rounded-lg hover:brightness-90 transition"
+                            >
+                                Insert
+                            </button>
+                        </div>
+                    )}
+                </div>
+
+                <ToolbarDivider />
+
                 {/* Font color */}
                 <div className="relative">
                     <button
                         type="button"
                         title="Font color"
-                        onMouseDown={(e) => { e.preventDefault(); setShowColors(v => !v); setShowFonts(false); setShowSizes(false) }}
+                        onMouseDown={(e) => { e.preventDefault(); setShowColors(v => !v); setShowFonts(false); setShowSizes(false); setShowLinkInput(false) }}
                         className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-text/80 hover:bg-primary/10 hover:text-text transition select-none"
                     >
                         <span className="font-bold" style={{ color: activeColor }}>A</span>
@@ -399,7 +527,6 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                 onPaste={handlePaste}
                 onKeyUp={syncState}
                 onMouseUp={syncState}
-                onBlur={closeAll}
                 data-placeholder={placeholder}
                 className={`min-h-[200px] px-5 py-4 bg-surface text-text outline-none
                     empty:before:content-[attr(data-placeholder)] empty:before:text-primary/70 empty:before:pointer-events-none
@@ -458,7 +585,7 @@ const fixLessonColors = (html) => {
     const RGB_TO_HEX = {
         'rgb(241, 245, 249)': '#f1f5f9',
         'rgb(19, 42, 19)': '#132a13',
-        
+
         'rgb(148, 163, 184)': '#94a3b8',
         'rgb(167, 139, 250)': '#a78bfa',
         'rgb(56, 189, 248)': '#38bdf8',
@@ -514,7 +641,7 @@ export const LessonContent = ({ html, className = '' }) => {
     return (
         <div
             className={`${PROSE} ${className}`}
-            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fixLessonColors(html)) }}
+            dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fixLessonColors(html), { ADD_ATTR: ['target', 'rel'] }) }}
         />
     )
 }

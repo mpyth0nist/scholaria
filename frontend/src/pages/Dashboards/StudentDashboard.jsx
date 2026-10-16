@@ -103,7 +103,7 @@ function Student() {
                                     </span>
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <span className="text-lg text-text font-bold group-hover:text-action truncate transition-colors">{course.course_name}</span>
+                                    <span className="text-lg text-text font-bold group-hover:text-action truncate transition-colors" title={course.course_name}>{course.course_name}</span>
                                     {course.subject && <span className="text-xs text-primary font-semibold">{course.subject}</span>}
                                 </div>
                                 <span className="ml-auto text-primary/50 group-hover:text-action text-xs transition-colors">→</span>
