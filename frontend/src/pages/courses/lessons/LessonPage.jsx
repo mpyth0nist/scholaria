@@ -8,6 +8,7 @@ import RichTextEditor, { LessonContent } from '../../../components/RichTextEdito
 import EdahAIAssistant from '../../../components/EdahAIAssistant'
 import SelectionToolbar from '../../../components/SelectionToolbar'
 import InlineExplainCard from '../../../components/InlineExplainCard'
+import LessonToolbar from '../../../components/LessonToolbar'
 import { usePermissions } from '../../../hooks/usePermissions.js'
 import { ENDPOINTS } from '../../../constants'
 
@@ -313,20 +314,12 @@ const LessonPage = () => {
                 <div className="flex flex-col gap-6 w-full text-text max-w-3xl mx-auto">
                     <div className="flex items-center justify-between w-full max-w-prose mx-auto gap-4">
                         {BackButton}
-                        <div className="flex items-center gap-2">
-                            <button
-                                onClick={() => setShowAI(p => !p)}
-                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action text-white shadow-sm border-action/20' : 'bg-surface border-border text-action hover:bg-surface-hover'}`}
-                            >
-                                ✨ Ask Edah
-                            </button>
-                            <button
-                                onClick={() => setShowPrefs(p => !p)}
-                                className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
-                            >
-                                Display Options
-                            </button>
-                        </div>
+                        <LessonToolbar
+                            showAI={showAI}
+                            onToggleAI={() => setShowAI(p => !p)}
+                            showPrefs={showPrefs}
+                            onTogglePrefs={() => setShowPrefs(p => !p)}
+                        />
                     </div>
 
                 {preferencesPanel}
@@ -530,19 +523,13 @@ const LessonPage = () => {
                     </div>
 
 
-                    <div className="flex justify-end max-w-prose w-full mx-auto mb-2 gap-2">
-                        <button
-                            onClick={() => setShowAI(p => !p)}
-                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showAI ? 'bg-action text-white shadow-sm border-action/20' : 'bg-surface border-border text-action hover:bg-surface-hover'}`}
-                        >
-                            ✨ Ask Edah
-                        </button>
-                        <button
-                            onClick={() => setShowPrefs(p => !p)}
-                            className={`text-xs font-bold uppercase tracking-widest px-3 py-1.5 rounded-lg border transition btn-press ${showPrefs ? 'bg-primary text-white shadow-sm border-primary/20' : 'bg-surface border-border text-text/70 hover:bg-surface-hover'}`}
-                        >
-                                Aa Reading
-                        </button>
+                    <div className="flex justify-end max-w-prose w-full mx-auto mb-2">
+                        <LessonToolbar
+                            showAI={showAI}
+                            onToggleAI={() => setShowAI(p => !p)}
+                            showPrefs={showPrefs}
+                            onTogglePrefs={() => setShowPrefs(p => !p)}
+                        />
                     </div>
 
                     {preferencesPanel}

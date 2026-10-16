@@ -1,16 +1,17 @@
 import React from 'react'
 import { History, PanelRight, Plus, X } from 'lucide-react'
+import EdahMark from './EdahMark'
 
 export default function EdahHeader({ onClose, toggleWidth, onClearChat, onShowHistory }) {
     return (
         <div className="flex items-center justify-between px-5 py-4 border-b border-primary/10 bg-primary/5 shrink-0 select-none">
             <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-full bg-action border border-white/20 flex items-center justify-center text-white font-serif font-bold shadow-sm text-lg" aria-hidden="true">
-                    إ
-                </div>
-                <div>
-                    <h3 className="text-sm font-bold tracking-widest uppercase text-action font-sans">Edah AI</h3>
-                    <p className="text-[10px] uppercase tracking-wider text-primary/60 font-sans">Your Tutor</p>
+                <EdahMark size={38} className="drop-shadow-sm" />
+                <div className="leading-tight">
+                    <h3 className="font-serif text-lg font-semibold text-text">
+                        Edah <span className="font-normal text-action/80" lang="ar" dir="rtl">إيضاح</span>
+                    </h3>
+                    <p className="text-[10px] uppercase tracking-[0.18em] text-text/60 font-sans">Your AI Tutor</p>
                 </div>
             </div>
             <div className="flex items-center gap-1">
