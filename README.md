@@ -149,10 +149,11 @@ docker compose exec backend uv run manage.py ingest_all_data
 #### B. Real-Time Incremental Sync (Runtime)
 In day-to-day use, you **do not** need to run `ingest_all_data`. Whenever a teacher creates or updates a lesson, quiz, or assignment via the platform, Django `post_save` signals automatically dispatch a background Celery task (`ingest_searchable_object_task`) to re-chunk and embed the content dynamically.
 
-Start the Celery worker to process these background ingestion tasks:
+These tasks are processed by the `worker` service, which `docker compose up` starts alongside the backend and restarts automatically. To check that new content is being indexed:
 ```bash
-docker compose exec -d backend uv run celery -A scholaria worker -l info
+docker compose logs -f worker   # each save logs a "Task rag.tasks.ingest_searchable_object_task ... succeeded" line
 ```
+When running the backend locally (`manage.py runserver`) with `DEBUG=True`, these tasks run inline during the save, so new content is indexed without Redis or a worker. To use a worker locally instead, set `CELERY_TASK_ALWAYS_EAGER=False`, run Redis, and start `uv run celery -A scholaria worker -l info` in a separate terminal (see `.env.example`).
 
 ---
 
