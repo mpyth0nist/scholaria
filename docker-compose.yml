@@ -48,6 +48,30 @@ services:
       redis:
         condition: service_started
 
+  # Processes background jobs, such as indexing lessons, quizzes and
+  # assignments for the AI tutor when they are saved. Without it, those
+  # jobs wait in Redis and new content never becomes searchable.
+  worker:
+    build: .
+    container_name: worker
+    command: ["uv", "run", "celery", "-A", "scholaria", "worker", "-l", "info", "--concurrency", "1"]
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - CELERY_BROKER_URL=redis://redis:6379/0
+      - CELERY_RESULT_BACKEND=redis://redis:6379/0
+    volumes:
+      - ./:/app
+      - /app/.venv
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+
   frontend:
     build: ./frontend
     container_name: frontend
