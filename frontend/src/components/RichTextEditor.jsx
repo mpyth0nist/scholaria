@@ -114,7 +114,7 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         }
     }, [value])
 
-    // ── read font-family from cursor position ─────────────────────────────────
+    // ── read toolbar state from current cursor position ───────────────────────
     const syncState = useCallback(() => {
         setActiveStyles({
             bold:      document.queryCommandState('bold'),
@@ -130,18 +130,24 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         const color = document.queryCommandValue('foreColor')
         if (color) setActiveColor(color)
 
-        // Walk from cursor node up to detect the effective font-family
+        // Walk from cursor node up to detect the effective font-family AND font-size
         const sel = window.getSelection()
         if (sel && sel.rangeCount > 0) {
             const el = closestEl(sel.getRangeAt(0).startContainer)
             if (el && editorRef.current?.contains(el)) {
-                const computedFamily = window.getComputedStyle(el).fontFamily
-                const primary = extractFamilyName(computedFamily)
+                const computed = window.getComputedStyle(el)
+
+                // Font family
+                const primary = extractFamilyName(computed.fontFamily)
                 const match = FONTS.find(f =>
                     extractFamilyName(f.value) === primary ||
                     f.value.toLowerCase().includes(primary)
                 )
                 if (match) setActiveFont(match.value)
+
+                // Font size — Bug fix: sync panel to actual cursor size
+                const px = Math.round(parseFloat(computed.fontSize))
+                if (!isNaN(px) && px > 0) setFontSize(px)
             }
         }
     }, [])
@@ -153,7 +159,27 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
         onChange(editorRef.current?.innerHTML ?? '')
     }, [onChange, syncState])
 
-    const applyColor = (c) => { setActiveColor(c.hex); setShowColors(false); exec('foreColor', c.hex) }
+    // Bug fix: for the "Default" colour, use styleWithCSS so the browser emits
+    // `<span style="color: inherit">` instead of `<font color="#132A13">`.
+    // `color: inherit` correctly picks up the theme's text colour (white in dark
+    // mode, dark in light mode) rather than hardcoding the dark-green hex.
+    const applyColor = (c) => {
+        setActiveColor(c.hex)
+        setShowColors(false)
+        editorRef.current?.focus()
+        if (c.value === 'inherit') {
+            try {
+                document.execCommand('styleWithCSS', false, 'true')
+                document.execCommand('foreColor', false, 'inherit')
+            } finally {
+                document.execCommand('styleWithCSS', false, 'false')
+            }
+            syncState()
+            onChange(editorRef.current?.innerHTML ?? '')
+        } else {
+            exec('foreColor', c.hex)
+        }
+    }
     const applyFont  = (val) => { setActiveFont(val); setShowFonts(false); exec('fontName', val) }
 
     // Fix #13: always use proper block-level heading elements.
