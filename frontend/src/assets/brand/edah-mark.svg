@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img">
+  <title>Edah</title>
+  <!-- Edah (إيضاح, "elucidation"): an open book and the flame of knowledge
+       framed by a horseshoe arch, after al-Qarawiyyin in Fez, the oldest
+       university still operating. -->
+<defs>
+  <linearGradient id="edah-gold" x1="0" y1="0" x2="0" y2="1">
+  <stop offset="0" stop-color="#F2D98B"/>
+  <stop offset=".55" stop-color="#D4AF55"/>
+  <stop offset="1" stop-color="#A9822F"/>
+  </linearGradient>
+<radialGradient id="edah-field" cx="50%" cy="40%" r="70%">
+  <stop offset="0" stop-color="#2E5A3C"/>
+  <stop offset="1" stop-color="#173022"/>
+  </radialGradient>
+  </defs>
+  <rect x="2" y="2" width="60" height="60" rx="14" fill="url(#edah-field)"/>
+  <rect x="4.2" y="4.2" width="55.6" height="55.6" rx="12" fill="none" stroke="url(#edah-gold)" stroke-width="1.1" opacity=".7"/>
+  <path d="M18.5 55 L18.5 31.5 A15 15 0 1 1 45.5 31.5 L45.5 55" fill="none" stroke="url(#edah-gold)" stroke-width="2.2" stroke-linecap="round"/>
+  <path d="M21.6 55 L21.6 31.6 A11.8 11.8 0 1 1 42.4 31.6 L42.4 55" fill="#1B3626" stroke="url(#edah-gold)" stroke-width=".8" opacity=".95"/>
+  <path d="M32 17.5 C36.32 23.35 36.5 30.16 36.5 32.5 A4.5 4.5 0 0 1 27.5 32.5 C27.5 30.16 27.68 23.35 32 17.5 Z" fill="url(#edah-gold)"/>
+  <path d="M32 24.91 C34.475 27.5665 34.25 31.5 34.25 32.5 A2.25 2.25 0 0 1 29.75 32.5 C29.75 31.5 29.525 27.5665 32 24.91 Z" fill="#FFF6DC"/>
+  <path d="M32 43.2 C25.7 40 20.799999999999997 40 18 41.5 L18 50 C20.799999999999997 48.7 25.7 48.7 32 51.32 Z" fill="#F6EBD0" stroke="url(#edah-gold)" stroke-width="1.1" stroke-linejoin="round"/>
+  <path d="M32 43.2 C38.3 40 43.2 40 46 41.5 L46 50 C43.2 48.7 38.3 48.7 32 51.32 Z" fill="#F6EBD0" stroke="url(#edah-gold)" stroke-width="1.1" stroke-linejoin="round"/>
+  <path d="M20.2 43.75 Q25.7 42.65 30.4 44.75" fill="none" stroke="#B89A55" stroke-width=".7" stroke-linecap="round"/>
+  <path d="M33.6 44.75 Q38.3 42.65 43.8 43.75" fill="none" stroke="#B89A55" stroke-width=".7" stroke-linecap="round"/>
+  <path d="M20.2 45.5 Q25.7 44.4 30.4 46.5" fill="none" stroke="#B89A55" stroke-width=".7" stroke-linecap="round"/>
+  <path d="M33.6 46.5 Q38.3 44.4 43.8 45.5" fill="none" stroke="#B89A55" stroke-width=".7" stroke-linecap="round"/>
+  <path d="M20.2 47.25 Q25.7 46.15 30.4 48.25" fill="none" stroke="#B89A55" stroke-width=".7" stroke-linecap="round"/>
+  <path d="M33.6 48.25 Q38.3 46.15 43.8 47.25" fill="none" stroke="#B89A55" stroke-width=".7" stroke-linecap="round"/>
+  <path d="M32 43.2 L32 51.32" stroke="#A9822F" stroke-width=".8"/>
+  <path d="M14 55 H50" stroke="url(#edah-gold)" stroke-width="2" stroke-linecap="round"/>
+</svg>

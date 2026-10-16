@@ -1,4 +1,8 @@
-import { ALargeSmall, Sparkles } from 'lucide-react'
+import { ALargeSmall } from 'lucide-react'
+import EdahMark from './edah/EdahMark'
+
+// Edah's logo stands in for an icon on the Ask Edah button
+const EdahIcon = ({ size }) => <EdahMark size={size + 2} className="-my-0.5 rounded-[5px]" />
 
 // Segmented toggle button: icon + label, filled with its accent color when
 // active. Shares sizing/motion with the rest of the app's buttons (btn-press).
@@ -31,7 +35,7 @@ export default function LessonToolbar({ showAI, onToggleAI, showPrefs, onToggleP
     return (
         <div className={`inline-flex items-center gap-1 p-1 rounded-xl bg-surface border border-border shadow-xs ${className}`}>
             <ToolbarButton
-                icon={Sparkles}
+                icon={EdahIcon}
                 label="Ask Edah"
                 active={showAI}
                 accentClass="bg-action"
