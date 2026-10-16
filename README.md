@@ -153,7 +153,7 @@ These tasks are processed by the `worker` service, which `docker compose up` sta
 ```bash
 docker compose logs -f worker   # each save logs a "Task rag.tasks.ingest_searchable_object_task ... succeeded" line
 ```
-When running the backend outside Docker, start a worker in a separate terminal with `uv run celery -A scholaria worker -l info`; without one, saved content waits in the queue and is not searchable.
+When running the backend locally (`manage.py runserver`) with `DEBUG=True`, these tasks run inline during the save, so new content is indexed without Redis or a worker. To use a worker locally instead, set `CELERY_TASK_ALWAYS_EAGER=False`, run Redis, and start `uv run celery -A scholaria worker -l info` in a separate terminal (see `.env.example`).
 
 ---
 

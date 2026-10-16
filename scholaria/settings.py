@@ -268,6 +268,11 @@ CELERY_BROKER_URL = os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")
 CELERY_RESULT_BACKEND = os.getenv("CELERY_RESULT_BACKEND", "redis://localhost:6379/0")
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
+# Run background tasks (such as indexing saved lessons for the AI tutor)
+# inline instead of through Redis and a worker. On by default in development,
+# so a plain `runserver` indexes new content without extra processes;
+# docker-compose and production set it to False and use the worker.
+CELERY_TASK_ALWAYS_EAGER = os.getenv("CELERY_TASK_ALWAYS_EAGER", str(DEBUG)).lower() in ("true", "1", "t")
 
 # Sentry error tracking (only active if SENTRY_DSN is set)
 SENTRY_DSN = os.getenv("SENTRY_DSN", "")
