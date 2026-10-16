@@ -113,7 +113,7 @@ export function useEdahChat({ lessonId = null } = {}) {
         const controller = new AbortController()
         abortRef.current = controller
 
-        const userMsg = { role: 'user', content: userText.trim() }
+        const userMsg = { role: 'user', content: userText.trim(), live: true }
         setMessages(prev => [...prev, userMsg])
         setStatus('loading')
 
@@ -189,7 +189,7 @@ export function useEdahChat({ lessonId = null } = {}) {
                         if (lastMsg && lastMsg.role === 'ai') {
                             newMsgs[newMsgs.length - 1] = { ...lastMsg, content: accumulatedText }
                         } else {
-                            newMsgs.push({ role: 'ai', content: accumulatedText })
+                            newMsgs.push({ role: 'ai', content: accumulatedText, live: true })
                         }
                         return newMsgs
                     })
@@ -207,7 +207,7 @@ export function useEdahChat({ lessonId = null } = {}) {
             const errorContent = err.message || 'Sorry, I encountered an error. Please try again.'
             
             if (!aiBubbleCreated) {
-                setMessages(prev => [...prev, { role: 'ai', content: errorContent }])
+                setMessages(prev => [...prev, { role: 'ai', content: errorContent, live: true }])
             } else {
                 setMessages(prev => {
                     const newMsgs = [...prev]

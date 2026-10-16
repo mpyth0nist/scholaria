@@ -1,11 +1,16 @@
 import React, { useState } from 'react'
 import { AlertTriangle, Check, Copy, RotateCcw } from 'lucide-react'
 import MarkdownRenderer from './MarkdownRenderer'
+import { useTypewriter } from '../../hooks/useTypewriter'
 
 export default function EdahMessageBubble({ message, isLatest, isStreaming, isExpandedWidth, onRetry }) {
     const [copied, setCopied] = useState(false)
     const isUser = message?.role === 'user'
     const contentStr = typeof message?.content === 'string' ? message.content : String(message?.content || '')
+    // Live replies are revealed at a reading pace; history renders instantly
+    const typed = useTypewriter(contentStr, { enabled: !isUser && Boolean(message?.live) })
+    const isTyping = typed.isTyping || (isStreaming && isLatest)
+    const enterAnimation = message?.live ? 'animate-page-enter' : ''
 
     const handleCopy = async () => {
         try {
@@ -25,7 +30,7 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
 
     if (isError) {
         return (
-            <div className="flex justify-start">
+            <div className={`flex justify-start ${enterAnimation}`}>
                 <div
                     className={`
                         ${isExpandedWidth ? 'max-w-[96%]' : 'max-w-[85%]'} rounded-2xl rounded-bl-sm px-4 py-3 text-sm
@@ -51,7 +56,7 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
     }
 
     return (
-        <div className={`group flex min-w-0 ${isUser ? 'justify-end' : 'justify-start'} relative`}>
+        <div className={`group flex min-w-0 ${isUser ? 'justify-end' : 'justify-start'} relative ${enterAnimation}`}>
             <div
                 className={`
                     ${isExpandedWidth ? 'max-w-[96%]' : 'max-w-[85%]'} min-w-0 rounded-2xl px-4 py-3 text-sm leading-relaxed shadow-sm relative transition-all
@@ -63,12 +68,7 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
                 {isUser ? (
                     message.content
                 ) : (
-                    <>
-                        <MarkdownRenderer>{message.content}</MarkdownRenderer>
-                        {isStreaming && isLatest && (
-                            <span className="inline-block w-1.5 h-3.5 bg-action/70 rounded-sm animate-pulse ml-1 align-middle" />
-                        )}
-                    </>
+                    <MarkdownRenderer className={isTyping ? 'typing-caret' : ''}>{typed.text}</MarkdownRenderer>
                 )}
 
                 {/* Hover Actions for AI bubbles */}
@@ -83,7 +83,7 @@ export default function EdahMessageBubble({ message, isLatest, isStreaming, isEx
                             {copied ? <Check size={14} aria-hidden="true" /> : <Copy size={14} aria-hidden="true" />}
                             {copied ? 'Copied' : 'Copy'}
                         </button>
-                        {isLatest && !isStreaming && onRetry && (
+                        {isLatest && !isTyping && onRetry && (
                             <button
                             onClick={onRetry}
                             title="Regenerate response"
