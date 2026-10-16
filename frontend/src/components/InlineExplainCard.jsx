@@ -22,6 +22,7 @@ import api from '../api'
 import { useExplainStream } from '../hooks/useExplainStream'
 import { ENDPOINTS } from '../constants'
 import MarkdownRenderer from './edah/MarkdownRenderer'
+import { useTypewriter } from '../hooks/useTypewriter'
 
 const ACTION_LABELS = {
     explain: 'Explain',
@@ -122,6 +123,8 @@ export default function InlineExplainCard({
 
     const displayText = initialText || text
     const displayStatus = initialText ? 'done' : status
+    // Saved annotations render instantly; new answers are typed out
+    const typed = useTypewriter(displayText, { enabled: !initialText })
     const ActionIcon = ACTION_ICONS[action]
 
     const truncatedQuote = selectedText.length > 80
@@ -192,10 +195,9 @@ export default function InlineExplainCard({
 
                 {(displayStatus === 'streaming' || displayStatus === 'done') && displayText && (
                     <div className="relative">
-                        <MarkdownRenderer>{displayText}</MarkdownRenderer>
-                        {displayStatus === 'streaming' && (
-                            <span className="inline-block w-1.5 h-3.5 bg-action/60 rounded-sm animate-pulse ml-0.5 align-middle" />
-                        )}
+                        <MarkdownRenderer className={typed.isTyping || displayStatus === 'streaming' ? 'typing-caret' : ''}>
+                            {typed.text}
+                        </MarkdownRenderer>
                     </div>
                 )}
             </div>

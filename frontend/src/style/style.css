@@ -183,6 +183,39 @@ html.dark {
   100% { opacity: 1;    transform: scale(1); }
 }
 
+/* AI reply caret: soft blink while the answer is being typed */
+@keyframes caret-blink {
+  0%, 45%   { opacity: 1; }
+  55%, 100% { opacity: 0; }
+}
+
+/* "Thinking" dots: gentle staggered bounce */
+@keyframes typing-dot {
+  0%, 60%, 100% { transform: translateY(0);    opacity: 0.35; }
+  30%           { transform: translateY(-4px); opacity: 1; }
+}
+
+/* Caret drawn inline after the last text being typed (paragraph or list item) */
+.typing-caret > :last-child:not(ul, ol, pre, table)::after,
+.typing-caret > :is(ul, ol):last-child > li:last-child::after {
+  content: '';
+  display: inline-block;
+  width: 0.45em;
+  height: 1em;
+  margin-left: 0.15em;
+  vertical-align: -0.12em;
+  border-radius: 2px;
+  background: var(--color-action);
+  opacity: 0.75;
+  animation: caret-blink 1s steps(1) infinite;
+}
+
+.typing-dot {
+  animation: typing-dot 1.2s ease-in-out infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.15s; }
+.typing-dot:nth-child(3) { animation-delay: 0.3s; }
+
 /* ── Animation utility classes ──────────────────────────────────────────── */
 @layer utilities {
 
