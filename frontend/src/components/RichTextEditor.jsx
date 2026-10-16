@@ -1,7 +1,9 @@
-import { useRef, useState, useCallback, useEffect } from 'react'
+import { useRef, useState, useCallback, useEffect, useMemo } from 'react'
 import DOMPurify from 'dompurify'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+
+import { hasRichFormatting, lessonMarkdown, looksLikeMarkdown, markdownToHtml } from '../utils/lessonContent'
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSTANTS
@@ -66,6 +68,30 @@ const ToolBtn = ({ onClick, active, title, children }) => (
 // ─────────────────────────────────────────────────────────────────────────────
 // RICH TEXT EDITOR
 // ─────────────────────────────────────────────────────────────────────────────
+
+// Typography shared by the editor and the lesson renderer, so content looks
+// the same while writing and reading, whether stored as HTML or Markdown.
+const PROSE = `
+    leading-relaxed
+    [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-6
+    [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-5
+    [&_h3]:text-lg   sm:[&_h3]:text-xl   [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4
+    [&_p]:mb-3   [&_p]:leading-relaxed
+    [&_div]:mb-1 [&_div]:leading-relaxed
+    [&_strong]:font-bold [&_em]:italic [&_u]:underline
+    [&_a]:text-action [&_a]:underline [&_a]:cursor-pointer
+    [&_span]:leading-[inherit]
+    [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
+    [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
+    [&_hr]:border-t [&_hr]:border-current [&_hr]:opacity-20 [&_hr]:my-6
+    [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:border-opacity-30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:opacity-80 [&_blockquote]:my-3
+    [&_code]:bg-black/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
+    [&_pre]:bg-black/10 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:mb-4 [&_pre]:overflow-x-auto
+    [&_pre_code]:bg-transparent [&_pre_code]:px-0 [&_pre_code]:py-0 [&_pre_code]:text-sm [&_pre_code]:leading-relaxed
+    [&_table]:w-full [&_table]:mb-4 [&_table]:border-collapse [&_table]:text-sm
+    [&_th]:text-left [&_th]:font-semibold [&_th]:px-4 [&_th]:py-2 [&_th]:border-b-2 [&_th]:border-current/20 [&_th]:bg-black/5
+    [&_td]:px-4 [&_td]:py-2 [&_td]:border-b [&_td]:border-current/10
+`
 
 const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson content here…', hasError = false }) => {
     const editorRef = useRef(null)
@@ -270,6 +296,17 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
     }
 
     const handleInput = () => { onChange(editorRef.current?.innerHTML ?? ''); syncState() }
+
+    // Pasted Markdown (from a text editor, a README, an AI chat's copy button)
+    // is converted to formatted HTML instead of being stored as literal ## and **
+    const handlePaste = (e) => {
+        const text = e.clipboardData?.getData('text/plain')
+        if (!looksLikeMarkdown(text) || hasRichFormatting(e.clipboardData.getData('text/html'))) return
+
+        e.preventDefault()
+        document.execCommand('insertHTML', false, DOMPurify.sanitize(markdownToHtml(text)))
+        handleInput()
+    }
 
     // Fix #7: close dropdowns only when focus leaves the entire widget,
     // not when it briefly moves from editor → toolbar button.
@@ -487,19 +524,13 @@ const RichTextEditor = ({ value = '', onChange, placeholder = 'Write lesson cont
                 contentEditable
                 suppressContentEditableWarning
                 onInput={handleInput}
+                onPaste={handlePaste}
                 onKeyUp={syncState}
                 onMouseUp={syncState}
                 data-placeholder={placeholder}
-                className="min-h-[200px] px-5 py-4 bg-surface text-text leading-relaxed outline-none
+                className={`min-h-[200px] px-5 py-4 bg-surface text-text outline-none
                     empty:before:content-[attr(data-placeholder)] empty:before:text-primary/70 empty:before:pointer-events-none
-                    [&_h1]:text-3xl [&_h1]:font-bold   [&_h1]:text-text [&_h1]:mb-2  [&_h1]:mt-3
-                    [&_h2]:text-xl  [&_h2]:font-semibold [&_h2]:text-text [&_h2]:mb-1.5 [&_h2]:mt-2.5
-                    [&_p]:mb-2   [&_p]:leading-relaxed
-                    [&_div]:mb-1 [&_div]:leading-relaxed
-                    [&_strong]:font-bold [&_em]:italic [&_u]:underline
-                    [&_a]:text-action [&_a]:underline [&_a]:cursor-pointer
-                    [&_ul]:list-disc    [&_ul]:pl-6 [&_ul]:mb-2 [&_ul>li]:mb-1
-                    [&_ol]:list-decimal [&_ol]:pl-6 [&_ol]:mb-2 [&_ol>li]:mb-1"
+                    ${PROSE}`}
             />
         </div>
     )
@@ -590,47 +621,18 @@ const fixLessonColors = (html) => {
 
 // ─────────────────────────────────────────────────────────────────────────────
 // LESSON CONTENT RENDERER  (read-only)
-// Detects whether the stored content is Markdown or HTML and renders
-// accordingly. Markdown is identified by the presence of # headings,
-// **bold**, or --- separators at the start of the content.
+// Renders Markdown lessons with ReactMarkdown and HTML lessons sanitized.
+// See utils/lessonContent for how the two are told apart.
 // ─────────────────────────────────────────────────────────────────────────────
 
-const isMarkdown = (content) => {
-    if (!content) return false
-    const trimmed = content.trim()
-    return (
-        /^#{1,6}\s/.test(trimmed) ||           // # Heading
-        /\*\*[^*]+\*\*/.test(trimmed) ||       // **bold**
-        /^---$/m.test(trimmed) ||              // --- divider
-        /^\s*[-*]\s/.test(trimmed)             // - list item
-    )
-}
-
-const MD_PROSE = `
-    leading-relaxed
-    [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-6
-    [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-5
-    [&_h3]:text-lg   sm:[&_h3]:text-xl   [&_h3]:font-semibold [&_h3]:mb-2 [&_h3]:mt-4
-    [&_p]:mb-3   [&_p]:leading-relaxed
-    [&_strong]:font-bold [&_em]:italic
-    [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
-    [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
-    [&_hr]:border-t [&_hr]:border-current [&_hr]:opacity-20 [&_hr]:my-6
-    [&_blockquote]:border-l-4 [&_blockquote]:border-current [&_blockquote]:border-opacity-30 [&_blockquote]:pl-4 [&_blockquote]:italic [&_blockquote]:opacity-80 [&_blockquote]:my-3
-    [&_code]:bg-black/10 [&_code]:px-1.5 [&_code]:py-0.5 [&_code]:rounded [&_code]:text-sm [&_code]:font-mono
-    [&_pre]:bg-black/10 [&_pre]:rounded-xl [&_pre]:p-4 [&_pre]:mb-4 [&_pre]:overflow-x-auto
-    [&_pre_code]:bg-transparent [&_pre_code]:px-0 [&_pre_code]:py-0 [&_pre_code]:text-sm [&_pre_code]:leading-relaxed
-    [&_table]:w-full [&_table]:mb-4 [&_table]:border-collapse [&_table]:text-sm
-    [&_th]:text-left [&_th]:font-semibold [&_th]:px-4 [&_th]:py-2 [&_th]:border-b-2 [&_th]:border-current/20 [&_th]:bg-black/5
-    [&_td]:px-4 [&_td]:py-2 [&_td]:border-b [&_td]:border-current/10
-`
-
 export const LessonContent = ({ html, className = '' }) => {
-    if (isMarkdown(html)) {
+    const markdown = useMemo(() => lessonMarkdown(html), [html])
+
+    if (markdown !== null) {
         return (
-            <div className={`${MD_PROSE} ${className}`}>
+            <div className={`${PROSE} ${className}`}>
                 <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                    {html}
+                    {markdown}
                 </ReactMarkdown>
             </div>
         )
@@ -638,17 +640,7 @@ export const LessonContent = ({ html, className = '' }) => {
 
     return (
         <div
-            className={`leading-relaxed
-                [&_h1]:text-2xl  sm:[&_h1]:text-4xl  [&_h1]:font-bold     [&_h1]:mb-3 [&_h1]:mt-4
-                [&_h2]:text-xl   sm:[&_h2]:text-2xl  [&_h2]:font-semibold [&_h2]:mb-2 [&_h2]:mt-3
-                [&_p]:mb-3   [&_p]:leading-relaxed
-                [&_div]:mb-1 [&_div]:leading-relaxed
-                [&_strong]:font-bold [&_em]:italic [&_u]:underline
-                [&_a]:text-action [&_a]:underline
-                [&_ul]:list-disc    [&_ul]:pl-7 [&_ul]:mb-3 [&_ul>li]:mb-1.5
-                [&_ol]:list-decimal [&_ol]:pl-7 [&_ol]:mb-3 [&_ol>li]:mb-1.5
-                [&_span]:leading-[inherit]
-                ${className}`}
+            className={`${PROSE} ${className}`}
             dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(fixLessonColors(html), { ADD_ATTR: ['target', 'rel'] }) }}
         />
     )

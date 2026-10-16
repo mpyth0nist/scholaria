@@ -102,23 +102,33 @@ docker compose up -d --build
 *(To follow logs at any time, run: `docker compose logs -f`)*
 
 ### 4. Database Setup & Seeding (Initial Run)
-Apply database migrations, optionally seed demo courses and quizzes, and create an administrator account:
+Apply database migrations, seed the demo, and optionally create an administrator account:
 ```bash
 # 1. Apply database migrations
 docker compose exec backend uv run manage.py migrate
 
-# 2. Seed demo university courses, student account, quiz, and vector embeddings
-docker compose exec backend uv run python scripts/seed_demo.py
+# 2. Seed the demo: teacher, 3 courses with 25 lessons and 4 quizzes, 21 students,
+#    quiz attempts, lesson progress, and the RAG index for the AI tutor
+docker compose exec backend uv run manage.py seed_demo
 
 # 3. (Optional) Create an administrator account
 docker compose exec backend uv run manage.py createsuperuser
 ```
 
-#### Demo Credentials (Created by `seed_demo.py`):
-| Role | Username | Password | Enrolled Courses |
+`seed_demo` is safe to rerun: content is synced by name and the demo students' activity is regenerated from a fixed random seed, so the dashboard numbers stay the same. Useful options:
+- `--reset` removes the demo students and demo courses first (including those created by older versions of the seeder)
+- `--seed N` changes the generated scores and progress; `--anchor-date YYYY-MM-DD` pins timestamps to a date
+- `--skip-index` skips building the RAG index (run `ingest_all_data` later)
+
+It only runs when `DEBUG=True` unless you pass `--force`.
+
+#### Demo Credentials (Created by `seed_demo`):
+| Role | Username | Password | Notes |
 | :--- | :--- | :--- | :--- |
-| **Student** | `sarah_chen` | `student123` | 3 University Courses (CS, Microeconomics, History) |
-| **Teacher** | `youssef_kaddioui` | `yousef1234` | Course Creator & Manager |
+| **Teacher** | `youssef_kaddioui` | `ScholariaDemo2026!` | Owns the 3 demo courses; the dashboard shows real engagement and recent submissions |
+| **Student** | `demo_student` | `ScholariaDemo2026!` | Enrolled in all 3 courses with no activity yet, ready for taking quizzes and chatting with Edah |
+
+Set `DEMO_PASSWORD` before seeding to use a different password. Passwords are only set on accounts the seeder creates, so an existing `youssef_kaddioui` account keeps its own password. The 20 roster students (e.g. `youssef.elamrani`) use the same password.
 
 
 ### 5. RAG Vector Ingestion (Cold Start vs. Runtime)
@@ -131,7 +141,7 @@ If you have existing database records (from custom seeds, migrations, or data du
 docker compose exec backend uv run manage.py ingest_all_data
 ```
 > **When is `ingest_all_data` required?**
-> - **Initial Setup / Post-Seed**: Signals only react to *future* saves. Any existing records in the database must be indexed once via this batch command.
+> - **Initial Setup**: Signals only react to *future* saves. Records that existed before (data dumps, or `seed_demo --skip-index`) must be indexed once via this batch command. `seed_demo` indexes its own content.
 > - **Switching Embedding Models**: If you change `RAG_EMBEDDING_MODEL` in settings (e.g., changing from `all-MiniLM-L6-v2` to another model), old vectors are incompatible and the index must be rebuilt.
 > - **Chunking Strategy Changes**: If you update `CHUNK_THRESHOLD`, `chunk_size`, or `overlap` in `utils/chunking.py`.
 > - **Reconciliation**: If the Celery worker or Redis broker was temporarily down and some real-time updates were missed.
@@ -151,15 +161,6 @@ docker compose exec -d backend uv run celery -A scholaria worker -l info
 * **Backend API**: [http://localhost:8000/api/](http://localhost:8000/api/)
 * **Django Admin**: [http://localhost:8000/admin/](http://localhost:8000/admin/)
 * **Silk Performance Profiler**: [http://localhost:8000/silk/](http://localhost:8000/silk/)
-
-### 7. Seed a Teacher Dashboard Demo
-The demo seeder uses the existing Django models and requires an existing teacher account. Run it from the repository root against the intended demo database:
-```bash
-ALLOW_DEMO_SEEDING=1 DEMO_PASSWORD='choose-a-demo-password' \
-  uv run python scripts/seed_demo.py --teacher youssef_kaddioui --anchor-date 2026-10-11
-```
-
-Use the same `--anchor-date` and `--seed` values on reruns; generated quiz attempts then reuse their stable timestamps. The script does not reset or delete data. It expects the teacher to have no courses/quizzes yet, or only the two demo courses and quizzes. It aborts if those assumptions or the reserved demo student identities conflict with existing data. `DEMO_PASSWORD` is applied only to newly created demo students.
 
 ---
 
