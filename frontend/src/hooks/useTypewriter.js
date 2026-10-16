@@ -7,7 +7,7 @@ const MIN_CPS = 60
 const MAX_CPS = 280
 const CATCH_UP_SECONDS = 2
 
-// Reveal whole words when the next boundary is close, to avoid half-words
+// Show whole words: hold back a partial word unless it is unusually long
 const WORD_SNAP = 12
 
 const prefersReducedMotion = () =>
@@ -19,11 +19,13 @@ const commonPrefixLength = (a, b) => {
     return i
 }
 
-const nextBoundary = (text, index) => {
-    if (index >= text.length) return text.length
-    const rest = text.slice(index, index + WORD_SNAP)
-    const offset = rest.search(/\s/)
-    return offset === -1 ? index : index + offset
+// The visible length for a reveal position: the end of the last complete word
+const wholeWords = (text, position) => {
+    if (position >= text.length) return text.length
+    const boundary = text.lastIndexOf(' ', position)
+    const newline = text.lastIndexOf('\n', position)
+    const end = Math.max(boundary, newline)
+    return end >= position - WORD_SNAP ? end + 1 : position
 }
 
 /**
@@ -47,41 +49,45 @@ export const closeOpenMarkdown = (partial) => {
 export function useTypewriter(text, { enabled = true } = {}) {
     const animate = enabled && !prefersReducedMotion()
     const [count, setCount] = useState(animate ? 0 : text.length)
-    const countRef = useRef(count)
+    // Exact reveal position; the visible count trails it to whole words
+    const positionRef = useRef(count)
     const textRef = useRef(text)
     const frameRef = useRef(null)
 
     useEffect(() => {
         // If the text changed rather than grew (a retry, or a trailing marker
         // the stream removed), keep only what still matches what was shown
-        countRef.current = commonPrefixLength(textRef.current.slice(0, countRef.current), text)
+        positionRef.current = commonPrefixLength(textRef.current.slice(0, positionRef.current), text)
         textRef.current = text
 
         if (!animate) {
-            countRef.current = text.length
+            positionRef.current = text.length
             setCount(text.length)
             return
         }
-        if (frameRef.current !== null || countRef.current >= text.length) return
+        if (positionRef.current >= text.length) return
 
         let last = performance.now()
         const step = (now) => {
             const target = textRef.current
-            const backlog = target.length - countRef.current
+            const backlog = target.length - positionRef.current
             const cps = Math.min(MAX_CPS, Math.max(MIN_CPS, backlog / CATCH_UP_SECONDS))
-            const advanced = countRef.current + Math.max(1, Math.round(cps * (now - last) / 1000))
+            positionRef.current = Math.min(target.length, positionRef.current + cps * (now - last) / 1000)
             last = now
 
-            countRef.current = Math.min(target.length, nextBoundary(target, advanced))
-            setCount(countRef.current)
-            frameRef.current = countRef.current < target.length ? requestAnimationFrame(step) : null
+            setCount(wholeWords(target, Math.floor(positionRef.current)))
+            frameRef.current = positionRef.current < target.length ? requestAnimationFrame(step) : null
         }
         frameRef.current = requestAnimationFrame(step)
-    }, [text, animate])
 
-    useEffect(() => () => {
-        if (frameRef.current !== null) cancelAnimationFrame(frameRef.current)
-    }, [])
+        // Each new chunk restarts the loop from the current position. Clearing
+        // the frame also matters when React remounts the component (StrictMode
+        // does this in development): a stale id would block the next start.
+        return () => {
+            cancelAnimationFrame(frameRef.current)
+            frameRef.current = null
+        }
+    }, [text, animate])
 
     const isTyping = count < text.length
     return {
