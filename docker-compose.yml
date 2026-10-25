@@ -22,8 +22,10 @@ services:
     ports:
       - "6380:6379"
 
+  # backend and worker share one image (scholaria-app), so it is stored once
   backend:
     build: .
+    image: scholaria-app
     container_name: backend
     env_file:
       - .env
@@ -38,9 +40,10 @@ services:
       - CSRF_TRUSTED_ORIGINS=http://localhost,http://127.0.0.1,http://localhost:5173,http://127.0.0.1:5173
     ports:
       - "8000:8000"
+    # The Python environment lives in the image at /opt/venv, outside the
+    # bind mount, so no volume copy of it is needed
     volumes:
       - ./:/app
-      - /app/.venv
       - /app/media
       - /app/static
     depends_on:
@@ -54,6 +57,7 @@ services:
   # jobs wait in Redis and new content never becomes searchable.
   worker:
     build: .
+    image: scholaria-app
     container_name: worker
     command: ["uv", "run", "celery", "-A", "scholaria", "worker", "-l", "info", "--concurrency", "1"]
     restart: unless-stopped
@@ -66,7 +70,6 @@ services:
       - CELERY_RESULT_BACKEND=redis://redis:6379/0
     volumes:
       - ./:/app
-      - /app/.venv
     depends_on:
       postgres:
         condition: service_healthy

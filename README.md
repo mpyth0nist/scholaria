@@ -171,7 +171,7 @@ The test suite covers the RAG utility layer, document ingestion idempotency, LLM
 
 ### Run tests inside the backend container:
 ```bash
-docker compose exec backend uv run pytest
+docker compose exec backend uv run --dev pytest   # the image leaves out dev tools; --dev installs them on demand
 ```
 
 ### Or run tests natively on your host:
